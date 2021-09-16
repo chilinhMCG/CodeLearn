@@ -1,0 +1,57 @@
+﻿@page "/admin/add-course-type"
+@inject ICourseTypeRepository CourseTypeRepository
+@inject ISnackbar Snackbar
+
+<MudGrid>
+    <MudItem lg="6">
+        <MudPaper Class="p-3">
+            <MudGrid>
+                <MudItem lg="12">
+                    <MudText Color="Color.Success">Thêm nhóm khóa học</MudText>
+                </MudItem>
+                <MudItem lg="9">
+                    <MudTextField @bind-Value="_courseType.Name" Label="Tên khóa học"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense">
+                    </MudTextField>
+                </MudItem>
+                <MudItem lg="3">
+                    <MudIconButton Icon="@Icons.Material.Outlined.AddCircleOutline"
+                                   Color="@Color.Success" @onclick="AddCourseType" />
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+    </MudItem>
+    <MudItem lg="12">
+        <MudPaper Class="p-3">
+            <MudTable Items="@courseTypes">
+                <HeaderContent>
+                    <MudTh>Tên nhóm khóa học</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Name">@context.Name</MudTd>
+                </RowTemplate>
+            </MudTable>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+@code {
+    CourseType _courseType = new();
+    List<CourseType> courseTypes = new();
+
+    protected override void OnInitialized()
+    {
+        courseTypes = CourseTypeRepository.GetAllCourseType();
+    }
+
+    void AddCourseType()
+    {
+        CourseTypeRepository.AddCourseType(_courseType);
+        Snackbar.Add("Thêm nhóm bài học thành công !", Severity.Success);
+        _courseType = new();
+
+        courseTypes = CourseTypeRepository.GetAllCourseType();
+
+    }
+}

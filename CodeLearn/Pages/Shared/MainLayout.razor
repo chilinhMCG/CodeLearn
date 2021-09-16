@@ -1,0 +1,26 @@
+﻿@inherits LayoutComponentBase
+
+<MudThemeProvider Theme="MCGTheme" />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <NavBar />
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.Large">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+    <Footer />
+</MudLayout>
+
+@code{
+    MudTheme MCGTheme = new()
+    {
+        Palette = new Palette()
+        {
+            Primary = "#19B33D",
+            AppbarBackground = "#19B33D",
+        }
+    };
+}
