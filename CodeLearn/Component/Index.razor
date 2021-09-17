@@ -21,6 +21,28 @@
 {
     <MudPaper Class="p-4">
         <MudText Typo="Typo.h5">@item.Name</MudText>
+        <!--<MudGrid>
+            @*@foreach (var item in collection)*@
+            @foreach (var course in item.Courses)
+            {
+                <MudItem lg="3">
+                    <MudLink Href="@("/khoa-hoc/" + course.Id.ToString())" Underline="Underline.None">
+                        <MudCard Elevation="0">
+                            <MudCardMedia Image="images/CSharp-Basic.jpg" Height="200" />
+                            <MudCardContent>
+                                <MudText Typo="Typo.h6">@course.Name</MudText>
+                                <MudText Typo="Typo.caption">@course.Author</MudText>
+                                <MudText Typo="Typo.body2">@course.Description</MudText>
+                                <MudRating SelectedValue="4" Size="Size.Small" ReadOnly="true" />
+                            </MudCardContent>
+                            <MudCardActions>
+                                <MudButton Variant="Variant.Text" Color="Color.Info">@course.Status</MudButton>
+                            </MudCardActions>
+                        </MudCard>
+                    </MudLink>
+                </MudItem>
+            }
+        </MudGrid> -->
     </MudPaper>
     <br>
 }
