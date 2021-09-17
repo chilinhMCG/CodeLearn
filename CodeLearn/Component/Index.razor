@@ -1,4 +1,5 @@
 ﻿@page "/"
+@inject ICourseTypeRepository CourseTypeRepository  
 <MudPaper Class="p-4 pb-1 mt-4 ">
     <MudText Typo="Typo.h4" Color="Color.Dark">
         Tự học lập trình trực tuyến. Hãy bắt đầu với khoá học đầu tiên của bạn!
@@ -16,6 +17,13 @@
     </MudGrid>
 </MudPaper>
 <br />
+@foreach (var item in courseTypes)
+{
+    <MudPaper Class="p-4">
+        <MudText Typo="Typo.h5">@item.Name</MudText>
+    </MudPaper>
+    <br>
+}
 <MudPaper Class="p-4">
     <MudText Typo="Typo.h5">Kiến thức cơ bản</MudText>
 
@@ -96,4 +104,11 @@
 </MudPaper>
 @code {
     string _searchString = String.Empty;
+
+    protected List<CourseType> courseTypes { get; set; }
+
+    protected override void OnInitialized()
+    {
+        courseTypes = CourseTypeRepository.GetAllCourseType();
+    }
 }

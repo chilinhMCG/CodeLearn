@@ -18,7 +18,7 @@
                 </MudItem>
                 <MudItem lg="3">
                     <MudIconButton Icon="@Icons.Material.Outlined.AddCircleOutline"
-                                   Color="@Color.Success" @onclick="AddCourseType" />
+                                   Color="@Color.Success" @onclick="Add" />
                 </MudItem>
             </MudGrid>
         </MudPaper>
@@ -38,8 +38,8 @@
 </MudGrid>
 
 @code {
-        CourseType _courseType = new();
-        List<CourseType> courseTypes = new();
+    CourseType _courseType = new();
+    List<CourseType> courseTypes = new();
 
     protected override void OnInitialized()
     {
@@ -47,7 +47,7 @@
         courseTypes = CourseTypeRepository.GetAllCourseType();
     }
 
-    void AddCourseType()
+    protected void Add()
     {
         if (!string.IsNullOrWhiteSpace(_courseType.Name))
         {
