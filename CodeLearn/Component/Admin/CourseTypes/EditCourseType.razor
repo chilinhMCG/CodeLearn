@@ -1,0 +1,39 @@
+﻿@page "/course-type/edit/{id}"
+@inject ICourseTypeRepository CourseTypeRepository
+@inject IJSRuntime JSRuntime
+<MudPaper Class="p-4">
+    <MudItem lg="12">
+        <MudText Color="Color.Success" Typo="Typo.h5" Class="text-center">Sửa tên nhóm khóa học</MudText>
+    </MudItem>
+    <MudTextField @bind-Value="current.Name" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
+</MudPaper>
+<br />
+<MudPaper Class="p-4">
+    <div class="text-center">
+        <MudButton Color="Color.Primary" @onclick="EditAsync">Update</MudButton>
+        <MudButton Color="Color.Dark">
+            <MudLink Href="/admin/course-type-manager" Color="Color.Dark" Underline="Underline.None">Cancel</MudLink>
+        </MudButton>
+    </div>
+</MudPaper>
+
+@code {
+    [Parameter]
+    public string ID { get; set; }
+
+    protected List<CourseType> courseTypes { get; set; }
+
+    protected CourseType current { get; set; }
+
+    protected override void OnInitialized()
+    {
+        courseTypes = CourseTypeRepository.GetAllCourseType();
+        current = courseTypes.FirstOrDefault(x => x.Id.ToString() == this.ID);
+    }
+
+    protected async Task EditAsync()
+    {
+        CourseTypeRepository.UpdateCourseType(current);
+        await JSRuntime.InvokeVoidAsync("RedirectToCourseType");
+    }
+}

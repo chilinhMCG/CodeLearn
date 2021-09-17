@@ -24,10 +24,17 @@ namespace CodeLearn.Repositories
             context.SaveChanges();
         }
 
+        public void UpdateCourseType(CourseType courseType)
+        {
+            using var context = _applicationDbContext.CreateDbContext();
+            context.CourseTypes.Update(courseType);
+            context.SaveChanges();
+        }
+
         public List<CourseType> GetAllCourseType()
         {
             using var context = _applicationDbContext.CreateDbContext();
-            return context.CourseTypes.ToList();
+            return context.CourseTypes.OrderBy(x => x.Name).ToList();
         }
     }
 }

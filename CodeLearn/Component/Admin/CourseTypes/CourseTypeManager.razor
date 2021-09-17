@@ -1,4 +1,4 @@
-﻿@page "/admin/add-course-type"
+﻿@page "/admin/course-type-manager"
 @inject ICourseTypeRepository CourseTypeRepository
 @inject ISnackbar Snackbar
 @attribute [Authorize(Roles = "Admin")]
@@ -25,21 +25,27 @@
     </MudItem>
     <MudItem lg="12">
         <MudPaper Class="p-3">
-            <MudTable Items="@courseTypes">
+            <MudTable Items="@courseTypes" Hover="true" Bordered="true">
                 <HeaderContent>
-                    <MudTh>Tên nhóm khóa học</MudTh>
+                    <MudTh Style="text-align:center">Tên nhóm khóa học</MudTh>
+                    <MudTh></MudTh>
                 </HeaderContent>
                 <RowTemplate>
                     <MudTd DataLabel="Name">@context.Name</MudTd>
+                    <MudTd DataLabel="Edit" Style="text-align:center">
+                        <MudLink Href="@($"course-type/edit/{context.Id.ToString()}")">Edit</MudLink>｜
+                        <MudLink Href="@($"course-type/delete/{context.Id.ToString()}")">Delete</MudLink>
+                    </MudTd>
                 </RowTemplate>
+               
             </MudTable>
         </MudPaper>
     </MudItem>
 </MudGrid>
 
 @code {
-    CourseType _courseType = new();
-    List<CourseType> courseTypes = new();
+        CourseType _courseType = new();
+        List<CourseType> courseTypes = new();
 
     protected override void OnInitialized()
     {
@@ -58,5 +64,8 @@
 
         courseTypes = CourseTypeRepository.GetAllCourseType();
 
+
     }
+
+    
 }

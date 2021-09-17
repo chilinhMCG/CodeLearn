@@ -11,5 +11,7 @@ namespace CodeLearn.Repositories.Interface
         List<CourseType> GetAllCourseType();
 
         void AddCourseType(CourseType courseType);
+
+        void UpdateCourseType(CourseType courseType);
     }
 }
