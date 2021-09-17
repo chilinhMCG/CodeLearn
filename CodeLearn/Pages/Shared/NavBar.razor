@@ -22,6 +22,12 @@
              Color="Color.Default" Href="/">
         <div style="color:white;">Đánh giá</div>
     </MudLink>
+    <AuthorizeView Roles="Admin">
+        <MudLink Class="mx-7" Underline="Underline.None"
+                 Color="Color.Default" Href="/">
+            <div style="color:white;">Admin</div>
+        </MudLink>
+    </AuthorizeView>
 
     <MudSpacer />
 

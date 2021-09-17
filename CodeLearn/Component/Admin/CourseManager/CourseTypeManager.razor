@@ -1,6 +1,7 @@
 ﻿@page "/admin/add-course-type"
 @inject ICourseTypeRepository CourseTypeRepository
 @inject ISnackbar Snackbar
+@attribute [Authorize(Roles = "Admin")]
 
 <MudGrid>
     <MudItem lg="6">
@@ -37,19 +38,23 @@
 </MudGrid>
 
 @code {
-    CourseType _courseType = new();
-    List<CourseType> courseTypes = new();
+        CourseType _courseType = new();
+        List<CourseType> courseTypes = new();
 
     protected override void OnInitialized()
     {
+
         courseTypes = CourseTypeRepository.GetAllCourseType();
     }
 
     void AddCourseType()
     {
-        CourseTypeRepository.AddCourseType(_courseType);
-        Snackbar.Add("Thêm nhóm bài học thành công !", Severity.Success);
-        _courseType = new();
+        if (!string.IsNullOrWhiteSpace(_courseType.Name))
+        {
+            CourseTypeRepository.AddCourseType(_courseType);
+            Snackbar.Add("Thêm nhóm bài học thành công !", Severity.Success);
+            _courseType = new();
+        }
 
         courseTypes = CourseTypeRepository.GetAllCourseType();
 
