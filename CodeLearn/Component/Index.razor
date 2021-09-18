@@ -22,6 +22,7 @@
 {
     <MudPaper Class="p-4">
         <MudText Typo="Typo.h5">@item.Name</MudText>
+        <br />
         <MudGrid>
             @foreach (var course in courses.Where(x => x.CourseTypeId == item.Id))
             {
@@ -32,9 +33,11 @@
                             <MudCardContent>
                                 <MudText Typo="Typo.h6">@course.Name</MudText>
                                 <MudText Typo="Typo.caption">@course.Author</MudText>
-                                <MudText Typo="Typo.body2">@course.Description</MudText>
+                                <MudText Typo="Typo.body2">@course.Description.Substring(0, 44)...</MudText>
+                                <br />
                                 <MudRating SelectedValue="@course.Rating" Size="Size.Small" ReadOnly="true" />
                             </MudCardContent>
+                            <MudDivider></MudDivider>
                             <MudCardActions>
                                 <MudButton Variant="Variant.Text" Color="Color.Info">@course.Status</MudButton>
                             </MudCardActions>
