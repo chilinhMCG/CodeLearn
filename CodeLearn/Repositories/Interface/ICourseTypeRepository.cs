@@ -13,5 +13,7 @@ namespace CodeLearn.Repositories.Interface
         void AddCourseType(CourseType courseType);
 
         void UpdateCourseType(CourseType courseType);
+
+        void DeleteCourseType(CourseType courseType);
     }
 }

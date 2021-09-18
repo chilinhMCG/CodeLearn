@@ -31,6 +31,13 @@ namespace CodeLearn.Repositories
             context.SaveChanges();
         }
 
+        public void DeleteCourseType(CourseType courseType)
+        {
+            using var context = _applicationDbContext.CreateDbContext();
+            context.CourseTypes.Remove(courseType);
+            context.SaveChanges();
+        }
+
         public List<CourseType> GetAllCourseType()
         {
             using var context = _applicationDbContext.CreateDbContext();
