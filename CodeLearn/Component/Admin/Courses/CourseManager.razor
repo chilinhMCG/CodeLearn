@@ -1,0 +1,41 @@
+﻿@page "/admin/course-manager"
+@inject ICourseRepository CourseRepository
+@inject ICourseTypeRepository CourseTypeRepository
+
+
+
+
+
+<MudPaper Class="p-4">
+    <MudItem>
+         @foreach (var item in courseTypes)
+         {
+             <MudTable Hover="true" Items="courses.Where(x => x.CourseTypeId == item.Id)" Bordered="true">
+                 <HeaderContent>
+                     <MudTh Class="text-center">@item.Name</MudTh>
+                     <MudTh></MudTh>
+                 </HeaderContent>
+                 <RowTemplate>
+                     <MudTd>@context.Name</MudTd>
+                 </RowTemplate> 
+             </MudTable>
+             <br />
+         }
+
+    </MudItem>
+</MudPaper>
+<br />
+
+
+@code {
+
+    protected List<Course> courses { get; set; }
+    protected List<CourseType> courseTypes { get; set; }
+
+    protected override void OnInitialized()
+    {
+        courses = CourseRepository.GetAllCourse();
+        courseTypes = CourseTypeRepository.GetAllCourseType();
+    }
+
+}
