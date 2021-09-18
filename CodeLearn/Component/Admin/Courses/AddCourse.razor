@@ -1,0 +1,95 @@
+﻿@page "/admin/course/add-new"
+@inject ISnackbar Snackbar
+@inject ICourseTypeRepository CourseTypeRepository
+@inject ICourseRepository CourseRepository
+
+<MudPaper Class="p-4">
+    <MudItem>
+        <MudText Class="text-center" Color="Color.Success" Typo="Typo.h3">Thêm khóa học mới</MudText>
+    </MudItem>
+</MudPaper>
+<br />
+<MudPaper Class="m-auto p-4" Width="500px">
+    <MudForm Model="newCourse">
+        <MudItem>
+            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="newCourse.Name"
+                          Label="Tên khóa học"></MudTextField>
+        </MudItem>
+        <br />
+
+
+        <MudItem>
+            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="newCourse.Author"
+                          Label="Tác giả"></MudTextField>
+        </MudItem>
+        <br />
+
+
+        <MudItem>
+            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="newCourse.Description"
+                          Label="Mô tả" Lines="3"></MudTextField>
+        </MudItem>
+        <br />
+
+
+        <MudItem>
+            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="newCourse.Thumbnail"
+                          Label="Thumbnail" Lines="2" Placeholder="Tên file ảnh, vui lòng để hình vào thư mục wwwroot/images/CoursesImg của project."></MudTextField>
+        </MudItem>
+        <br />
+
+
+        <MudItem>
+            <MudNumericField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="newCourse.Rating"
+                             Label="Rating" Min="0" Max="5" Placeholder="Rating từ 0 đến 5"></MudNumericField>
+        </MudItem>
+        <br />
+
+
+        <MudItem>
+            <MudSelect T="CourseStatusEnum" Label="Status" @bind-Value="newCourse.Status">
+                <MudSelectItem Value="CourseStatusEnum.Free" />
+                <MudSelectItem Value="CourseStatusEnum.Block" />
+                <MudSelectItem Value="CourseStatusEnum.Updating" />
+                <MudSelectItem Value="CourseStatusEnum.Cancel" />
+            </MudSelect>
+        </MudItem>
+        <br />
+
+
+        <MudItem>
+            <MudSelect T="Guid" Label="Thuộc loại khóa học" @bind-Value="newCourse.CourseTypeId">
+                @foreach (var item in courseTypes)
+                {
+                    <MudSelectItem Value="item.Id">@item.Name</MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+        <MudItem Class="text-center">
+            <MudButton Color="Color.Success" @onclick="Add">Thêm</MudButton>
+            <MudButton Color="Color.Dark">
+                <MudLink Color="Color.Dark" Underline="Underline.None" Href="admin">Quay lại</MudLink>
+            </MudButton>
+        </MudItem>
+    </MudForm>
+</MudPaper>
+
+
+@code {
+
+    protected Course newCourse { get; set; } = new();
+
+    protected List<CourseType> courseTypes { get; set; }
+
+    protected override void OnInitialized()
+    {
+        courseTypes = CourseTypeRepository.GetAllCourseType();
+    }
+
+    protected void Add()
+    {
+        CourseRepository.AddCourse(newCourse);
+        Snackbar.Add("Thêm thành công", Severity.Success);
+    }
+
+}

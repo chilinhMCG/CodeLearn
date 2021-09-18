@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,10 +19,12 @@ namespace CodeLearn.Models
         public string Description { get; set; }
         [Column("author")]
         public string Author { get; set; }
-        [Column("rating")]
-        public string Rating { get; set;}
         [Column("created_at")]
         public DateTime CreatedAt { get; set; }
+
+        [Column("rating")]
+        public int Rating { get; set; }
+
         [Column("status")]
         public CourseStatusEnum Status { get; set; }
         [Column("course_type_id")]
