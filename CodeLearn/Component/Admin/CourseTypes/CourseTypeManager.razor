@@ -1,7 +1,8 @@
 ﻿@page "/admin/course-type-manager"
+@attribute [Authorize(Roles = "Admin")]
 @inject ICourseTypeRepository CourseTypeRepository
 @inject ISnackbar Snackbar
-@attribute [Authorize(Roles = "Admin")]
+
 
 <MudGrid>
     <MudItem lg="6">
@@ -33,19 +34,25 @@
                 <RowTemplate>
                     <MudTd DataLabel="Name">@context.Name</MudTd>
                     <MudTd DataLabel="Edit" Style="text-align:center">
-                        <MudLink Href="@($"course-type/edit/{context.Id.ToString()}")">Edit</MudLink>｜
-                        <MudLink Href="@($"course-type/delete/{context.Id.ToString()}")">Delete</MudLink>
+                        <MudButton Color="Color.Dark" Variant="Variant.Text">
+                            <MudLink Underline="Underline.None" Href="@($"course-type/edit/{context.Id.ToString()}")">Edit</MudLink>
+                        </MudButton>
+                        ｜
+                        <MudButton Variant="Variant.Text">
+                            <MudLink Underline="Underline.None" Href="@($"course-type/delete/{context.Id.ToString()}")">Delete</MudLink>
+                        </MudButton>
+
                     </MudTd>
                 </RowTemplate>
-               
+
             </MudTable>
         </MudPaper>
     </MudItem>
 </MudGrid>
 
 @code {
-        CourseType _courseType = new();
-        List<CourseType> courseTypes = new();
+    CourseType _courseType = new();
+    List<CourseType> courseTypes = new();
 
     protected override void OnInitialized()
     {
@@ -67,5 +74,5 @@
 
     }
 
-    
+
 }

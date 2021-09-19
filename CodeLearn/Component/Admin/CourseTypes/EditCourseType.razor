@@ -1,4 +1,5 @@
 ﻿@page "/course-type/edit/{id}"
+@attribute [Authorize(Roles = "Admin")]
 @inject ICourseTypeRepository CourseTypeRepository
 @inject IJSRuntime JSRuntime
 <MudPaper Class="p-4">

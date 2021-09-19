@@ -33,7 +33,7 @@
                             <MudCardContent>
                                 <MudText Typo="Typo.h6">@course.Name</MudText>
                                 <MudText Typo="Typo.caption">@course.Author</MudText>
-                                <MudText Typo="Typo.body2">@course.Description.Substring(0, 44)...</MudText>
+                                <MudText Typo="Typo.body2">@((MarkupString)(@course.Description.Substring(0, 44) + "..."))</MudText>
                                 <br />
                                 <MudRating SelectedValue="@course.Rating" Size="Size.Small" ReadOnly="true" />
                             </MudCardContent>

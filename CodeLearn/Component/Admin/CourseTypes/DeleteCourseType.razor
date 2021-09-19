@@ -1,4 +1,5 @@
 ﻿@page "/course-type/delete/{id}"
+@attribute [Authorize(Roles = "Admin")]
 @inject ICourseTypeRepository CourseTypeRepository
 @inject IJSRuntime JSRuntime
 
