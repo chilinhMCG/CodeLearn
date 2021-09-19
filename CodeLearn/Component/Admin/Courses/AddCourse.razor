@@ -28,15 +28,19 @@
 
 
         <MudItem>
-            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="newCourse.Description"
-                          Label="Mô tả" Lines="3" Required="true" Placeholder="Có thể sử dụng các thẻ html như h1, p..."></MudTextField>
+            <MudSelect T="Guid" Label="Thuộc loại khóa học" Required="true" @bind-Value="newCourse.CourseTypeId">
+                @foreach (var item in courseTypes)
+                {
+                    <MudSelectItem Value="item.Id">@item.Name</MudSelectItem>
+                }
+            </MudSelect>
         </MudItem>
         <br />
 
 
         <MudItem>
             <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="newCourse.Thumbnail"
-                          Label="Thumbnail" Lines="2" Required="true" 
+                          Label="Thumbnail" Lines="2" Required="true"
                           Placeholder="Tên file ảnh, vui lòng để hình vào thư mục wwwroot/images/CoursesImg của project."></MudTextField>
         </MudItem>
         <br />
@@ -61,13 +65,13 @@
 
 
         <MudItem>
-            <MudSelect T="Guid" Label="Thuộc loại khóa học" Required="true" @bind-Value="newCourse.CourseTypeId">
-                @foreach (var item in courseTypes)
-                {
-                    <MudSelectItem Value="item.Id">@item.Name</MudSelectItem>
-                }
-            </MudSelect>
+            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="newCourse.Description"
+                          Label="Mô tả" Lines="10" Required="true" Placeholder="Có thể sử dụng các thẻ html như h1, p..."></MudTextField>
         </MudItem>
+        <br />
+
+
+
         <MudItem Class="text-center">
             <MudButton Color="Color.Success" @onclick="AddAsync" Disabled="@(!formSuccess)">Thêm</MudButton>
             <MudButton Color="Color.Dark">

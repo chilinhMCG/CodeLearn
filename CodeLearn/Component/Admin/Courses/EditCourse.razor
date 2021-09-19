@@ -8,7 +8,7 @@
 
 <MudPaper Class="p-4">
     <MudItem>
-        <MudText Class="text-center" Color="Color.Success" Typo="Typo.h3">Thêm khóa học mới</MudText>
+        <MudText Class="text-center" Color="Color.Success" Typo="Typo.h3">Chỉnh sửa khóa học</MudText>
     </MudItem>
 </MudPaper>
 <br />
@@ -29,10 +29,17 @@
 
 
         <MudItem>
-            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="currentCourse.Description"
-                          Label="Mô tả" Lines="3" Required="true"></MudTextField>
+            <MudSelect T="Guid" Label="Thuộc loại khóa học" Required="true" @bind-Value="currentCourse.CourseTypeId">
+                @foreach (var item in courseTypes)
+                {
+                    <MudSelectItem Value="item.Id">@item.Name</MudSelectItem>
+                }
+            </MudSelect>
         </MudItem>
         <br />
+
+
+
 
 
         <MudItem>
@@ -62,13 +69,13 @@
 
 
         <MudItem>
-            <MudSelect T="Guid" Label="Thuộc loại khóa học" Required="true" @bind-Value="currentCourse.CourseTypeId">
-                @foreach (var item in courseTypes)
-                {
-                    <MudSelectItem Value="item.Id">@item.Name</MudSelectItem>
-                }
-            </MudSelect>
+            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="currentCourse.Description"
+                          Label="Mô tả" Lines="10" Required="true"></MudTextField>
         </MudItem>
+        <br />
+
+
+
         <MudItem Class="text-center">
             <MudButton Color="Color.Success" @onclick="EditAsync" Disabled="@(!formSuccess)">Update</MudButton>
             <MudButton Color="Color.Dark">
