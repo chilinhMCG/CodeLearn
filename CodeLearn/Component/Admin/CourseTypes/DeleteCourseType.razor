@@ -1,6 +1,8 @@
 ﻿@page "/course-type/delete/{id}"
 @attribute [Authorize(Roles = "Admin")]
 @inject ICourseTypeRepository CourseTypeRepository
+@inject ICourseRepository CourseRepository
+@inject ISnackbar Snackbar
 @inject IJSRuntime JSRuntime
 
 <MudPaper Class="p-4">
@@ -19,22 +21,32 @@
 
 
 @code {
-    [Parameter]
-    public string ID { get; set; }
+        [Parameter]
+        public string ID { get; set; }
 
     protected List<CourseType> courseTypes { get; set; }
+
+    protected List<Course> courses { get; set; }
 
     protected CourseType currentCourseType { get; set; }
 
     protected override void OnInitialized()
     {
+        courses = CourseRepository.GetAllCourse();
         courseTypes = CourseTypeRepository.GetAllCourseType();
         currentCourseType = courseTypes.FirstOrDefault(x => x.Id.ToString() == this.ID);
     }
 
     protected async Task DeleteAsync()
     {
-        CourseTypeRepository.DeleteCourseType(currentCourseType);
-        await JSRuntime.InvokeVoidAsync("RedirectToCourseType");
+        if (courses.Any(x => x.CourseTypeId.ToString() == this.ID))
+        {
+            Snackbar.Add("Trong loại khóa học này vẫn còn khóa học!!! Vui lòng xóa hết khóa học để xóa được loại này!", Severity.Warning);
+        }
+        else
+        {
+            CourseTypeRepository.DeleteCourseType(currentCourseType);
+            await JSRuntime.InvokeVoidAsync("RedirectToCourseType");
+        }
     }
 }

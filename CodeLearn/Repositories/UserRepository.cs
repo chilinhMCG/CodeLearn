@@ -30,6 +30,12 @@ namespace CodeLearn.Repositories
             return await context.Users.ToListAsync();
         }
 
+        public List<User> GetUser()
+        {
+            using var context = _applicationDBContext.CreateDbContext();
+            return context.Users.ToList();
+        }
+
         public User GetUserById(Guid id)
         {
             using var context = _applicationDBContext.CreateDbContext();

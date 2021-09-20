@@ -1,22 +1,19 @@
-﻿@page "/admin/course-manager"
+﻿@page "/admin/course-detail-manager"
 @attribute [Authorize(Roles = "Admin")]
 @inject ICourseRepository CourseRepository
-@inject ICourseTypeRepository CourseTypeRepository
-@inject IJSRuntime JSRuntime
-
-
+@inject ICourseDetailRepository CourseDetailRepository
 
 
 <MudPaper Class="p-4">
 
     <MudItem>
-        <MudLink Href="/admin/course/add-new" Color="Color.Success" Typo="Typo.h5">Thêm khóa học mới</MudLink>
+        <MudLink Href="/admin/course-detail/add-new" Color="Color.Success" Typo="Typo.h5">Thêm bài học mới</MudLink>
     </MudItem>
     <br />
     <MudItem lg="12">
-        @foreach (var item in courseTypes)
+        @foreach (var item in courses)
         {
-            <MudTable Hover="true" Items="courses.Where(x => x.CourseTypeId == item.Id)" Bordered="true" Dense="true">
+            <MudTable Hover="true" Items="courseDetails.Where(x => x.CourseId == item.Id)" Bordered="true" Dense="true">
                 <HeaderContent>
                     <MudTh>@item.Name</MudTh>
                     <MudTh></MudTh>
@@ -25,7 +22,7 @@
                     <MudTd DataLabel="name" Class="text-center">@context.Name</MudTd>
                     <MudTd DataLabel="crud" Class="text-center">
                         <MudButton Variant="Variant.Text">
-                            <MudLink Underline="Underline.None" Href="@($"/admin/course/edit/{context.Id}")">Edit</MudLink>
+                            <MudLink Underline="Underline.None" Href="@($"/admin/course-detail/edit/{context.Id}")">Edit</MudLink>
                         </MudButton>
                     </MudTd>
                 </RowTemplate>
@@ -39,16 +36,13 @@
 
 
 @code {
+    protected List<Course> courses { get; set; } = new List<Course>();
 
-    protected bool deleteConfirm { get; set; }
-
-    protected List<Course> courses { get; set; }
-    protected List<CourseType> courseTypes { get; set; }
+    protected List<CourseDetail> courseDetails { get; set; } = new List<CourseDetail>();
 
     protected override void OnInitialized()
     {
         courses = CourseRepository.GetAllCourse();
-        courseTypes = CourseTypeRepository.GetAllCourseType();
-
+        courseDetails = CourseDetailRepository.GetAllCourseDetail();
     }
 }

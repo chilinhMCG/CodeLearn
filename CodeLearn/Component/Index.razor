@@ -1,6 +1,6 @@
 ﻿@page "/"
 @inject ICourseRepository CourseRepository
-@inject ICourseTypeRepository CourseTypeRepository  
+@inject ICourseTypeRepository CourseTypeRepository
 <MudPaper Class="p-4 pb-1 mt-4 ">
     <MudText Typo="Typo.h4" Color="Color.Dark">
         Tự học lập trình trực tuyến. Hãy bắt đầu với khoá học đầu tiên của bạn!
@@ -12,8 +12,8 @@
                           Variant="Variant.Outlined"
                           Adornment="Adornment.End"
                           AdornmentIcon="@Icons.Filled.Search"
-                          Margin="Margin.Dense" 
-                          Class="my-4"/>
+                          Margin="Margin.Dense"
+                          Class="my-4" />
         </MudItem>
     </MudGrid>
 </MudPaper>
@@ -48,91 +48,14 @@
         </MudGrid>
     </MudPaper>
     <br>
+    
 }
-<MudPaper Class="p-4">
-    <MudText Typo="Typo.h5">Kiến thức cơ bản</MudText>
-
-    <MudGrid>
-        @*@foreach (var item in collection)*@
-        @for (int i = 0; i < 4; i++)
-        {
-            <MudItem lg="3">
-                <MudLink Href="@("/khoa-hoc/" + i.ToString())" Underline="Underline.None">
-                    <MudCard Elevation="0">
-                        <MudCardMedia Image="images/CSharp-Basic.jpg" Height="200" />
-                        <MudCardContent>
-                            <MudText Typo="Typo.h6">C# cơ bản</MudText>
-                            <MudText Typo="Typo.caption">Chí Link</MudText>
-                            <MudText Typo="Typo.body2">Khóa học cung cấp các kiến thức cơ bản về C#</MudText>
-                            <MudRating SelectedValue="4" Size="Size.Small" ReadOnly="true" />
-                        </MudCardContent>
-                        <MudCardActions>
-                            <MudButton Variant="Variant.Text" Color="Color.Info">Miễn phí</MudButton>
-                        </MudCardActions>
-                    </MudCard>
-                </MudLink>
-            </MudItem>
-        }
-    </MudGrid>
-</MudPaper>
-<br />
-<MudPaper Class="p-4">
-    <MudText Typo="Typo.h5">Lập trình cơ sở</MudText>
-    <MudGrid>
-        @*@foreach (var item in collection)*@
-        @for (int i = 0; i < 5; i++)
-        {
-            <MudItem lg="3">
-                <MudLink Href="#" Underline="Underline.None">
-                    <MudCard>
-                        <MudCardMedia Image="images/CSharp-Basic.jpg" Height="200" />
-                        <MudCardContent>
-                            <MudText Typo="Typo.h5">OOP trong C#</MudText>
-                            <MudText Typo="Typo.caption">Chí Link</MudText>
-                            <MudText Typo="Typo.body2">Khóa học cung cấp các kiến thức cơ bản về C#</MudText>
-                            <MudRating SelectedValue="4" Size="Size.Small" ReadOnly="true" />
-                        </MudCardContent>
-                        <MudCardActions>
-                            <MudButton Variant="Variant.Text" Color="Color.Info">Miễn phí</MudButton>
-                        </MudCardActions>
-                    </MudCard>
-                </MudLink>
-            </MudItem>
-        }
-    </MudGrid>
-</MudPaper>
-<br />
-<MudPaper Class="p-4">
-    <MudText Typo="Typo.h5">Lập trình nâng cao</MudText>
-    <MudGrid>
-        @*@foreach (var item in collection)*@
-        @for (int i = 0; i < 7; i++)
-        {
-            <MudItem lg="3">
-                <MudLink Href="#" Underline="Underline.None">
-                    <MudCard>
-                        <MudCardMedia Image="images/CSharp-Basic.jpg" Height="200" />
-                        <MudCardContent>
-                            <MudText Typo="Typo.h5">C# Nâng cao</MudText>
-                            <MudText Typo="Typo.caption">Chí Link</MudText>
-                            <MudText Typo="Typo.body2">Khóa học cung cấp các kiến thức cơ bản về C#</MudText>
-                            <MudRating SelectedValue="4" Size="Size.Small" ReadOnly="true" />
-                        </MudCardContent>
-                        <MudCardActions>
-                            <MudButton Variant="Variant.Text" Color="Color.Info">Miễn phí</MudButton>
-                        </MudCardActions>
-                    </MudCard>
-                </MudLink>
-            </MudItem>
-        }
-    </MudGrid>
-</MudPaper>
 @code {
     string _searchString = String.Empty;
 
     protected List<CourseType> courseTypes { get; set; }
 
-    protected List<Course>  courses { get; set; }
+    protected List<Course> courses { get; set; }
 
     protected override void OnInitialized()
     {

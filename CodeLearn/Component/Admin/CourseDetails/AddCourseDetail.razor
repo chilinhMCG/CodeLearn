@@ -1,0 +1,82 @@
+﻿@page "/admin/course-detail/add-new"
+@attribute [Authorize(Roles = "Admin")]
+@inject ICourseRepository CourseRepository
+@inject ICourseDetailRepository CourseDetailRepository
+@inject IUserRepository UserRepository
+@inject IJSRuntime JSRuntime 
+
+<MudPaper Class="p-4">
+    <MudItem>
+        <MudText Class="text-center" Color="Color.Success" Typo="Typo.h3">Thêm bài học mới</MudText>
+    </MudItem>
+</MudPaper>
+<br />
+<MudPaper Class="m-auto p-4">
+    <MudForm Model="newCourseDetail" @bind-IsValid="formSuccess">
+        <MudItem>
+            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="newCourseDetail.Name"
+                          Label="Tên bài học" Required="true"></MudTextField>
+        </MudItem>
+        <br />
+        <MudItem>
+            <MudSelect T="Guid" Label="Thuộc khóa học" Required="true" @bind-Value="newCourseDetail.CourseId">
+                @foreach (var course in courses)
+                {
+                    <MudSelectItem Value="course.Id">@course.Name</MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+        <br />
+
+        <MudItem>
+            <MudSelect T="Guid" Label="Người tạo" Required="true" @bind-Value="newCourseDetail.CreatorId">
+                @foreach (var user in users)
+                {
+                    <MudSelectItem Value="user.Id">@user.Name</MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+        <br />
+
+        <MudItem>
+            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" Lines="10" Placeholder="Có thể sử dụng các thẻ html"
+                          @bind-Value="newCourseDetail.Content" Label="Nội dung" Required="true"></MudTextField>
+        </MudItem>
+        <br />
+
+        <MudItem Class="text-center">
+            <MudButton Color="Color.Success" @onclick="AddAsync" Disabled="@(!formSuccess)">Thêm</MudButton>
+            <MudButton Color="Color.Dark">
+                <MudLink Color="Color.Dark" Underline="Underline.None" Href="admin/course-detail-manager">Quay lại</MudLink>
+            </MudButton>
+        </MudItem>
+    </MudForm>
+</MudPaper>
+
+
+@code {
+
+    protected bool formSuccess { get; set; }
+
+    protected List<Course> courses { get; set; } = new List<Course>();
+
+    protected CourseDetail newCourseDetail { get; set; } = new CourseDetail();
+
+    protected List<User> users { get; set; } = new List<User>();
+
+    protected override void OnInitialized()
+    {
+        courses = CourseRepository.GetAllCourse();
+        users = UserRepository.GetUser();
+    }
+
+
+    protected async Task AddAsync()
+    {
+        if (newCourseDetail is not null)
+        {
+            CourseDetailRepository.AddCourseDetail(newCourseDetail);
+            await JSRuntime.InvokeVoidAsync("RedirectToCourseDetail");
+        }
+    }
+}

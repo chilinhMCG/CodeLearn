@@ -5,3 +5,7 @@
 function RedirectToCourse() {
     window.location.href = "/admin/course-manager";
 }
+
+function RedirectToCourseDetail() {
+    window.location.href = "/admin/course-detail-manager";
+}

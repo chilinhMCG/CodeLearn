@@ -10,6 +10,8 @@ namespace CodeLearn.Repositories.Interface
     {
         List<CourseDetail> GetAllCourseDetail();
 
+        List<CourseDetail> GetAllCourseDetailsByCourseID(string courseID);
+
         void AddCourseDetail(CourseDetail courseDetail);
 
         void UpdateCourseDetail(CourseDetail courseDetail);

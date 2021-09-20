@@ -44,5 +44,11 @@ namespace CodeLearn.Repositories
             using var context = _applicationDbContext.CreateDbContext();
             return context.CourseDetails.OrderBy(x => x.Name).ToList();
         }
+
+        public List<CourseDetail> GetAllCourseDetailsByCourseID(string courseID)
+        {
+            using var context = _applicationDbContext.CreateDbContext();
+            return context.CourseDetails.Where(x => x.CourseId.ToString() == courseID).ToList();
+        }
     }
 }

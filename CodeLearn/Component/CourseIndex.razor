@@ -1,0 +1,55 @@
+﻿@page "/course/{id}"
+@inject ICourseRepository CourseRepository
+@inject ICourseDetailRepository CourseDetailRepository
+
+<MudPaper Class="d-flex justify-space-around p-4">
+    <MudItem Style="float:left; width:20%">
+        <MudText Typo="Typo.h4">@currentCourse.Name</MudText>
+        <MudText Typo="Typo.subtitle1">
+            @currentCourse.Author
+            <MudRating SelectedValue="@currentCourse.Rating" Size="Size.Small" ReadOnly="true"></MudRating>
+        </MudText>
+
+    </MudItem>
+
+    <MudDivider Vertical="true" FlexItem="true" Class="mr-3" />
+    <MudItem Style="float:right; width:80%">
+        <MudText Align="Align.Justify">
+            @((MarkupString) currentCourse.Description)
+        </MudText>
+    </MudItem>
+
+</MudPaper>
+<br />
+<MudPaper Class="d-flex justify-space-around p-4">
+    @foreach (var item in courseDetails)
+    {
+        <MudCard Class="float-left">
+            <MudCardContent>
+                <MudLink Href="@($"/course-detail/{item.Id}")" Typo="Typo.button" Underline="Underline.None">@item.Name</MudLink>
+            </MudCardContent>
+        </MudCard>
+    }
+</MudPaper>
+
+
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+
+    protected List<Course> courses { get; set; } = new List<Course>();
+
+    protected Course currentCourse { get; set; } = new Course();
+
+    protected List<CourseDetail> courseDetails { get; set; } = new List<CourseDetail>();
+
+    protected override void OnInitialized()
+    {
+        courses = CourseRepository.GetAllCourse();
+        currentCourse = courses.FirstOrDefault(x => x.Id.ToString() == this.Id);
+        courseDetails = CourseDetailRepository.GetAllCourseDetailsByCourseID(this.Id);
+    }
+
+
+}
