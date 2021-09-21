@@ -1,6 +1,8 @@
 ﻿@page "/course/{id}"
 @inject ICourseRepository CourseRepository
 @inject ICourseDetailRepository CourseDetailRepository
+@inject IJSRuntime JSRuntime
+@inject ISnackbar Snackbar
 
 <MudPaper Class="d-flex justify-space-around p-4">
     <MudItem Style="float:left; width:20%">
@@ -8,6 +10,9 @@
         <MudText Typo="Typo.subtitle1">
             @currentCourse.Author
             <MudRating SelectedValue="@currentCourse.Rating" Size="Size.Small" ReadOnly="true"></MudRating>
+            <AuthorizeView Roles="Admin">
+                <MudButton Color="Color.Error" Variant="Variant.Filled" @onclick="DeleteCourseAsync">Delete</MudButton>
+            </AuthorizeView>
         </MudText>
 
     </MudItem>
@@ -35,8 +40,8 @@
 
 
 @code {
-    [Parameter]
-    public string Id { get; set; }
+        [Parameter]
+        public string Id { get; set; }
 
     protected List<Course> courses { get; set; } = new List<Course>();
 
@@ -49,6 +54,23 @@
         courses = CourseRepository.GetAllCourse();
         currentCourse = courses.FirstOrDefault(x => x.Id.ToString() == this.Id);
         courseDetails = CourseDetailRepository.GetAllCourseDetailsByCourseID(this.Id);
+    }
+
+    protected async Task DeleteCourseAsync()
+    {
+        bool deleteConfirm = await JSRuntime.InvokeAsync<bool>("DeleteConfirm");
+        if (deleteConfirm)
+        {
+            if (courseDetails.Any(x => x.CourseId == currentCourse.Id))
+            {
+                Snackbar.Add("Bạn phải xóa hết các bài học trong khóa học trước!", Severity.Warning);
+            }
+            else
+            {
+                CourseRepository.DeleteCourse(currentCourse);
+                await JSRuntime.InvokeVoidAsync("RedirectToHomePage");
+            }
+        }
     }
 
 

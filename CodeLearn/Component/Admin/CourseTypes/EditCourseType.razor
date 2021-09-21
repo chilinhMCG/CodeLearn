@@ -1,40 +1,27 @@
-﻿@page "/course-type/edit/{id}"
+﻿
 @attribute [Authorize(Roles = "Admin")]
 @inject ICourseTypeRepository CourseTypeRepository
 @inject IJSRuntime JSRuntime
-<MudPaper Class="p-4">
-    <MudItem lg="12">
-        <MudText Color="Color.Success" Typo="Typo.h5" Class="text-center">Sửa tên nhóm khóa học</MudText>
-    </MudItem>
-    <MudTextField @bind-Value="current.Name" Variant="Variant.Outlined" Margin="Margin.Dense"></MudTextField>
-</MudPaper>
-<br />
-<MudPaper Class="p-4">
-    <div class="text-center">
-        <MudButton Color="Color.Success" @onclick="EditAsync">Update</MudButton>
-        <MudButton Color="Color.Dark">
-            <MudLink Href="/admin/course-type-manager" Color="Color.Dark" Underline="Underline.None">Quay lại</MudLink>
-        </MudButton>
-    </div>
-</MudPaper>
+
+
+
+<MudTextField Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value="@courseType.Name"
+              Label="Tên loại khóa học" Required="true"></MudTextField>
+<MudButton>Update</MudButton>
+<MudButton>Cancel</MudButton>
+
 
 @code {
     [Parameter]
-    public string ID { get; set; }
-
-    protected List<CourseType> courseTypes { get; set; }
-
-    protected CourseType current { get; set; }
+    public CourseType courseType { get; set; }
 
     protected override void OnInitialized()
     {
-        courseTypes = CourseTypeRepository.GetAllCourseType();
-        current = courseTypes.FirstOrDefault(x => x.Id.ToString() == this.ID);
+
     }
 
     protected async Task EditAsync()
     {
-        CourseTypeRepository.UpdateCourseType(current);
-        await JSRuntime.InvokeVoidAsync("RedirectToCourseType");
+
     }
 }

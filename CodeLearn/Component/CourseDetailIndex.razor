@@ -1,9 +1,16 @@
 ﻿@page "/course-detail/{id}" 
 @inject ICourseDetailRepository CourseDetailRepository
+@inject IJSRuntime JSRuntime
 
 <MudPaper Class="p-4">
     <MudItem>
-        <MudText Typo="Typo.h4" Align="Align.Center">@currentCourseDetail.Name</MudText>
+        <MudText Typo="Typo.h4" Align="Align.Center">
+            @currentCourseDetail.Name
+            <br />
+            <AuthorizeView Roles="Admin">
+                <MudButton Color="Color.Error" Variant="Variant.Filled" @onclick="DeleteAsync">Delete</MudButton>
+            </AuthorizeView>
+        </MudText>
     </MudItem>
     <MudItem>
         <MudText Align="Align.Justify">
@@ -14,8 +21,8 @@
 </MudPaper>
 
 @code {
-    [Parameter]
-    public string ID { get; set; }
+        [Parameter]
+        public string ID { get; set; }
 
     protected List<CourseDetail> courseDetails { get; set; } = new List<CourseDetail>();
 
@@ -26,4 +33,17 @@
         courseDetails = CourseDetailRepository.GetAllCourseDetail();
         currentCourseDetail = courseDetails.FirstOrDefault(x => x.Id.ToString() == this.ID);
     }
+
+
+    protected async Task DeleteAsync()
+    {
+        bool deleteConfirm = await JSRuntime.InvokeAsync<bool>("DeleteConfirm");
+        if (deleteConfirm)
+        {
+            CourseDetailRepository.DeleteCourseDetail(currentCourseDetail);
+            await JSRuntime.InvokeVoidAsync("RedirectToHomePage");
+        }
+    }
+
+
 }

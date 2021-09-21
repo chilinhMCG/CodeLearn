@@ -9,3 +9,7 @@ function RedirectToCourse() {
 function RedirectToCourseDetail() {
     window.location.href = "/admin/course-detail-manager";
 }
+
+function RedirectToHomePage() {
+    window.location.href = "/";
+}

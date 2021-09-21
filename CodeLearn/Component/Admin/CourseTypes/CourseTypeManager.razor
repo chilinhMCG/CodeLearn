@@ -1,8 +1,9 @@
 ﻿@page "/admin/course-type-manager"
 @attribute [Authorize(Roles = "Admin")]
 @inject ICourseTypeRepository CourseTypeRepository
+@inject ICourseRepository CourseRepository
 @inject ISnackbar Snackbar
-
+@inject IJSRuntime JSRuntime
 
 <MudGrid>
     <MudItem lg="6">
@@ -32,16 +33,13 @@
                     <MudTh></MudTh>
                 </HeaderContent>
                 <RowTemplate>
-                    <MudTd DataLabel="Name">@context.Name</MudTd>
-                    <MudTd DataLabel="Edit" Style="text-align:center">
-                        <MudButton Color="Color.Dark" Variant="Variant.Text">
-                            <MudLink Underline="Underline.None" Href="@($"course-type/edit/{context.Id.ToString()}")">Edit</MudLink>
-                        </MudButton>
-                        ｜
-                        <MudButton Variant="Variant.Text">
-                            <MudLink Underline="Underline.None" Href="@($"course-type/delete/{context.Id.ToString()}")">Delete</MudLink>
-                        </MudButton>
-
+                    
+                    <MudTd DataLabel="Name">
+                        <MudTextField @bind-Value="context.Name" Variant="Variant.Outlined"
+                                      Margin="Margin.Dense" Required="true" @onfocusout="(() => EditCourseType(context))"></MudTextField>
+                    </MudTd>
+                    <MudTd DataLabel="Delete">
+                        <MudButton Color="Color.Error" @onclick="(() => DeleteCourseTypeAsync(context))">Delete</MudButton>
                     </MudTd>
                 </RowTemplate>
 
@@ -51,13 +49,18 @@
 </MudGrid>
 
 @code {
-    CourseType _courseType = new();
-    List<CourseType> courseTypes = new();
+
+        CourseType _courseType = new();
+
+        List<CourseType> courseTypes = new();
+
+        List<Course> courses { get; set; }
 
     protected override void OnInitialized()
     {
 
         courseTypes = CourseTypeRepository.GetAllCourseType();
+        courses = CourseRepository.GetAllCourse();
     }
 
     protected void Add()
@@ -71,8 +74,30 @@
 
         courseTypes = CourseTypeRepository.GetAllCourseType();
 
-
     }
 
+    protected void EditCourseType(CourseType courseType)
+    {
+        CourseTypeRepository.UpdateCourseType(courseType);
+    }
+
+
+    protected async Task DeleteCourseTypeAsync(CourseType courseType)
+    {
+
+        bool deleteConfirm = await JSRuntime.InvokeAsync<bool>("DeleteConfirm");
+        if (deleteConfirm)
+        {
+            if (courses.Any(x => x.CourseTypeId == courseType.Id))
+            {
+                Snackbar.Add("Bạn phải xóa hết khóa học trong loại khóa học này trước!", Severity.Warning);
+            }
+            else
+            {
+                CourseTypeRepository.DeleteCourseType(courseType);
+            }
+        }
+        await InvokeAsync(StateHasChanged);
+    }
 
 }

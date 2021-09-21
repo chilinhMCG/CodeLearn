@@ -19,7 +19,10 @@
                     <MudTh></MudTh>
                 </HeaderContent>
                 <RowTemplate>
-                    <MudTd DataLabel="name" Class="text-center">@context.Name</MudTd>
+                    <MudTd DataLabel="name" Class="text-center">
+                        <MudLink Color="Color.Success" Underline="Underline.None"
+                                 Href="@($"course-detail/{context.Id}")">@context.Name</MudLink>
+                    </MudTd>
                     <MudTd DataLabel="crud" Class="text-center">
                         <MudButton Variant="Variant.Text">
                             <MudLink Underline="Underline.None" Href="@($"/admin/course-detail/edit/{context.Id}")">Edit</MudLink>
