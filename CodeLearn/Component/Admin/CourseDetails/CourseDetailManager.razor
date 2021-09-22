@@ -1,7 +1,8 @@
 ﻿@page "/admin/course-detail-manager"
 @attribute [Authorize(Roles = "Admin")]
-@inject ICourseRepository CourseRepository
 @inject ICourseDetailRepository CourseDetailRepository
+@inject ICourseRepository CourseRepository
+
 
 
 <MudPaper Class="p-4">
@@ -11,9 +12,9 @@
     </MudItem>
     <br />
     <MudItem lg="12">
-        @foreach (var item in courses)
+        @foreach (var item in _courses)
         {
-            <MudTable Hover="true" Items="courseDetails.Where(x => x.CourseId == item.Id)" Bordered="true" Dense="true">
+            <MudTable Hover="true" Items="_courseDetails.Where(x => x.CourseId == item.Id)" Bordered="true" Dense="true">
                 <HeaderContent>
                     <MudTh>@item.Name</MudTh>
                     <MudTh></MudTh>
@@ -22,16 +23,16 @@
                     <MudTd DataLabel="name" Class="text-center">
                         <MudLink Color="Color.Success" Underline="Underline.None"
                                  Href="@($"course-detail/{context.Id}")">@context.Name</MudLink>
-                    </MudTd>
-                    <MudTd DataLabel="crud" Class="text-center">
-                        <MudButton Variant="Variant.Text">
-                            <MudLink Underline="Underline.None" Href="@($"/admin/course-detail/edit/{context.Id}")">Edit</MudLink>
-                        </MudButton>
-                    </MudTd>
-                </RowTemplate>
-            </MudTable>
-            <br />
-        }
+                            </MudTd>
+                            <MudTd DataLabel="crud" Class="text-center">
+                                <MudButton Variant="Variant.Text">
+                                    <MudLink Underline="Underline.None" Href="@($"/admin/course-detail/edit/{context.Id}")">Edit</MudLink>
+                                </MudButton>
+                            </MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                    <br />
+                }
 
     </MudItem>
 </MudPaper>
@@ -39,13 +40,13 @@
 
 
 @code {
-    protected List<Course> courses { get; set; } = new List<Course>();
+    private List<Course> _courses { get; set; } = new List<Course>();
 
-    protected List<CourseDetail> courseDetails { get; set; } = new List<CourseDetail>();
+    private List<CourseDetail> _courseDetails { get; set; } = new List<CourseDetail>();
 
     protected override void OnInitialized()
     {
-        courses = CourseRepository.GetAllCourse();
-        courseDetails = CourseDetailRepository.GetAllCourseDetail();
+        _courses = CourseRepository.GetAllCourse();
+        _courseDetails = CourseDetailRepository.GetAllCourseDetail();
     }
 }

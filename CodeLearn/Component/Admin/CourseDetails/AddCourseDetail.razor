@@ -1,10 +1,10 @@
 ﻿@page "/admin/course-detail/add-new"
 @attribute [Authorize(Roles = "Admin")]
-@inject ISnackbar Snackbar
-@inject ICourseRepository CourseRepository
 @inject ICourseDetailRepository CourseDetailRepository
+@inject ICourseRepository CourseRepository
+@inject ISnackbar Snackbar
 @inject IUserRepository UserRepository
-@inject IJSRuntime JSRuntime 
+@inject NavigationManager Navigation
 
 <MudPaper Class="p-4">
     <MudItem>
@@ -13,15 +13,15 @@
 </MudPaper>
 <br />
 <MudPaper Class="m-auto p-4">
-    <MudForm Model="newCourseDetail" @bind-IsValid="formSuccess">
+    <MudForm Model="_newCourseDetail" @bind-IsValid="_formSuccess">
         <MudItem>
-            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="newCourseDetail.Name"
+            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="_newCourseDetail.Name"
                           Label="Tên bài học" Required="true"></MudTextField>
         </MudItem>
         <br />
         <MudItem>
-            <MudSelect T="Guid" Label="Thuộc khóa học" Required="true" @bind-Value="newCourseDetail.CourseId">
-                @foreach (var course in courses)
+            <MudSelect T="Guid" Label="Thuộc khóa học" Required="true" @bind-Value="_newCourseDetail.CourseId">
+                @foreach (var course in _courses)
                 {
                     <MudSelectItem Value="course.Id">@course.Name</MudSelectItem>
                 }
@@ -30,8 +30,8 @@
         <br />
 
         <MudItem>
-            <MudSelect T="Guid" Label="Người tạo" Required="true" @bind-Value="newCourseDetail.CreatorId">
-                @foreach (var user in users)
+            <MudSelect T="Guid" Label="Người tạo" Required="true" @bind-Value="_newCourseDetail.CreatorId">
+                @foreach (var user in _users)
                 {
                     <MudSelectItem Value="user.Id">@user.Name</MudSelectItem>
                 }
@@ -41,12 +41,12 @@
 
         <MudItem>
             <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" Lines="10" Placeholder="Có thể sử dụng các thẻ html"
-                          @bind-Value="newCourseDetail.Content" Label="Nội dung" Required="true"></MudTextField>
+                          @bind-Value="_newCourseDetail.Content" Label="Nội dung" Required="true"></MudTextField>
         </MudItem>
         <br />
 
         <MudItem Class="text-center">
-            <MudButton Color="Color.Success" @onclick="AddAsync" Disabled="@(!formSuccess)">Thêm</MudButton>
+            <MudButton Color="Color.Success" @onclick="_addAsync" Disabled="@(!_formSuccess)">Thêm</MudButton>
             <MudButton Color="Color.Dark">
                 <MudLink Color="Color.Dark" Underline="Underline.None" Href="admin/course-detail-manager">Quay lại</MudLink>
             </MudButton>
@@ -57,34 +57,29 @@
 
 @code {
 
-    protected bool formSuccess { get; set; }
+    private bool _formSuccess { get; set; }
 
-    protected List<Course> courses { get; set; } = new List<Course>();
+    private List<Course> _courses { get; set; } = new List<Course>();
 
-    protected CourseDetail newCourseDetail { get; set; } = new CourseDetail();
+    private CourseDetail _newCourseDetail { get; set; } = new CourseDetail();
 
-    protected List<User> users { get; set; } = new List<User>();
+    private List<User> _users { get; set; } = new List<User>();
 
     protected override void OnInitialized()
     {
-        courses = CourseRepository.GetAllCourse();
-        users = UserRepository.GetUser();
+        _courses = CourseRepository.GetAllCourse();
+        _users = UserRepository.GetUser();
     }
 
 
-    protected async Task AddAsync()
+    private void _addAsync()
     {
-        if (newCourseDetail is not null)
+        if (_newCourseDetail is not null)
         {
-            CourseDetailRepository.AddCourseDetail(newCourseDetail);
+            CourseDetailRepository.AddCourseDetail(_newCourseDetail);
             Snackbar.Add("Thêm thành công!", Severity.Success);
-
-
-
-
         }
-        await Task.Delay(2000);
-        await JSRuntime.InvokeVoidAsync("RedirectToCourseDetail");
+        Navigation.NavigateTo("/", false);
 
     }
 }

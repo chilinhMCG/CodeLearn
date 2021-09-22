@@ -1,6 +1,8 @@
 ﻿@page "/"
-@inject ICourseRepository CourseRepository
 @inject ICourseTypeRepository CourseTypeRepository
+@inject ICourseRepository CourseRepository
+
+
 <MudPaper Class="p-4 pb-1 mt-4 ">
     <MudText Typo="Typo.h4" Color="Color.Dark">
         Tự học lập trình trực tuyến. Hãy bắt đầu với khoá học đầu tiên của bạn!
@@ -18,15 +20,15 @@
     </MudGrid>
 </MudPaper>
 <br />
-@foreach (var item in courseTypes)
+@foreach (var item in _courseTypes)
 {
-    @if (searchCourses.Any(x => x.CourseTypeId == item.Id))
-     {
+    @if (_searchCourses.Any(x => x.CourseTypeId == item.Id))
+    {
         <MudPaper Class="p-4">
             <MudText Typo="Typo.h5">@item.Name</MudText>
             <br />
             <MudGrid>
-                @foreach (var course in searchCourses.Where(x => x.CourseTypeId == item.Id))
+                @foreach (var course in _searchCourses.Where(x => x.CourseTypeId == item.Id))
                 {
                     <MudItem lg="3">
                         <MudLink Href="@("/course/" + course.Id.ToString())" Underline="Underline.None">
@@ -50,22 +52,19 @@
             </MudGrid>
         </MudPaper>
         <br>
-     }
- }
+    }
+}
 @code {
-    string _searchString = String.Empty;
+    private string _searchString = String.Empty;
 
-    protected List<CourseType> courseTypes { get; set; }
+    private List<CourseType> _courseTypes { get; set; }
 
-    protected List<Course> courses { get; set; }
-
-    protected IEnumerable<Course> searchCourses { get; set; }
+    protected IEnumerable<Course> _searchCourses { get; set; }
 
     protected override void OnInitialized()
     {
-        courseTypes = CourseTypeRepository.GetAllCourseType();
-        courses = CourseRepository.GetAllCourse();
-        searchCourses = CourseRepository.GetAllCourse()
+        _courseTypes = CourseTypeRepository.GetAllCourseType();
+        _searchCourses = CourseRepository.GetAllCourse()
             .Where(x => string.IsNullOrEmpty(_searchString) ||
                 x.Name.ToLower().Contains(_searchString.ToLower())
         );

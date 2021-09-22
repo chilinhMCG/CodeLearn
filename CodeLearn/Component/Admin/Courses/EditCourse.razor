@@ -1,9 +1,9 @@
 ﻿@page "/admin/course/edit/{id}"
 @attribute [Authorize(Roles = "Admin")]
-@inject ISnackbar Snackbar
 @inject ICourseTypeRepository CourseTypeRepository
 @inject ICourseRepository CourseRepository
-@inject IJSRuntime JSRuntime
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
 
 
 <MudPaper Class="p-4">
@@ -13,24 +13,24 @@
 </MudPaper>
 <br />
 <MudPaper Class="m-auto p-4">
-    <MudForm Model="currentCourse" @bind-IsValid="@formSuccess">
+    <MudForm Model="_currentCourse" @bind-IsValid="@_formSuccess">
         <MudItem>
-            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="currentCourse.Name"
+            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="_currentCourse.Name"
                           Label="Tên khóa học" Required="true"></MudTextField>
         </MudItem>
         <br />
 
 
         <MudItem>
-            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="currentCourse.Author"
+            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="_currentCourse.Author"
                           Label="Tác giả" Required="true"></MudTextField>
         </MudItem>
         <br />
 
 
         <MudItem>
-            <MudSelect T="Guid" Label="Thuộc loại khóa học" Required="true" @bind-Value="currentCourse.CourseTypeId">
-                @foreach (var item in courseTypes)
+            <MudSelect T="Guid" Label="Thuộc loại khóa học" Required="true" @bind-Value="_currentCourse.CourseTypeId">
+                @foreach (var item in _courseTypes)
                 {
                     <MudSelectItem Value="item.Id">@item.Name</MudSelectItem>
                 }
@@ -43,7 +43,7 @@
 
 
         <MudItem>
-            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="currentCourse.Thumbnail"
+            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="_currentCourse.Thumbnail"
                           Label="Thumbnail" Lines="2" Required="true"
                           Placeholder="Tên file ảnh, vui lòng để hình vào thư mục wwwroot/images/CoursesImg của project."></MudTextField>
         </MudItem>
@@ -51,14 +51,14 @@
 
 
         <MudItem>
-            <MudNumericField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="currentCourse.Rating"
+            <MudNumericField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="_currentCourse.Rating"
                              Label="Rating" Min="0" Max="5" Required="true" Placeholder="Rating từ 0 đến 5"></MudNumericField>
         </MudItem>
         <br />
 
 
         <MudItem>
-            <MudSelect T="CourseStatusEnum" Label="Status" Required="true" @bind-Value="currentCourse.Status">
+            <MudSelect T="CourseStatusEnum" Label="Status" Required="true" @bind-Value="_currentCourse.Status">
                 <MudSelectItem Value="CourseStatusEnum.Free" />
                 <MudSelectItem Value="CourseStatusEnum.Block" />
                 <MudSelectItem Value="CourseStatusEnum.Updating" />
@@ -69,7 +69,7 @@
 
 
         <MudItem>
-            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="currentCourse.Description"
+            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="_currentCourse.Description"
                           Label="Mô tả" Lines="10" Required="true"></MudTextField>
         </MudItem>
         <br />
@@ -77,7 +77,7 @@
 
 
         <MudItem Class="text-center">
-            <MudButton Color="Color.Success" @onclick="EditAsync" Disabled="@(!formSuccess)">Update</MudButton>
+            <MudButton Color="Color.Success" @onclick="_editCourse" Disabled="@(!_formSuccess)">Update</MudButton>
             <MudButton Color="Color.Dark">
                 <MudLink Color="Color.Dark" Underline="Underline.None" Href="admin/course-manager">Quay lại</MudLink>
             </MudButton>
@@ -87,35 +87,32 @@
 
 @code {
 
-    protected bool formSuccess { get; set; }
+        [Parameter]
+        public string ID { get; set; }
 
-    [Parameter]
-    public string ID { get; set; }
+    private bool _formSuccess { get; set; }
 
-    protected Course currentCourse { get; set; } = new Course();
+    private Course _currentCourse { get; set; } = new Course();
 
-    protected List<Course> courses { get; set; } = new List<Course>();
+    private List<Course> _courses { get; set; } = new List<Course>();
 
-    protected List<CourseType> courseTypes { get; set; } = new List<CourseType>();
+    private List<CourseType> _courseTypes { get; set; } = new List<CourseType>();
 
     protected override void OnInitialized()
     {
 
-        courseTypes = CourseTypeRepository.GetAllCourseType();
-        courses = CourseRepository.GetAllCourse();
-        currentCourse = courses.FirstOrDefault(x => x.Id.ToString() == this.ID);
+        _courseTypes = CourseTypeRepository.GetAllCourseType();
+        _courses = CourseRepository.GetAllCourse();
+        _currentCourse = _courses.FirstOrDefault(x => x.Id.ToString() == this.ID);
 
 
     }
 
-    protected async Task EditAsync()
+    private void _editCourse()
     {
-        CourseRepository.UpdateCourse(currentCourse);
+        CourseRepository.UpdateCourse(_currentCourse);
         Snackbar.Add("Chỉnh sửa thành công!", Severity.Success);
-
-        await Task.Delay(2000);
-        await JSRuntime.InvokeVoidAsync("RedirectToCourse");
-
+        Navigation.NavigateTo("/admin/course-manager");
     }
 
 }

@@ -1,8 +1,7 @@
 ﻿@page "/admin/course-manager"
 @attribute [Authorize(Roles = "Admin")]
-@inject ICourseRepository CourseRepository
 @inject ICourseTypeRepository CourseTypeRepository
-@inject IJSRuntime JSRuntime
+@inject ICourseRepository CourseRepository
 
 
 
@@ -14,9 +13,9 @@
     </MudItem>
     <br />
     <MudItem lg="12">
-        @foreach (var item in courseTypes)
+        @foreach (var item in _courseTypes)
         {
-            <MudTable Hover="true" Items="courses.Where(x => x.CourseTypeId == item.Id)" Bordered="true" Dense="true">
+            <MudTable Hover="true" Items="_courses.Where(x => x.CourseTypeId == item.Id)" Bordered="true" Dense="true">
                 <HeaderContent>
                     <MudTh>@item.Name</MudTh>
                     <MudTh></MudTh>
@@ -25,16 +24,16 @@
                     <MudTd DataLabel="name" Class="text-center">
                         <MudLink Underline="Underline.None" Color="Color.Success"
                                  Href="@($"/course/{context.Id}")">@context.Name</MudLink>
-                    </MudTd>
-                    <MudTd DataLabel="crud" Class="text-center">
-                        <MudButton Variant="Variant.Text">
-                            <MudLink Underline="Underline.None" Href="@($"/admin/course/edit/{context.Id}")">Edit</MudLink>
-                        </MudButton>
-                    </MudTd>
-                </RowTemplate>
-            </MudTable>
-            <br />
-        }
+                            </MudTd>
+                            <MudTd DataLabel="crud" Class="text-center">
+                                <MudButton Variant="Variant.Text">
+                                    <MudLink Underline="Underline.None" Href="@($"/admin/course/edit/{context.Id}")">Edit</MudLink>
+                                </MudButton>
+                            </MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                    <br />
+                }
 
     </MudItem>
 </MudPaper>
@@ -43,13 +42,13 @@
 
 @code {
 
-    protected List<Course> courses { get; set; }
-    protected List<CourseType> courseTypes { get; set; }
+    private List<Course> _courses { get; set; }
+    private List<CourseType> _courseTypes { get; set; }
 
     protected override void OnInitialized()
     {
-        courses = CourseRepository.GetAllCourse();
-        courseTypes = CourseTypeRepository.GetAllCourseType();
+        _courses = CourseRepository.GetAllCourse();
+        _courseTypes = CourseTypeRepository.GetAllCourseType();
 
     }
 }

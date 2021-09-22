@@ -1,22 +1,22 @@
 ﻿@page "/course-detail/{id}" 
 @inject ICourseDetailRepository CourseDetailRepository
 @inject IDialogService DialogService
-@inject IJSRuntime JSRuntime
 @inject ISnackbar Snackbar
+@inject NavigationManager Navigation
 
 <MudPaper Class="p-4">
     <MudItem>
         <MudText Typo="Typo.h4" Align="Align.Center">
-            @currentCourseDetail.Name
+            @_currentCourseDetail.Name
             <br />
             <AuthorizeView Roles="Admin">
-                <MudButton Color="Color.Error" Variant="Variant.Filled" @onclick="deleteAsync">Delete</MudButton>
+                <MudButton Color="Color.Error" Variant="Variant.Filled" @onclick="_deleteCourseDetailAsync">Delete</MudButton>
             </AuthorizeView>
         </MudText>
     </MudItem>
     <MudItem>
         <MudText Align="Align.Justify">
-            @((MarkupString)currentCourseDetail.Content)
+            @((MarkupString) _currentCourseDetail.Content)
         </MudText>
     </MudItem>
     
@@ -26,18 +26,18 @@
     [Parameter]
     public string ID { get; set; }
 
-    protected List<CourseDetail> courseDetails { get; set; } = new List<CourseDetail>();
+    private List<CourseDetail> _courseDetails { get; set; } = new List<CourseDetail>();
 
-    protected CourseDetail currentCourseDetail { get; set; } = new CourseDetail();
+    private CourseDetail _currentCourseDetail { get; set; } = new CourseDetail();
 
     protected override void OnInitialized()
     {
-        courseDetails = CourseDetailRepository.GetAllCourseDetail();
+        _courseDetails = CourseDetailRepository.GetAllCourseDetail();
 
-        currentCourseDetail = courseDetails.FirstOrDefault(x => x.Id.ToString() == this.ID);
+        _currentCourseDetail = _courseDetails.FirstOrDefault(x => x.Id.ToString() == this.ID);
     }
 
-    protected async Task deleteAsync()
+    private async Task _deleteCourseDetailAsync()
     {
 
         var dialog = DialogService.Show<DeleteDialog>("Xóa bài học");
@@ -46,12 +46,11 @@
         if (!result.Cancelled)
         {
 
-            CourseDetailRepository.DeleteCourseDetail(currentCourseDetail);
+            CourseDetailRepository.DeleteCourseDetail(_currentCourseDetail);
             Snackbar.Add("Xóa thành công!", Severity.Success);
 
         }
-        await Task.Delay(2000);
-        await JSRuntime.InvokeVoidAsync("RedirectToHomePage");
+        Navigation.NavigateTo("/");
     }
 
 
