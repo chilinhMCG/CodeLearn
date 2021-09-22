@@ -1,5 +1,6 @@
 ﻿@page "/admin/course-detail/add-new"
 @attribute [Authorize(Roles = "Admin")]
+@inject ISnackbar Snackbar
 @inject ICourseRepository CourseRepository
 @inject ICourseDetailRepository CourseDetailRepository
 @inject IUserRepository UserRepository
@@ -76,7 +77,14 @@
         if (newCourseDetail is not null)
         {
             CourseDetailRepository.AddCourseDetail(newCourseDetail);
-            await JSRuntime.InvokeVoidAsync("RedirectToCourseDetail");
+            Snackbar.Add("Thêm thành công!", Severity.Success);
+
+
+
+
         }
+        await Task.Delay(2000);
+        await JSRuntime.InvokeVoidAsync("RedirectToCourseDetail");
+
     }
 }

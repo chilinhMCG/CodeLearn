@@ -101,7 +101,11 @@
         if (newCourse is not null)
         {
             CourseRepository.AddCourse(newCourse);
+            Snackbar.Add("Thêm thành công!", Severity.Success);
+
+            await Task.Delay(2000);
             await JSRuntime.InvokeVoidAsync("RedirectToCourse");
+
         }
 
     }

@@ -2,6 +2,7 @@
 @attribute [Authorize(Roles = "Admin")]
 @inject ICourseTypeRepository CourseTypeRepository
 @inject ICourseRepository CourseRepository
+@inject IDialogService DialogService
 @inject ISnackbar Snackbar
 @inject IJSRuntime JSRuntime
 
@@ -38,8 +39,8 @@
                         <MudTextField @bind-Value="context.Name" Variant="Variant.Outlined"
                                       Margin="Margin.Dense" Required="true" @onfocusout="(() => EditCourseType(context))"></MudTextField>
                     </MudTd>
-                    <MudTd DataLabel="Delete">
-                        <MudButton Color="Color.Error" @onclick="(() => DeleteCourseTypeAsync(context))">Delete</MudButton>
+                    <MudTd DataLabel="Delete" Class="text-center">
+                        <MudButton Color="Color.Error" @onclick="(() => deleteAsync(context))">Delete</MudButton>
                     </MudTd>
                 </RowTemplate>
 
@@ -50,11 +51,11 @@
 
 @code {
 
-        CourseType _courseType = new();
+    CourseType _courseType = new();
 
-        List<CourseType> courseTypes = new();
+    List<CourseType> courseTypes = new();
 
-        List<Course> courses { get; set; }
+    List<Course> courses { get; set; }
 
     protected override void OnInitialized()
     {
@@ -79,25 +80,27 @@
     protected void EditCourseType(CourseType courseType)
     {
         CourseTypeRepository.UpdateCourseType(courseType);
+        Snackbar.Add("Chỉnh sửa thành công!", Severity.Success);
     }
 
 
-    protected async Task DeleteCourseTypeAsync(CourseType courseType)
+    protected async Task deleteAsync(CourseType courseType)
     {
-
-        bool deleteConfirm = await JSRuntime.InvokeAsync<bool>("DeleteConfirm");
-        if (deleteConfirm)
+        var dialog = DialogService.Show<DeleteDialog>("Xóa khóa học");
+        var result = await dialog.Result;
+        if (!result.Cancelled)
         {
             if (courses.Any(x => x.CourseTypeId == courseType.Id))
             {
-                Snackbar.Add("Bạn phải xóa hết khóa học trong loại khóa học này trước!", Severity.Warning);
+                Snackbar.Add("Bạn phải xóa hết tất cả các khóa học trong loại khóa học này trước!", Severity.Warning);
             }
             else
             {
                 CourseTypeRepository.DeleteCourseType(courseType);
+                courseTypes = CourseTypeRepository.GetAllCourseType();
+
             }
         }
-        await InvokeAsync(StateHasChanged);
     }
 
 }

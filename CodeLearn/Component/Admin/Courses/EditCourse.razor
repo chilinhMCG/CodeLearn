@@ -111,7 +111,11 @@
     protected async Task EditAsync()
     {
         CourseRepository.UpdateCourse(currentCourse);
+        Snackbar.Add("Chỉnh sửa thành công!", Severity.Success);
+
+        await Task.Delay(2000);
         await JSRuntime.InvokeVoidAsync("RedirectToCourse");
+
     }
 
 }

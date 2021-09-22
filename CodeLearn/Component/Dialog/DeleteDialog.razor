@@ -1,0 +1,29 @@
+﻿@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        Bạn có chắc chắn muốn xóa?
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Quay lại</MudButton>
+        <MudButton OnClick="Submit" Color="Color.Primary">Xóa</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    protected void Submit()
+    {
+        MudDialog.Close(DialogResult.Ok(true));
+        Snackbar.Add("Xóa thành công!", Severity.Success);
+    }
+
+    protected void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+}

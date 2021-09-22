@@ -1,6 +1,8 @@
 ﻿@page "/course-detail/{id}" 
 @inject ICourseDetailRepository CourseDetailRepository
+@inject IDialogService DialogService
 @inject IJSRuntime JSRuntime
+@inject ISnackbar Snackbar
 
 <MudPaper Class="p-4">
     <MudItem>
@@ -8,21 +10,21 @@
             @currentCourseDetail.Name
             <br />
             <AuthorizeView Roles="Admin">
-                <MudButton Color="Color.Error" Variant="Variant.Filled" @onclick="DeleteAsync">Delete</MudButton>
+                <MudButton Color="Color.Error" Variant="Variant.Filled" @onclick="deleteAsync">Delete</MudButton>
             </AuthorizeView>
         </MudText>
     </MudItem>
     <MudItem>
         <MudText Align="Align.Justify">
-            @((MarkupString) currentCourseDetail.Content)
+            @((MarkupString)currentCourseDetail.Content)
         </MudText>
     </MudItem>
     
 </MudPaper>
 
 @code {
-        [Parameter]
-        public string ID { get; set; }
+    [Parameter]
+    public string ID { get; set; }
 
     protected List<CourseDetail> courseDetails { get; set; } = new List<CourseDetail>();
 
@@ -31,18 +33,25 @@
     protected override void OnInitialized()
     {
         courseDetails = CourseDetailRepository.GetAllCourseDetail();
+
         currentCourseDetail = courseDetails.FirstOrDefault(x => x.Id.ToString() == this.ID);
     }
 
-
-    protected async Task DeleteAsync()
+    protected async Task deleteAsync()
     {
-        bool deleteConfirm = await JSRuntime.InvokeAsync<bool>("DeleteConfirm");
-        if (deleteConfirm)
+
+        var dialog = DialogService.Show<DeleteDialog>("Xóa bài học");
+        var result = await dialog.Result;
+
+        if (!result.Cancelled)
         {
+
             CourseDetailRepository.DeleteCourseDetail(currentCourseDetail);
-            await JSRuntime.InvokeVoidAsync("RedirectToHomePage");
+            Snackbar.Add("Xóa thành công!", Severity.Success);
+
         }
+        await Task.Delay(2000);
+        await JSRuntime.InvokeVoidAsync("RedirectToHomePage");
     }
 
 

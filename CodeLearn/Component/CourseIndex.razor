@@ -1,6 +1,7 @@
 ﻿@page "/course/{id}"
 @inject ICourseRepository CourseRepository
 @inject ICourseDetailRepository CourseDetailRepository
+@inject IDialogService DialogService
 @inject IJSRuntime JSRuntime
 @inject ISnackbar Snackbar
 
@@ -11,7 +12,7 @@
             @currentCourse.Author
             <MudRating SelectedValue="@currentCourse.Rating" Size="Size.Small" ReadOnly="true"></MudRating>
             <AuthorizeView Roles="Admin">
-                <MudButton Color="Color.Error" Variant="Variant.Filled" @onclick="DeleteCourseAsync">Delete</MudButton>
+                <MudButton Color="Color.Error" Variant="Variant.Filled" @onclick="deleteAsync">Delete</MudButton>
             </AuthorizeView>
         </MudText>
 
@@ -56,18 +57,24 @@
         courseDetails = CourseDetailRepository.GetAllCourseDetailsByCourseID(this.Id);
     }
 
-    protected async Task DeleteCourseAsync()
+
+    protected async Task deleteAsync()
     {
-        bool deleteConfirm = await JSRuntime.InvokeAsync<bool>("DeleteConfirm");
-        if (deleteConfirm)
+        var dialog = DialogService.Show<DeleteDialog>("Xóa khóa học");
+        var result = await dialog.Result;
+
+        if (!result.Cancelled)
         {
             if (courseDetails.Any(x => x.CourseId == currentCourse.Id))
             {
-                Snackbar.Add("Bạn phải xóa hết các bài học trong khóa học trước!", Severity.Warning);
+                Snackbar.Add("Bạn cần phải xóa tất cả bài học trong khóa này trước!", Severity.Warning);
             }
             else
             {
                 CourseRepository.DeleteCourse(currentCourse);
+                Snackbar.Add("Xóa thành công", Severity.Success);
+
+                await Task.Delay(2000);
                 await JSRuntime.InvokeVoidAsync("RedirectToHomePage");
             }
         }
