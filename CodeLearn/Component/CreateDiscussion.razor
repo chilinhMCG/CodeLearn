@@ -1,0 +1,59 @@
+﻿@page "/CreateDiscussion"
+<MudPaper Class="p-4 pb-1 mt-4 ">
+    <MudContainer>
+        <MudItem lg="4">
+            <MudText Typo="Typo.h5">Tạo một cuộc thảo luận mới</MudText>
+        </MudItem>
+        <br />
+        <br />
+        <MudItem lg="4">
+            <MudText Typo="Typo.h6">Tiêu đề</MudText>
+            <MudTextField @bind-Value="_searchString"
+                          Variant="Variant.Filled"
+                          Adornment="Adornment.End"
+                          Margin="Margin.Dense"
+                          Class="my-4"
+                          Lines="1" />
+        </MudItem>
+        <MudItem lg="4">
+            <MudText Typo="Typo.h6">#Hashtag</MudText>
+            <MudGrid>
+                &emsp;
+                <MudTextField @bind-Value="_searchString"
+                              Variant="Variant.Filled"
+                              Adornment="Adornment.End"
+                              Margin="Margin.Dense"
+                              Class="my-4"
+                              Lines="1" />
+                &emsp;
+                <MudIconButton Icon="@Icons.Material.Filled.Add" OnClick="Add"></MudIconButton>
+            </MudGrid>
+            <MudChipSet AllClosable="true" OnClose="Closed">
+                @foreach (var value in values)
+                {
+                    <MudChip Text="@value"></MudChip>
+                }
+            </MudChipSet>
+        </MudItem>
+        <MudItem xs="12" sm="12" md="12">
+            <MudText Typo="Typo.h6">Nội dung</MudText>
+            <MudTextField T="string" Label="Outlined" Variant="Variant.Outlined" Text="@sampleText" Lines="17" />
+        </MudItem>
+        <br />
+        <MudItem Style="text-align: end;">
+            <MudButton Variant="Variant.Filled">Hủy</MudButton>
+            &emsp;
+            <MudButton Variant="Variant.Filled" Color="Color.Primary">Đăng</MudButton>
+        </MudItem>
+    </MudContainer>
+</MudPaper>
+@code {
+    string _searchString = String.Empty;
+    string sampleText;
+    int i = 1;
+    List<string> values = new List<string>();
+    public void Add()
+        { values.Add(_searchString); 
+          _searchString = String.Empty;}
+    public void Closed(MudChip chip) => values.Remove(chip.Text);
+}

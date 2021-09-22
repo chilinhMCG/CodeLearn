@@ -7,7 +7,7 @@
         <div style="color:white;">Học tập</div>
     </MudLink>
     <MudLink Class="mx-7" Underline="Underline.None"
-             Color="Color.Default" Href="/">
+             Color="Color.Default" Href="/test">
         <div style="color:white;">Luyện tập</div>
     </MudLink>
     <MudLink Class="mx-7" Underline="Underline.None"
@@ -22,6 +22,10 @@
              Color="Color.Default" Href="/">
         <div style="color:white;">Đánh giá</div>
     </MudLink>
+    <MudLink Class="mx-7" Underline="Underline.None"
+             Color="Color.Default" Href="/Discussion">
+        <div style="color:white;">Thảo luận</div>
+    </MudLink>
 
     <MudSpacer />
 
@@ -31,8 +35,8 @@
                      Color="Color.Default" Href="/">
                 <div style="color:white;">Chào, @context.User.Identity.Name!</div>
             </MudLink>
-            <MudIconButton Icon="@Icons.Material.Filled.ExitToApp" 
-                           Link="Identity/Account/Logout"  
+            <MudIconButton Icon="@Icons.Material.Filled.ExitToApp"
+                           Link="Identity/Account/Logout"
                            Color="Color.Inherit" />
         </Authorized>
         <NotAuthorized>

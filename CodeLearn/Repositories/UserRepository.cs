@@ -21,7 +21,7 @@ namespace CodeLearn.Repositories
         {
             using var context = _applicationDBContext.CreateDbContext();
             context.Add(user);
-            context.SaveChanges();
+            //context.SaveChanges();
         }
 
         public async Task<List<User>> GetAllUser()
@@ -40,7 +40,7 @@ namespace CodeLearn.Repositories
         {
             using var context = _applicationDBContext.CreateDbContext();
             context.Update(user);
-            context.SaveChanges();
+            //context.SaveChanges();
         }
     }
 }

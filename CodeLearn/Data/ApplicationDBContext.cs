@@ -18,7 +18,7 @@ namespace CodeLearn.Data
         public DbSet<User> Users { get; set; }
 
         static ApplicationDBContext() => NpgsqlConnection.GlobalTypeMapper.MapEnum<CourseStatusEnum>();
-
+      
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasPostgresEnum<CourseStatusEnum>();

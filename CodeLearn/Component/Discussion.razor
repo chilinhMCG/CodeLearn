@@ -1,0 +1,67 @@
+﻿@page "/Discussion"
+<MudPaper Class="p-4 pb-1 mt-4 ">
+    <MudGrid Style="justify-content: space-between;">
+        <MudItem lg="4">
+            <MudTextField @bind-Value="_searchString"
+                          Label="Tìm cuộc thảo luận"
+                          Variant="Variant.Outlined"
+                          Adornment="Adornment.End"
+                          AdornmentIcon="@Icons.Filled.Search"
+                          Margin="Margin.Dense"
+                          Class="my-4" />
+        </MudItem>
+        <MudItem>
+            <MudLink Style="text-align: end;" Href="CreateDiscussion" Underline="Underline.None" Color="Color.Secondary">Tạo một cuộc thảo luận mới</MudLink>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+<br />
+    <MudPaper Width="100%">
+        <MudContainer Style="padding-top: 5%;">
+            @*@foreach (var post in allposts)*@
+            @for(int i=0;i<10;i++)
+            {
+            <MudCard>
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudAvatar Color="Color.Info" Variant="Variant.Outlined">M</MudAvatar>
+                        <MudLink Typo="Typo.h5" Href="DetailDiscussion" Color="Color.Dark">@*@post.Title*@ Sóng bắt đầu từ gió</MudLink>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent Style="padding-top: 0px;">
+                    <MudText Style="max-width: 67%;display: -webkit-box;-webkit-box-orient: vertical; -webkit-line-clamp: 3;overflow:hidden; text-overflow: ellipsis;" Typo="Typo.body2">@*@post.Body*@Sóng bắt đầu từ gió Sóng bắt đầu từ gió Sóng bắt đầu từ gió Sóng bắt đầu từ gió Sóng bắt đầu từ gió Sóng bắt đầu từ gió Sóng bắt đầu từ gió Sóng bắt đầu từ gió Sóng bắt đầu từ gió Sóng bắt đầu từ gió Sóng bắt đầu từ gió Sóng bắt đầu từ gió Sóng bắt đầu từ gió Sóng bắt đầu từ gió</MudText>
+                </MudCardContent>
+                <MudText>
+                    &emsp;
+                    Người đăng: <MudElement HtmlTag="a"
+                                            Class="ma-0"
+                                            Style="color:red;font-weight:bold;"
+                                            target="blank"
+                                            rel="noopener noreferrer">
+                        Xuân Quỳnh
+                    </MudElement>
+                    &emsp;Ngày đăng: <MudElement HtmlTag="a"
+                                                 Class="ma-0"
+                                                 Style="color:red;font-weight:bold;"
+                                                 target="blank"
+                                                 rel="noopener noreferrer">
+                        01/01/2021
+                    </MudElement>
+                </MudText>
+                <MudChipSet>
+                    @*@foreach (var value in values)*@
+                    @for(int i=0;i<2;i++)
+                    {
+                        <MudChip Style="background-color: gray;" Text="@*@value*@ Sóng"></MudChip>
+                    }
+                </MudChipSet>
+            </MudCard>
+                <MudDivider />
+                <MudDivider />
+                <br \>
+            }
+        </MudContainer>
+    </MudPaper>
+@code {
+    string _searchString = String.Empty;
+}
