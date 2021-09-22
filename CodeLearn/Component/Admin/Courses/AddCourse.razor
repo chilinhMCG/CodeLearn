@@ -3,6 +3,7 @@
 @inject ICourseTypeRepository CourseTypeRepository
 @inject ICourseRepository CourseRepository
 @inject ISnackbar Snackbar
+@inject IWebHostEnvironment Environment
 @inject NavigationManager Navigation
 
 <MudPaper Class="p-4">
@@ -30,7 +31,7 @@
         <MudItem>
             <MudSelect T="Guid" Label="Thuộc loại khóa học" Required="true" @bind-Value="_newCourse.CourseTypeId">
                 @foreach (var item in _courseTypes)
-                {
+                {   
                     <MudSelectItem Value="item.Id">@item.Name</MudSelectItem>
                 }
             </MudSelect>
@@ -39,9 +40,9 @@
 
 
         <MudItem>
-            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="_newCourse.Thumbnail"
-                          Label="Thumbnail" Lines="2" Required="true"
-                          Placeholder="Tên file ảnh, vui lòng để hình vào thư mục wwwroot/images/CoursesImg của project."></MudTextField>
+            <MudText Typo="Typo.caption">Thumbnail</MudText><br />
+            <InputFile id="file-input" OnChange="_imgCourseFileAsync" accept=".jpg, .jpeg"></InputFile>
+            
         </MudItem>
         <br />
 
@@ -105,6 +106,17 @@
             Snackbar.Add("Thêm thành công!", Severity.Success);
             Navigation.NavigateTo("/admin/course-manager");
         }
+    }
+
+    public string text { get; set; }
+
+    private async Task _imgCourseFileAsync(InputFileChangeEventArgs e)
+    {
+        _newCourse.Thumbnail = e.File.Name;
+
+        var path = Path.Combine(Environment.ContentRootPath, "wwwroot\\images\\CoursesImg", e.File.Name);
+        await using FileStream fs = new(path, FileMode.OpenOrCreate);
+        await e.File.OpenReadStream().CopyToAsync(fs);
     }
 
 }

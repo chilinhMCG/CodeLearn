@@ -3,6 +3,7 @@
 @inject ICourseTypeRepository CourseTypeRepository
 @inject ICourseRepository CourseRepository
 @inject ISnackbar Snackbar
+@inject IWebHostEnvironment Environment
 @inject NavigationManager Navigation
 
 
@@ -43,9 +44,8 @@
 
 
         <MudItem>
-            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="_currentCourse.Thumbnail"
-                          Label="Thumbnail" Lines="2" Required="true"
-                          Placeholder="Tên file ảnh, vui lòng để hình vào thư mục wwwroot/images/CoursesImg của project."></MudTextField>
+            <MudText Typo="Typo.caption">Thumbnail</MudText><br />
+            <InputFile required id="input-file" accept=".jpg, .jpeg" OnChange="_imgCourseFileAsync"></InputFile>
         </MudItem>
         <br />
 
@@ -87,8 +87,8 @@
 
 @code {
 
-        [Parameter]
-        public string ID { get; set; }
+    [Parameter]
+    public string ID { get; set; }
 
     private bool _formSuccess { get; set; }
 
@@ -114,5 +114,15 @@
         Snackbar.Add("Chỉnh sửa thành công!", Severity.Success);
         Navigation.NavigateTo("/admin/course-manager");
     }
+
+    private async Task _imgCourseFileAsync(InputFileChangeEventArgs e)
+    {
+        _currentCourse.Thumbnail = e.File.Name;
+
+        var path = Path.Combine(Environment.ContentRootPath, "wwwroot\\images\\CoursesImg", e.File.Name);
+        await using FileStream fs = new(path, FileMode.OpenOrCreate);
+        await e.File.OpenReadStream().CopyToAsync(fs);
+    }
+
 
 }
