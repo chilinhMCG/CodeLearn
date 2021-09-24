@@ -1,0 +1,37 @@
+﻿@page "/admin/user-manager"
+@inject ISnackbar Snackbar
+@inject IUserRepository UserRepository
+
+
+<MudPaper Class="p-4">
+    <MudItem lg="12">
+        <MudTable Bordered="true" Items="_users">
+            <HeaderContent>
+                <MudTh Class="text-center">Tên</MudTh>
+                <MudTh Class="text-center">Email</MudTh>
+                <MudTh Class="text-center">Role</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Name">
+                    @context.Name
+                </MudTd>
+                <MudTd DataLabel="Email">
+                    @context.Email
+                </MudTd>
+                <MudTd></MudTd>
+            </RowTemplate>
+        </MudTable> 
+    </MudItem>
+</MudPaper>
+
+
+@code {
+
+    private List<User> _users { get; set; }
+
+    protected override void OnInitialized()
+    {
+        _users = UserRepository.GetUser();
+    }
+
+}
