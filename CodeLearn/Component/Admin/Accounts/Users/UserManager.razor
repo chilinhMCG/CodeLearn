@@ -9,20 +9,19 @@
             <HeaderContent>
                 <MudTh Class="text-center">Tên</MudTh>
                 <MudTh Class="text-center">Email</MudTh>
-                <MudTh Class="text-center">Role</MudTh>
+                <MudTh Class="text-center">Quyền hạn</MudTh>
+                <MudTh Class="text-center">Trạng thái</MudTh>
             </HeaderContent>
             <RowTemplate>
-                <MudTd DataLabel="Name">
-                    @context.Name
-                </MudTd>
-                <MudTd DataLabel="Email">
-                    @context.Email
-                </MudTd>
+                <MudTd DataLabel="Name">@context.Name</MudTd>
+                <MudTd>@context.Email</MudTd>
                 <MudTd></MudTd>
+                <MudTd>@context.IsBlocked</MudTd>
             </RowTemplate>
         </MudTable> 
     </MudItem>
 </MudPaper>
+
 
 
 @code {
@@ -33,5 +32,7 @@
     {
         _users = UserRepository.GetUser();
     }
+
+
 
 }
