@@ -1,11 +1,16 @@
 ﻿@page "/admin/user-manager"
 @inject ISnackbar Snackbar
-@inject IUserRepository UserRepository
+@*@inject IUserRepository UserRepository*@
+@using CodeLearn.Areas.Identity
+
+@inject Microsoft.AspNetCore.Identity.UserManager<IdentityUser> IdentityUserManager
+@*//tuong tu nhu cai nay ne, dung de o duoi nhu vay*@
 
 
 <MudPaper Class="p-4">
     <MudItem lg="12">
-        <MudTable Bordered="true" Items="_users">
+        <MudTable Bordered="true" Items="allUsers">
+
             <HeaderContent>
                 <MudTh Class="text-center">Tên</MudTh>
                 <MudTh Class="text-center">Email</MudTh>
@@ -13,24 +18,19 @@
                 <MudTh Class="text-center">Trạng thái</MudTh>
             </HeaderContent>
             <RowTemplate>
-                <MudTd DataLabel="Name">@context.Name</MudTd>
+                <MudTd DataLabel="Name">@context.UserName</MudTd>
                 <MudTd>@context.Email</MudTd>
                 <MudTd>
-                    @_userManager.GetUsersInRoleAsync("Admin")
+                    @IdentityUserManager.GetRolesAsync(context).Result.FirstOrDefault();
                 </MudTd>
-                <MudTd>@context.IsBlocked</MudTd>
+                <MudTd></MudTd>
             </RowTemplate>
-        </MudTable> 
+        </MudTable>
     </MudItem>
 </MudPaper>
 
+
 <br />
-
-
-
-
-
-
 
 @code {
 
@@ -38,19 +38,26 @@
 
     List<string> _listRoles { get; set; }
 
-    [Inject]
-    private UserManager<IdentityUser> _userManager { get; set; }
+    //[Inject]
+    //private UserManager<IdentityUser> _userManager { get; set; }
 
-    [Inject]
-    private RoleManager<IdentityRole> _roleManager { get; set; }
+    //[Inject]
+    //private RoleManager<IdentityRole> _roleManager { get; set; }
+    //Cai nao la inject thi em de len tren dau nha
 
+    List<IdentityUser> allUsers = new();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        _users = UserRepository.GetUser();
-        
+        //_users = UserRepository.GetUser();
+        var user = await IdentityUserManager.GetUsersInRoleAsync("Admin");
+        allUsers = IdentityUserManager.Users.ToList();
     }
 
 
-
+    async Task<string> GetRoleUser(IdentityUser user)
+    {
+        var Roles = await IdentityUserManager.GetRolesAsync(user);
+        return Roles.FirstOrDefault();
+    }
 }
