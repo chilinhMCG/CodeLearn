@@ -23,7 +23,16 @@ namespace CodeLearn.Models
         public DateTime CreatedAt { get; set; }
 
         [Column("rating")]
-        public int Rating { get; set; }
+        public double TotalRating { get; set; }
+
+        [Column("double_average_rating")]
+        public double DoubleAverageRate { get; set; }
+
+        [Column("int_average_rate")]
+        public int IntAverageRate { get; set; }
+
+        [Column("rate_count")]
+        public int RateCount { get; set; }
 
         [Column("status")]
         public CourseStatusEnum Status { get; set; }

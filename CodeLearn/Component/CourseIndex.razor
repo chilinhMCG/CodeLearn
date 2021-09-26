@@ -10,7 +10,8 @@
         <MudText Typo="Typo.h4">@_currentCourse.Name</MudText>
         <MudText Typo="Typo.subtitle1">
             @_currentCourse.Author
-            <MudRating SelectedValue="@_currentCourse.Rating" Size="Size.Small" ReadOnly="true"></MudRating>
+            <MudRating @bind-SelectedValue="@_currentCourse.IntAverageRate" Size="Size.Small"></MudRating> 
+            @_currentCourse.RateCount vote(s)
             <AuthorizeView Roles="Admin">
                 <MudButton Color="Color.Error" Variant="Variant.Filled" @onclick="_deleteCourseAsync">Delete</MudButton>
             </AuthorizeView>

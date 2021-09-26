@@ -17,5 +17,9 @@ namespace CodeLearn.Repositories.Interface
 
         void DeleteCourse(Course course);
 
+        //int GetCourseRating(Course course);
+
+        void UpdateCourseRating(Course course, int value);
+
     }
 }
