@@ -12,8 +12,8 @@ namespace CodeLearn.Data
     {
         public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options) : base(options)
         { }
-        public DbSet<Course> Courses { get; set; }
-        public DbSet<CourseDetail> CourseDetails { get; set; }
+        public DbSet<Comment> Comments { get; set; }
+        public DbSet<Discussion> Discussions { get; set; }
         public DbSet<CourseType> CourseTypes { get; set; }
         public DbSet<User> Users { get; set; }
 
@@ -26,13 +26,24 @@ namespace CodeLearn.Data
             modelBuilder.Entity<Course>(entity =>
                 entity.Property(p => p.CreatedAt)
                       .HasDefaultValueSql("CURRENT_TIMESTAMP"));
+
             modelBuilder.Entity<Course>()
                 .HasOne(h => h.CourseTypeNavigation)
                 .WithMany(h => h.Courses)
                 .HasForeignKey(h => h.CourseTypeId)
                 .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("fk_courses_coursestype");
-
+            modelBuilder.Entity<Discussion>()
+               .HasOne(h => h.User)
+               .WithMany(t => t.Discussions)
+               .HasForeignKey(t => t.UserId);
+            modelBuilder.Entity<Comment>()
+               .HasOne(h => h.Discussion)
+               .WithMany(t => t.Comments);
+            modelBuilder.Entity<Comment>()
+               .HasOne(h => h.User)
+              .WithMany(t => t.Comments)
+              .HasForeignKey(t => t.UserId);
             modelBuilder.Entity<CourseDetail>(entity =>
                 entity.Property(p => p.CreatedAt)
                       .HasDefaultValueSql("CURRENT_TIMESTAMP"));

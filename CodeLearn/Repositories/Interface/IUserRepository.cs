@@ -10,10 +10,8 @@ namespace CodeLearn.Repositories.Interface
     {
         Task<List<User>> GetAllUser();
         User GetUserById(Guid id);
-        void AddUser(User user)
-        {
-
-        }
+        User GetUserByName(string name);
+        void AddUser(User user);
         void UpdateUser(User user);
     }
 }

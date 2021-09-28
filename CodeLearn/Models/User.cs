@@ -17,5 +17,12 @@ namespace CodeLearn.Models
         [Column("is_blocked")]
         public bool IsBlocked { get; set; }
         public ICollection<CourseDetail> CourseDetails { get; set; }
+        public ICollection<Comment> Comments { get; set; }
+        public ICollection<Discussion> Discussions { get; set; }
+        public User()
+        {
+            this.Discussions = new HashSet<Discussion>();
+            this.Comments = new HashSet<Comment>();
+        }
     }
 }

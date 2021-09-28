@@ -1,0 +1,140 @@
+﻿@page "/DetailDiscussion/{Id}"
+@using CodeLearn.Component
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Mvc.RazorPages;
+@inject IDiscussionRepository DiscussionRepository
+@inject IUserRepository UserRepository
+@inject ICommentRepository CommentRepository
+
+<MudPaper Width="100%">
+    <MudContainer Style="padding-top: 5%;">
+        <MudCard>
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudGrid Style="margin-top: 9px 0 0 6px;">
+                        <MudAvatar Color="Color.Info" Variant="Variant.Outlined" Size="Size.Large">M</MudAvatar>
+                        &emsp;
+                        <MudText Typo="Typo.h5">
+                            @_discussion.Question<br \>
+                            <MudText Style="@($"color:{Colors.BlueGrey.Lighten3}; font-size: 13px;")">
+                                Người đăng: <MudElement HtmlTag="a"
+                                                        Class="ma-0"
+                                                        Style="@($"color:{Colors.BlueGrey.Lighten2};  font-weight:bold;")"
+                                                        target="blank"
+                                                        rel="noopener noreferrer">
+                                    @_user.Name
+                                </MudElement>
+                                &emsp;
+                                Ngày đăng: <MudElement HtmlTag="a"
+                                                       Class="ma-0"
+                                                       Style="@($"color:{Colors.BlueGrey.Lighten2};  font-weight:bold;")"
+                                                       target="blank"
+                                                       rel="noopener noreferrer">
+                                    @_discussion.CreateOn
+                                </MudElement>
+                            </MudText>
+                        </MudText>
+                    </MudGrid>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent Style="padding-top: 0px; margin: 25px 0 13px 57px;">
+                <MudText Style="max-width: 67%;display: -webkit-box;-webkit-box-orient: vertical; -webkit-line-clamp: 3;overflow:hidden; text-overflow: ellipsis; margin-bottom: 13px;" Typo="Typo.button">@_discussion.Content</MudText>
+                <MudChipSet>
+                    @foreach (var value in _discussion.HashTag)
+                    {
+                        <MudChip Style="@($"background-color :{Colors.BlueGrey.Lighten4};")" Text="@value"></MudChip>
+                    }
+                </MudChipSet>
+                <br \>
+                <MudItem xs="12" sm="12" md="12" Style="margin: 13px 0 13px 0;">
+                    @if (_isLogIn == false)
+                    {
+                        <MudTextField Style="color: darkgray;" T="string" Label="Đăng nhập để bình luận" Disabled="true" Variant="Variant.Outlined" Lines="8" />
+                    }
+                    else
+                    {
+                        <MudTextField T="string" Label="Comment.." Variant="Variant.Outlined" @bind-Value="@_sampleText" Lines="8" />
+                    }
+                </MudItem>
+                <MudItem Style="text-align: end;">
+                    @if (string.IsNullOrWhiteSpace(_sampleText) == true || _isLogIn == false)
+                    {
+                        <MudButton Variant="Variant.Filled" Color="Color.Info " Disabled="true">Bình luận</MudButton>
+                    }
+                    else if(string.IsNullOrWhiteSpace(_sampleText) == false && _isLogIn == true)
+                    {
+                        <MudButton Variant="Variant.Filled" Color="Color.Info " OnClick="AddComment">Bình luận</MudButton>
+                    }
+                </MudItem>
+            </MudCardContent>
+            <MudCardContent>
+                <MudText Style="border-bottom: 1px solid darkgray;" Color="Color.Info">@_comments.Count() comments</MudText>
+                @foreach(var comment in _comments)
+                {
+                    <MudGrid Style="margin: 13px 4px 0 0;">
+                        <MudAvatar Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Medium">@GetUserNamebyID(comment.UserId.Value)[0]</MudAvatar>
+                        &emsp;
+                        <MudItem Style="padding-top: 0;">
+                            <MudLink Href="#" Typo="Typo.subtitle1" Color="Color.Info">@GetUserNamebyID(comment.UserId.Value)</MudLink>
+                            &emsp;
+                            <MudText Style="display:inline" Typo="Typo.subtitle1">@comment.CreateOn</MudText>
+                        </MudItem>
+                        <MudText Style="margin-left: 65px; max-width: 85%;width: 100%; border-bottom: 1px solid darkgray">
+                            @comment.Content
+                        </MudText>
+                    </MudGrid>
+                }
+            </MudCardContent>
+        </MudCard>
+        <MudDivider />
+        <MudDivider />
+        <br \>
+    </MudContainer>
+</MudPaper>
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    [Parameter]
+    public string Id { get; set; }
+    public Guid Kd = Guid.Empty;
+    string _searchString = String.Empty;
+    string _sampleText = String.Empty;
+    Discussion _discussion;
+    List<Comment> _comments;
+    Comment _comment = new();
+    User _user;
+    bool _isLogIn;
+    protected override void OnInitialized()
+    {
+        Console.WriteLine("\n\n\t\tolaquydo: " + Id);
+        Kd = new Guid(Id);
+        this._discussion = DiscussionRepository.GetDiscussionById(Kd);
+        _user = UserRepository.GetUserById(_discussion.UserId.Value);
+        _comments = CommentRepository.GetAllCommentInPost(Kd);
+        LogUsername().Wait();
+    }
+    public string GetUserNamebyID(Guid id)
+    {
+        var user = UserRepository.GetUserById(id);
+        return user.Name;
+    }
+    public void AddComment()
+    {
+        var user = UserRepository.GetUserByName(LogUsername().Result);
+        _comment.UserId = user.Id;
+        _comment.Content = _sampleText;
+        _comment.DiscussionId = _discussion.Id;
+        CommentRepository.AddComment(_comment);
+        _comments.Add(_comment);
+        _comment = new();
+        _sampleText = string.Empty;
+    }
+    public async Task<string> LogUsername()
+    {
+        var authState = await authenticationStateTask;
+        var user = authState.User;
+        if (user.Identity.IsAuthenticated) _isLogIn = true;
+        else _isLogIn = false;
+        return user.Identity.Name;
+    }
+}

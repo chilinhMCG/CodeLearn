@@ -1,0 +1,101 @@
+﻿@page "/Discussion"
+@using CodeLearn.Component
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Mvc.RazorPages;
+@inject IDiscussionRepository DiscussionRepository
+@inject IUserRepository UserRepository
+<MudPaper Class="p-4 pb-1 mt-4 ">
+    <MudGrid Style="justify-content: space-between;">
+        <MudItem lg="4">
+            <MudTextField @bind-Value="_searchString"
+                          Label="Tìm cuộc thảo luận"
+                          Variant="Variant.Outlined"
+                          Adornment="Adornment.End"
+                          AdornmentIcon="@Icons.Filled.Search"
+                          Margin="Margin.Dense"
+                          Class="my-4" />
+        </MudItem>
+        <MudItem>
+            @if (_isLogIn == true)
+            {
+                <MudButton Link="CreateDiscussion" Variant="Variant.Filled" Color="Color.Secondary">Tạo bài viết</MudButton>
+            }
+            else
+            {
+                <MudLink Style="text-align: end;" Href="Identity/Account/Login" Underline="Underline.None" Color="Color.Secondary">Đăng nhập để tiếp tục</MudLink>
+            }
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+<br />
+<MudPaper Width="100%">
+    <MudContainer Style="padding-top: 5%;">
+        @foreach (var post in _discussions)
+        {
+            <MudCard>
+                <MudCardHeader Style="padding-bottom: 0px;">
+                    <CardHeaderContent>
+                        <MudAvatar Color="Color.Info" Variant="Variant.Outlined">@GetUserNamebyID(post.UserId.Value)[0]</MudAvatar>
+                        <MudLink Typo="Typo.h5" Href="@("/DetailDiscussion/" + post.Id)" Color="Color.Dark">@post.Question</MudLink>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent Style="padding-top: 0px; margin-left: 45px;">
+                    <MudText Style="max-width: 67%;display: -webkit-box;-webkit-box-orient: vertical; -webkit-line-clamp: 3;overflow:hidden; text-overflow: ellipsis;" Typo="Typo.body2">@post.Content</MudText>
+                </MudCardContent>
+                <MudText Style="@($"color:{Colors.BlueGrey.Lighten4}; font-size: 13px;  margin-left: 45px;")">
+                    &emsp;
+                    Người đăng: <MudElement HtmlTag="a"
+                                            Class="ma-0"
+                                            Style="@($"color:{Colors.BlueGrey.Lighten2};  font-weight:bold;")"
+                                            target="blank"
+                                            rel="noopener noreferrer">
+                        @GetUserNamebyID(post.UserId.Value)
+                    </MudElement>
+                    &emsp;Ngày đăng: <MudElement HtmlTag="a"
+                                                 Class="ma-0"
+                                                 Style="@($"color:{Colors.BlueGrey.Lighten2};  font-weight:bold;")"
+                                                 target="blank"
+                                                 rel="noopener noreferrer">
+                        @post.CreateOn
+                    </MudElement>
+                </MudText>
+                <MudChipSet Style="margin-left: 53px;">
+                    @foreach (var value in post.HashTag)
+                    {
+                    <MudChip Style="@($"background-color :{Colors.BlueGrey.Lighten4};")" Text="@value"></MudChip>
+                    }
+                </MudChipSet>
+            </MudCard>
+            <MudDivider />
+            <MudDivider />
+            <br \>
+        }
+    </MudContainer>
+</MudPaper>
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> _authenticationStateTask { get; set; }
+    string _searchString = String.Empty;
+    CodeLearn.Models.Discussion _discussion = new();
+    CodeLearn.Models.User _user = new();
+    IList<Discussion> _discussions;
+    bool _isLogIn;
+    protected override void OnInitialized()
+    {
+        this._discussions = DiscussionRepository.GetAllDiscussionType();
+        LogUsername().Wait();
+    }
+    public string GetUserNamebyID(Guid id)
+    {
+        var user = UserRepository.GetUserById(id);
+        return user.Name;
+    }
+    public async Task<string> LogUsername()
+    {
+        var authState = await _authenticationStateTask;
+        var user = authState.User;
+        if (user.Identity.IsAuthenticated) _isLogIn = true;
+        else _isLogIn = false;
+        return user.Identity.Name;
+    }
+}

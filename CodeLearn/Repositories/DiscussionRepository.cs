@@ -9,19 +9,25 @@ using System.Threading.Tasks;
 
 namespace CodeLearn.Repositories
 {
-    public class UserRepository : IUserRepository
+    public class DiscussionRepository : IDiscussionRepository
     {
         private readonly IDbContextFactory<ApplicationDBContext> _applicationDBContext;
-        public UserRepository(IDbContextFactory<ApplicationDBContext> applicationDBContext)
+        public DiscussionRepository(IDbContextFactory<ApplicationDBContext> applicationDBContext)
         {
             _applicationDBContext = applicationDBContext;
         }
 
-        public void AddUser(User user)
+        public void AddDiscussion(Discussion discussion)
         {
             using var context = _applicationDBContext.CreateDbContext();
-            context.Add(user);
+            context.Add(discussion);
             context.SaveChanges();
+        }
+
+        public List<Discussion> GetAllDiscussionType()
+        {
+            using var context = _applicationDBContext.CreateDbContext();
+            return context.Discussions.ToList();
         }
 
         public async Task<List<User>> GetAllUser()
@@ -30,21 +36,17 @@ namespace CodeLearn.Repositories
             return await context.Users.ToListAsync();
         }
 
-        public User GetUserById(Guid id)
+        public Discussion GetDiscussionById(Guid id)
         {
             using var context = _applicationDBContext.CreateDbContext();
-            return context.Users.Where(h => h.Id == id).FirstOrDefault();
+            return context.Discussions.Where(h => h.Id == id).FirstOrDefault();
         }
-        public User GetUserByName(string name)
+
+        public void UpdateDiscussion(Discussion discussion)
         {
             using var context = _applicationDBContext.CreateDbContext();
-            return context.Users.Where(h => h.Name == name).FirstOrDefault();
-        }
-        public void UpdateUser(User user)
-        {
-            using var context = _applicationDBContext.CreateDbContext();
-            context.Update(user);
-            context.SaveChanges();
+            context.Update(discussion);
+            //context.SaveChanges();
         }
     }
 }
