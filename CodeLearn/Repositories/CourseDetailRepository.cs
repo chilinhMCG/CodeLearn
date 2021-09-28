@@ -48,7 +48,7 @@ namespace CodeLearn.Repositories
         public List<CourseDetail> GetAllCourseDetailsByCourseID(string courseID)
         {
             using var context = _applicationDbContext.CreateDbContext();
-            return context.CourseDetails.Where(x => x.CourseId.ToString() == courseID).ToList();
+            return context.CourseDetails.Where(x => x.CourseId.ToString() == courseID).OrderBy(x => x.CreatedAt).ToList();
         }
     }
 }

@@ -17,10 +17,12 @@
         {
             <MudTable Hover="true" Items="_courses.Where(x => x.CourseTypeId == item.Id)" Bordered="true" Dense="true">
                 <HeaderContent>
+                    <!-- ten nhom khoa hoc -->
                     <MudTh>@item.Name</MudTh>
                     <MudTh></MudTh>
                 </HeaderContent>
                 <RowTemplate>
+                    <!-- khoa hoc -->
                     <MudTd DataLabel="name" Class="text-center">
                         <MudLink Underline="Underline.None" Color="Color.Success"
                                  Href="@($"/course/{context.Id}")">@context.Name</MudLink>

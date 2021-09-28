@@ -28,12 +28,13 @@
             <MudText Typo="Typo.h5">@item.Name</MudText>
             <br />
             <MudGrid>
-                @foreach (var course in _searchCourses.Where(x => x.CourseTypeId == item.Id))
+                @foreach (var course in _searchCourses.Where(x => x.CourseTypeId == item.Id && x.Status == CourseStatusEnum.Free))
                 {
                     
                  <MudItem lg="3">
                     <MudLink Href="@("/course/" + course.Id.ToString())" Underline="Underline.None">
                         <MudCard Elevation="0">
+                            <!-- khoa hoc -->
                             <MudCardMedia Image="@($"images/CoursesImg/{course.Thumbnail}")" Height="200" />
                             <MudCardContent>
                                 <MudText Typo="Typo.h6">@course.Name</MudText>

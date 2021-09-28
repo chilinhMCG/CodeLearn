@@ -7,6 +7,7 @@
 <MudPaper Class="p-4">
     <MudItem>
         <MudText Typo="Typo.h4" Align="Align.Center">
+            <!-- ten bai hoc-->
             @_currentCourseDetail.Name
             <br />
             <AuthorizeView Roles="Admin">
@@ -14,6 +15,7 @@
             </AuthorizeView>
         </MudText>
     </MudItem>
+    <br />
     <MudItem>
         <MudText Align="Align.Justify">
             @((MarkupString) _currentCourseDetail.Content)

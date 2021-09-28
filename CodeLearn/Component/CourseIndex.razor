@@ -28,15 +28,18 @@
 
 </MudPaper>
 <br />
+<!-- bai hoc -->
 <MudPaper Class="d-flex justify-space-around p-4">
-    @foreach (var item in _courseDetails)
-    {
-        <MudCard Class="float-left">
-            <MudCardContent>
-                <MudLink Href="@($"/course-detail/{item.Id}")" Typo="Typo.button" Underline="Underline.None">@item.Name</MudLink>
-            </MudCardContent>
-        </MudCard>
-    }
+    <MudItem Style="width:600px">
+        @foreach (var item in _courseDetails)
+        {
+            <MudCard Style="width: 150px; float:left;" Class="m-3 text-center">
+                <MudCardContent>
+                    <MudLink Underline="Underline.None" Href="@($"/course-detail/{item.Id}")">@item.Name</MudLink>
+                </MudCardContent>
+            </MudCard>
+        }
+    </MudItem>
 </MudPaper>
 
 
