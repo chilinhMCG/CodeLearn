@@ -12,6 +12,7 @@
             <br />
             <AuthorizeView Roles="Admin">
                 <MudButton Color="Color.Error" Variant="Variant.Filled" @onclick="_deleteCourseDetailAsync">Delete</MudButton>
+                <MudButton Color="Color.Dark" Style="text-decoration:none"s Variant="Variant.Filled" Link="@($"/admin/course-detail/edit/{_currentCourseDetail.Id}")">Edit</MudButton>
             </AuthorizeView>
         </MudText>
     </MudItem>

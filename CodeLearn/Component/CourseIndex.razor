@@ -14,6 +14,7 @@
             @_currentCourse.RateCount vote(s)
             <AuthorizeView Roles="Admin">
                 <MudButton Color="Color.Error" Variant="Variant.Filled" @onclick="_deleteCourseAsync">Delete</MudButton>
+                <MudButton Color="Color.Dark" Style="text-decoration:none" Variant="Variant.Filled" Link="@($"/account/course/edit/{_currentCourse.Id}")">Edit</MudButton>
             </AuthorizeView>
         </MudText>
 
