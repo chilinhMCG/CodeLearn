@@ -30,7 +30,7 @@
 
 
         <MudItem>
-            <MudSelect T="Guid" Label="Thuộc loại khóa học" Required="true" @bind-Value="_currentCourse.CourseTypeId">
+            <MudSelect T="Guid" Strict="true" Label="Thuộc loại khóa học" Required="true" @bind-Value="_currentCourse.CourseTypeId">
                 @foreach (var item in _courseTypes)
                 {
                     <MudSelectItem Value="item.Id">@item.Name</MudSelectItem>
@@ -46,6 +46,8 @@
         <MudItem>
             <MudText Typo="Typo.caption">Thumbnail</MudText><br />
             <InputFile required id="input-file" accept=".jpg, .jpeg" OnChange="_imgCourseFileAsync"></InputFile>
+            <br /><br />
+            <MudCardMedia Image="@($"images/CoursesImg/{_currentCourse.Thumbnail}")" Style="width:200px; height:200px;" />
         </MudItem>
         <br />
 

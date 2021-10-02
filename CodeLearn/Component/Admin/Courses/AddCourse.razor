@@ -29,10 +29,10 @@
 
 
         <MudItem>
-            <MudSelect T="Guid" Label="Thuộc loại khóa học" Required="true" @bind-Value="_newCourse.CourseTypeId">
+            <MudSelect T="Guid" Label="Thuộc loại khóa học" Strict="true" Required="true" @bind-Value="_newCourse.CourseTypeId">
                 @foreach (var item in _courseTypes)
-                {   
-                    <MudSelectItem Value="item.Id">@item.Name</MudSelectItem>
+                {
+                    <MudSelectItem Value="@item.Id">@item.Name</MudSelectItem>
                 }
             </MudSelect>
         </MudItem>
@@ -41,13 +41,19 @@
 
         <MudItem>
             <MudText Typo="Typo.caption">Thumbnail</MudText><br />
-            <InputFile id="file-input" OnChange="_imgCourseFileAsync" accept=".jpg, .jpeg"></InputFile>
-            
+            <!-- image only file jpg or jpeg -->
+            <InputFile id="file-input" OnChange="_imgCourseFileAsync" accept=".jpg,.jpeg"></InputFile>
+            <br /><br />
+            @if (_newCourse.Thumbnail != null)
+            {
+                <img src="@($"images/CoursesImg/{_newCourse.Thumbnail}")" width="250" height="210" alt="img" />
+
+            }
         </MudItem>
         <br />
 
 
-        
+
 
 
         <MudItem>
@@ -111,8 +117,12 @@
         _newCourse.Thumbnail = e.File.Name;
 
         var path = Path.Combine(Environment.ContentRootPath, "wwwroot\\images\\CoursesImg", e.File.Name);
-        await using FileStream fs = new(path, FileMode.OpenOrCreate);
+        await using FileStream fs = new FileStream(path, FileMode.OpenOrCreate);
         await e.File.OpenReadStream().CopyToAsync(fs);
+
+        fs.Dispose();
+        fs.Close();
+        await InvokeAsync(StateHasChanged);
     }
 
 }

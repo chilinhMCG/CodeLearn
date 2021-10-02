@@ -20,7 +20,7 @@
         </MudItem>
         <br />
         <MudItem>
-            <MudSelect T="Guid" Label="Thuộc khóa học" Required="true" @bind-Value="_newCourseDetail.CourseId">
+            <MudSelect T="Guid" Label="Thuộc khóa học" Strict="true" Required="true" @bind-Value="_newCourseDetail.CourseId">
                 @foreach (var course in _courses)
                 {
                     <MudSelectItem Value="course.Id">@course.Name</MudSelectItem>
@@ -30,7 +30,7 @@
         <br />
 
         <MudItem>
-            <MudSelect T="Guid" Label="Người tạo" Required="true" @bind-Value="_newCourseDetail.CreatorId">
+            <MudSelect T="Guid" Label="Người tạo" Required="true" Strict="true" @bind-Value="_newCourseDetail.CreatorId">
                 @foreach (var user in _users)
                 {
                     <MudSelectItem Value="user.Id">@user.Name</MudSelectItem>

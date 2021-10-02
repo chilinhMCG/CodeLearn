@@ -1,4 +1,4 @@
-﻿@page "/course-detail/{id}" 
+﻿@page "/course-detail/{id}"
 @inject ICourseDetailRepository CourseDetailRepository
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
@@ -12,7 +12,7 @@
             <br />
             <AuthorizeView Roles="Admin">
                 <MudButton Color="Color.Error" Variant="Variant.Filled" @onclick="_deleteCourseDetailAsync">Delete</MudButton>
-                <MudButton Color="Color.Dark" Style="text-decoration:none"s Variant="Variant.Filled" Link="@($"/admin/course-detail/edit/{_currentCourseDetail.Id}")">Edit</MudButton>
+                <MudButton Color="Color.Dark" Style="text-decoration:none" s Variant="Variant.Filled" Link="@($"/admin/course-detail/edit/{_currentCourseDetail.Id}")">Edit</MudButton>
             </AuthorizeView>
         </MudText>
     </MudItem>
@@ -22,7 +22,7 @@
             @((MarkupString) _currentCourseDetail.Content)
         </MudText>
     </MudItem>
-    
+
 </MudPaper>
 
 @code {
@@ -51,9 +51,10 @@
 
             CourseDetailRepository.DeleteCourseDetail(_currentCourseDetail);
             Snackbar.Add("Xóa thành công!", Severity.Success);
+            Navigation.NavigateTo("/");
 
         }
-        Navigation.NavigateTo("/");
+
     }
 
 
