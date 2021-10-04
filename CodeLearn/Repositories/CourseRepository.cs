@@ -56,5 +56,6 @@ namespace CodeLearn.Repositories
             using var context = _applicationDbContext.CreateDbContext();
             return context.Courses.OrderBy(x => x.Name).ToList();
         }
+
     }
 }
