@@ -1,0 +1,105 @@
+﻿@page "/admin/course-images-manager"
+@attribute [Authorize(Roles = "Admin")]
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject IWebHostEnvironment Environment
+@inject NavigationManager Navigation
+
+
+<MudGrid>
+    <MudItem lg="6">
+        <MudPaper Class="p-3">
+            <MudGrid>
+                <MudItem lg="12">
+                    <MudText Color="Color.Success">Thêm hình ảnh vào kho</MudText>
+                </MudItem>
+                <MudItem lg="9">
+                    <InputFile id="file-input" OnChange="AddFileToFolder"></InputFile>
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+    </MudItem>
+    <MudItem lg="12">
+        <MudLink Underline="Underline.None" Href="/admin/course/add-new">Thêm khóa học mới</MudLink>
+    </MudItem>
+    <MudItem lg="12">
+            @foreach (var file in fileInfos)
+            {
+                <MudCard Style="width:250px;" Class="float-left m-3 text-center">
+                    <MudCardMedia Image="@($"images/CoursesImg/{file.Name}")" Style="width:250px;height:210px;"></MudCardMedia>
+                    <MudCardContent Style="height:50px;">
+                        @file.Name
+                    </MudCardContent>
+                    
+                    <MudCardActions>
+                        <MudButton Color="Color.Error" Variant="Variant.Text"
+                                   @onclick="(() => DeleteImageAsync(file.Name.ToString()))">Xóa</MudButton>
+                    </MudCardActions>
+                </MudCard>
+            }
+    </MudItem>
+</MudGrid>
+
+@code {
+    DirectoryInfo directoryInfo = new DirectoryInfo("wwwroot/images/CoursesImg");
+
+    FileInfo[] fileInfos;
+
+    protected override void OnInitialized()
+    {
+        fileInfos = directoryInfo.GetFiles();
+    }
+
+    async Task DeleteImageAsync(string fileName)
+    {
+
+        var dialog = DialogService.Show<DeleteDialog>("Xóa hình ảnh");
+        var result = await dialog.Result;
+
+        if (!result.Cancelled)
+        {
+
+            foreach (var file in fileInfos)
+            {
+                if (file.Name.ToString() == fileName)
+                {
+                    File.Delete($"{file.ToString()}");
+                }
+            }
+
+            Snackbar.Add("Xóa thành công!", Severity.Success);
+            await Task.Delay(1500);
+            Navigation.NavigateTo("/admin/course-images-manager", true);
+        }
+
+
+    }
+
+
+    async Task AddFileToFolder(InputFileChangeEventArgs e)
+    {
+        if (e.File.Size > 512000)
+        {
+            Snackbar.Add("Vui lòng chọn ảnh có kích thước bé hơn 512KB!", Severity.Warning);
+        }
+        else
+        {
+
+
+            var path = Path.Combine(Environment.ContentRootPath, "wwwroot\\images\\CoursesImg", e.File.Name);
+
+            await using FileStream fs = new FileStream(path, FileMode.OpenOrCreate);
+            await e.File.OpenReadStream().CopyToAsync(fs);
+            fs.Dispose();
+            fs.Close();
+        }
+
+        await InvokeAsync(StateHasChanged);
+        Snackbar.Add("Thêm thành công!", Severity.Success);
+        await Task.Delay(1500);
+        Navigation.NavigateTo("/admin/course-images-manager", true);
+
+
+    }
+}
+
