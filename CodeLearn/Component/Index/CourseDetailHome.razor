@@ -24,7 +24,24 @@
         </MudText>
     </MudItem>
    
-
+    <MudItem Class="text-center m-3">
+        @{
+            var index = courseDetailsWithCourseID.FindIndex(x => x.Id.ToString() == this.ID);
+        }
+        @if (index == 0)
+        {
+            <MudButton Color="Color.Success" Variant="Variant.Outlined" @onclick="(() => MoveToNextCourseDetail(index))">Next</MudButton>
+        }
+        else if (index == (courseDetailsWithCourseID.Count - 1))
+        {
+            <MudButton Color="Color.Success" Variant="Variant.Outlined" @onclick="(() => MoveToPreviousCourseDetail(index))">Previous</MudButton>
+        }
+        else
+        {
+            <MudButton Color="Color.Success" Variant="Variant.Outlined" @onclick="(() => MoveToPreviousCourseDetail(index))">Previous</MudButton>
+            <MudButton Color="Color.Success" Variant="Variant.Outlined" @onclick="(() => MoveToNextCourseDetail(index))">Next</MudButton>
+        }
+    </MudItem>
 </MudPaper>
 
 @code {
@@ -36,6 +53,10 @@
 
     private CourseDetail _currentCourseDetail { get; set; } = new CourseDetail();
 
+    private List<CourseDetail> courseDetailsWithCourseID { get; set; } = new List<CourseDetail>();
+
+    private Course currentCourse { get; set; } = new Course();
+
 
 
     protected override void OnInitialized()
@@ -44,6 +65,10 @@
         _courseDetails = CourseDetailRepository.GetAllCourseDetail();
 
         _currentCourseDetail = _courseDetails.FirstOrDefault(x => x.Id.ToString() == this.ID);
+
+        currentCourse.CourseDetails = CourseDetailRepository.GetAllCourseDetailsByCourseID(_currentCourseDetail.CourseId.ToString());
+
+        courseDetailsWithCourseID = CourseDetailRepository.GetAllCourseDetailsByCourseID(_currentCourseDetail.CourseId.ToString());
     }
 
     private async Task _deleteCourseDetailAsync()
@@ -61,6 +86,16 @@
 
         }
 
+    }
+
+    void MoveToNextCourseDetail(int index)
+    {
+        Navigation.NavigateTo($"course-detail/{courseDetailsWithCourseID[index + 1].Id}", true);
+    }
+
+    void MoveToPreviousCourseDetail(int index)
+    {
+        Navigation.NavigateTo($"course-detail/{courseDetailsWithCourseID[index - 1].Id}", true);
     }
 
 
