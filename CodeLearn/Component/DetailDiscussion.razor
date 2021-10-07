@@ -12,7 +12,7 @@
             <MudCardHeader>
                 <CardHeaderContent>
                     <MudGrid Style="margin-top: 9px 0 0 6px;">
-                        <MudAvatar Color="Color.Info" Variant="Variant.Outlined" Size="Size.Large">M</MudAvatar>
+                        <MudAvatar Color="Color.Info" Variant="Variant.Outlined" Size="Size.Large">@GetUserNamebyID(_discussion.UserId.Value)[0]</MudAvatar>
                         &emsp;
                         <MudText Typo="Typo.h5">
                             @_discussion.Question<br \>
@@ -61,15 +61,20 @@
                     {
                         <MudButton Variant="Variant.Filled" Color="Color.Info " Disabled="true">Bình luận</MudButton>
                     }
-                    else if(string.IsNullOrWhiteSpace(_sampleText) == false && _isLogIn == true)
+                    else if (string.IsNullOrWhiteSpace(_sampleText) == false && _isLogIn == true)
                     {
                         <MudButton Variant="Variant.Filled" Color="Color.Info " OnClick="AddComment">Bình luận</MudButton>
                     }
+                    @if (UserRepository.GetUserById(_discussion.UserId.Value).Name == _userName)
+                    {
+                        <MudButton OnClick="OpenWarning" Variant="Variant.Filled" Style="@($"background:{Colors.Green.Darken3}; margin-left: 20px;")">Xóa</MudButton>
+                    }
                 </MudItem>
             </MudCardContent>
+            @* Here for comment*@
             <MudCardContent>
                 <MudText Style="border-bottom: 1px solid darkgray;" Color="Color.Info">@_comments.Count() comments</MudText>
-                @foreach(var comment in _comments)
+                @foreach (var comment in _comments)
                 {
                     <MudGrid Style="margin: 13px 4px 0 0;">
                         <MudAvatar Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Medium">@GetUserNamebyID(comment.UserId.Value)[0]</MudAvatar>
@@ -77,7 +82,13 @@
                         <MudItem Style="padding-top: 0;">
                             <MudLink Href="#" Typo="Typo.subtitle1" Color="Color.Info">@GetUserNamebyID(comment.UserId.Value)</MudLink>
                             &emsp;
-                            <MudText Style="display:inline" Typo="Typo.subtitle1">@comment.CreateOn</MudText>
+                            <MudText Style="display:inline" Typo="Typo.subtitle1">
+                                @comment.CreateOn
+                                @if (UserRepository.GetUserById(comment.UserId.Value).Name == _userName)
+                                {
+                                    <MudIconButton OnClick="() => OpenWarning(comment)" Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Style="margin: 0 0 0 8px;"></MudIconButton>
+                                }
+                            </MudText>
                         </MudItem>
                         <MudText Style="margin-left: 65px; max-width: 85%;width: 100%; border-bottom: 1px solid darkgray">
                             @comment.Content
@@ -85,6 +96,34 @@
                     </MudGrid>
                 }
             </MudCardContent>
+            <MudDialog @bind-IsVisible="_commentVisible">
+                <TitleContent>
+                    <MudText Typo="Typo.h6">
+                        Xóa bình luận
+                    </MudText>
+                </TitleContent>
+                <DialogContent>
+                    <p>Bình luân sẽ bị xóa khỏi bài viết, bạn có muốn tiếp tục?</p>
+                </DialogContent>
+                <DialogActions>
+                    <MudButton OnClick="DeleteComment" Variant="Variant.Filled" Style="@($"background:{Colors.Green.Darken3}; margin-left: 20px;")">Xóa</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Default" OnClick="CloseWarning" Class="px-10">Hủy</MudButton>
+                </DialogActions>
+            </MudDialog>
+            <MudDialog @bind-IsVisible="_discussionVisible">
+                <TitleContent>
+                    <MudText Typo="Typo.h6">
+                        Xóa bài viết
+                    </MudText>
+                </TitleContent>
+                <DialogContent>
+                    <p>Bài viết sẽ bị xóa khỏi diễn đàn, bạn có muốn tiếp tục?</p>
+                </DialogContent>
+                <DialogActions>
+                    <MudButton OnClick="Delete" Link="@_home" Variant="Variant.Filled" Style="@($"background:{Colors.Green.Darken3}; margin-left: 20px;")">Xóa</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Default" OnClick="CloseWarning" Class="px-10">Hủy</MudButton>
+                </DialogActions>
+            </MudDialog>
         </MudCard>
         <MudDivider />
         <MudDivider />
@@ -94,29 +133,45 @@
 @code {
     [CascadingParameter]
     private Task<AuthenticationState> authenticationStateTask { get; set; }
+    private bool _discussionVisible, _commentVisible;
+    private string _home;
     [Parameter]
     public string Id { get; set; }
-    public Guid Kd = Guid.Empty;
-    string _searchString = String.Empty;
-    string _sampleText = String.Empty;
-    Discussion _discussion;
-    List<Comment> _comments;
-    Comment _comment = new();
-    User _user;
-    bool _isLogIn;
+    private Guid Kd = Guid.Empty;
+    private string _searchString = String.Empty;
+    private string _sampleText = String.Empty;
+    private string _userName = string.Empty;
+    private Discussion _discussion;
+    private List<Comment> _comments;
+    private Comment _comment = new(), _commentDelete;
+    private User _user;
+    private bool _isLogIn;
     protected override void OnInitialized()
     {
         Console.WriteLine("\n\n\t\tolaquydo: " + Id);
         Kd = new Guid(Id);
         this._discussion = DiscussionRepository.GetDiscussionById(Kd);
         _user = UserRepository.GetUserById(_discussion.UserId.Value);
-        _comments = CommentRepository.GetAllCommentInPost(Kd);
+        var alter = CommentRepository.GetAllCommentInPost(_discussion.Id);
+        _comments = alter.OrderByDescending(t => t.CreateOn).ToList();
         LogUsername().Wait();
     }
-    public string GetUserNamebyID(Guid id)
+    private string GetUserNamebyID(Guid id)
     {
         var user = UserRepository.GetUserById(id);
         return user.Name;
+    }
+    private void Delete()
+    {
+        CommentRepository.DeleteAllCommentsInPost(_discussion.Id);
+        DiscussionRepository.DeleteDiscussionByID(_discussion.Id);
+        _home = "Discussion";
+    }
+    private void DeleteComment()
+    {
+        DeleteComment(_commentDelete);
+        _commentDelete = null;
+        CloseWarning();
     }
     public void AddComment()
     {
@@ -125,7 +180,7 @@
         _comment.Content = _sampleText;
         _comment.DiscussionId = _discussion.Id;
         CommentRepository.AddComment(_comment);
-        _comments.Add(_comment);
+        _comments.Insert(0, _comment);
         _comment = new();
         _sampleText = string.Empty;
     }
@@ -135,6 +190,28 @@
         var user = authState.User;
         if (user.Identity.IsAuthenticated) _isLogIn = true;
         else _isLogIn = false;
+        _userName = user.Identity.Name;
         return user.Identity.Name;
+    }
+    private void DeleteComment(Comment comment)
+    {
+        CommentRepository.DeleteCommentbyObject(comment);
+        _comments.Remove(comment);
+    }
+    private void OpenWarning()
+    {
+        _discussionVisible = true;
+        _home = "Discussion";
+    }
+    private void OpenWarning(Comment comment)
+    {
+        _commentVisible = true;
+        _commentDelete = comment;
+    }
+    private void CloseWarning()
+    {
+        _discussionVisible = false;
+        _commentVisible = false;
+        _home = string.Empty;
     }
 }

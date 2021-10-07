@@ -23,7 +23,13 @@ namespace CodeLearn.Repositories
             context.Add(discussion);
             context.SaveChanges();
         }
-
+        public void DeleteDiscussionByID(Guid id)
+        {
+            using var context = _applicationDBContext.CreateDbContext();
+            Discussion discussion = GetDiscussionById(id);
+            context.Remove(discussion);
+            context.SaveChanges();
+        }
         public List<Discussion> GetAllDiscussionType()
         {
             using var context = _applicationDBContext.CreateDbContext();

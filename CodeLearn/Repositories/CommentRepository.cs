@@ -34,5 +34,22 @@ namespace CodeLearn.Repositories
             }
             return (List<Comment>)_comments;
         }
+        public void DeleteAllCommentsInPost(Guid postID)
+        {
+            using var context = _applicationDBContext.CreateDbContext();
+            IList<Comment> _comments = context.Comments.ToList();
+            foreach(var comment in _comments)
+            {
+                if (comment.DiscussionId == postID) context.Comments.Remove(comment);
+            }
+            context.SaveChanges();
+
+        }
+        public void DeleteCommentbyObject(Comment comment)
+        {
+            using var context = _applicationDBContext.CreateDbContext();
+            context.Comments.Remove(comment);
+            context.SaveChanges();
+        }
     }
 }

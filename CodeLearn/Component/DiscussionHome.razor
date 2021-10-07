@@ -13,6 +13,7 @@
                           Adornment="Adornment.End"
                           AdornmentIcon="@Icons.Filled.Search"
                           Margin="Margin.Dense"
+                          TextChanged="UpdateList"
                           Class="my-4" />
         </MudItem>
         <MudItem>
@@ -30,37 +31,34 @@
 <br />
 <MudPaper Width="100%">
     <MudContainer Style="padding-top: 5%;">
-        @foreach (var post in _discussions)
-        {
+    @{
+        for (int count = (_pageSelected * _sizePage) - _sizePage; count < (_pageSelected * _sizePage) - 1; count++)
+            if (count < _searchedDiscussion.Count())
+            {
+                int i = count;
             <MudCard>
                 <MudCardHeader Style="padding-bottom: 0px;">
                     <CardHeaderContent>
-                        <MudAvatar Color="Color.Info" Variant="Variant.Outlined">@GetUserNamebyID(post.UserId.Value)[0]</MudAvatar>
-                        <MudLink Typo="Typo.h5" Href="@("/DetailDiscussion/" + post.Id)" Color="Color.Dark">@post.Question</MudLink>
+                        <MudAvatar Color="Color.Info" Variant="Variant.Outlined">@GetUserNamebyID(_searchedDiscussion[i].UserId.Value)[0]</MudAvatar>
+                        <MudLink Typo="Typo.h5" Href="@("/DetailDiscussion/" + _searchedDiscussion[i].Id)" Color="Color.Dark">@_searchedDiscussion[i].Question</MudLink>
                     </CardHeaderContent>
                 </MudCardHeader>
                 <MudCardContent Style="padding-top: 0px; margin-left: 45px;">
-                    <MudText Style="max-width: 67%;display: -webkit-box;-webkit-box-orient: vertical; -webkit-line-clamp: 3;overflow:hidden; text-overflow: ellipsis;" Typo="Typo.body2">@post.Content</MudText>
+                    <MudText Style="max-width: 67%;display: -webkit-box;-webkit-box-orient: vertical; -webkit-line-clamp: 3;overflow:hidden; text-overflow: ellipsis;" Typo="Typo.body2">@_searchedDiscussion[i].Content</MudText>
                 </MudCardContent>
                 <MudText Style="@($"color:{Colors.BlueGrey.Lighten4}; font-size: 13px;  margin-left: 45px;")">
                     &emsp;
                     Người đăng: <MudElement HtmlTag="a"
-                                            Class="ma-0"
-                                            Style="@($"color:{Colors.BlueGrey.Lighten2};  font-weight:bold;")"
-                                            target="blank"
-                                            rel="noopener noreferrer">
-                        @GetUserNamebyID(post.UserId.Value)
+                                            Style="@($"color:{Colors.BlueGrey.Lighten2};  font-weight:bold;")">
+                        @GetUserNamebyID(_searchedDiscussion[i].UserId.Value)
                     </MudElement>
                     &emsp;Ngày đăng: <MudElement HtmlTag="a"
-                                                 Class="ma-0"
-                                                 Style="@($"color:{Colors.BlueGrey.Lighten2};  font-weight:bold;")"
-                                                 target="blank"
-                                                 rel="noopener noreferrer">
-                        @post.CreateOn
+                                                 Style="@($"color:{Colors.BlueGrey.Lighten2};  font-weight:bold;")">
+                        @_searchedDiscussion[i].CreateOn
                     </MudElement>
                 </MudText>
                 <MudChipSet Style="margin-left: 53px;">
-                    @foreach (var value in post.HashTag)
+                    @foreach (var value in _searchedDiscussion[i].HashTag)
                     {
                     <MudChip Style="@($"background-color :{Colors.BlueGrey.Lighten4};")" Text="@value"></MudChip>
                     }
@@ -70,32 +68,62 @@
             <MudDivider />
             <br \>
         }
+    }
     </MudContainer>
 </MudPaper>
-@code {
+<MudPagination Style="margin-top: 14px;" Color="Color.Primary" Count="(_searchedDiscussion.Count() / _sizePage) + 1" @bind-Selected="@_pageSelected" />
+@code 
+{
     [CascadingParameter]
     private Task<AuthenticationState> _authenticationStateTask { get; set; }
-    string _searchString = String.Empty;
-    CodeLearn.Models.Discussion _discussion = new();
+    private int _pageSelected = 1, _sizePage = 7;
+    private string _searchString = String.Empty;
     CodeLearn.Models.User _user = new();
-    IList<Discussion> _discussions;
+    IList<Discussion> _discussions, _searchedDiscussion;
     bool _isLogIn;
     protected override void OnInitialized()
     {
-        this._discussions = DiscussionRepository.GetAllDiscussionType();
+        _discussions = DiscussionRepository.GetAllDiscussionType().OrderByDescending(t => t.CreateOn).ToList();
         LogUsername().Wait();
+        _searchedDiscussion = _discussions;
     }
-    public string GetUserNamebyID(Guid id)
+    private string GetUserNamebyID(Guid id)
     {
         var user = UserRepository.GetUserById(id);
         return user.Name;
     }
-    public async Task<string> LogUsername()
+    private async Task<string> LogUsername()
     {
         var authState = await _authenticationStateTask;
         var user = authState.User;
         if (user.Identity.IsAuthenticated) _isLogIn = true;
         else _isLogIn = false;
         return user.Identity.Name;
+    }
+    private bool CheckContain(Discussion discussion)
+    {
+        if (discussion.Question.Contains(_searchString) == true)
+        {
+            return true;
+        }
+        foreach(var n in discussion.HashTag)
+        {
+            if (n.Contains(_searchString) == true)
+            {
+                return true;
+            }
+        }
+        return false;
+
+    }
+    private void UpdateList()
+    {
+        _pageSelected = 1;
+        _searchedDiscussion = new List<Discussion>();
+        if(_discussions != null)
+        foreach(Discussion discussion in _discussions)
+        {
+            if(CheckContain(discussion) == true) _searchedDiscussion.Add(discussion);
+        }
     }
 }

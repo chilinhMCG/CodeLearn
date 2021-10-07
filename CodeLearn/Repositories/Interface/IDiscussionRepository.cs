@@ -12,5 +12,6 @@ namespace CodeLearn.Repositories.Interface
         void AddDiscussion(Discussion discussion);
         Discussion GetDiscussionById(Guid id);
         void UpdateDiscussion(Discussion discussion);
+        void DeleteDiscussionByID(Guid id);
     }
 }

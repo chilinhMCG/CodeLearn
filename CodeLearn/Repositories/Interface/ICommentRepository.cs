@@ -10,5 +10,7 @@ namespace CodeLearn.Repositories.Interface
     {
         List<Comment> GetAllCommentInPost(Guid postID);
         void AddComment(Comment comment);
+        void DeleteAllCommentsInPost(Guid postID);
+        public void DeleteCommentbyObject(Comment comment);
     }
 }

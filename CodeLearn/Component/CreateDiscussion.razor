@@ -67,7 +67,6 @@
     </MudContainer>
 </MudPaper>
 @code {
-    //public void Closed(MudChip chip) => values.Remove(chip.Text);
     List<Discussion> _discussions = new();
     CodeLearn.Models.Discussion _discussion = new();
     CodeLearn.Models.User _user = new();
@@ -75,19 +74,19 @@
     private Task<AuthenticationState> authenticationStateTask { get; set; }
     string _searchString = String.Empty;
     IList<string> _hashTags;
-    public bool _isLogIn;
+    private bool _isLogIn;
     protected override void OnInitialized()
     {
         LogUsername().Wait();
     }
-    public void Add()
+    private void Add()
     {
         if (_hashTags == null) _hashTags = new List<string>();
         _hashTags.Add(_searchString);
         _searchString = String.Empty;
     }
-    public void Close(MudChip chip) => _hashTags.Remove(chip.Text);
-    void AddDiscussion()
+    private void Close(MudChip chip) => _hashTags.Remove(chip.Text);
+    private void AddDiscussion()
     {
         var user = UserRepository.GetUserByName(LogUsername().Result);
         _discussion.UserId = user.Id;
@@ -101,7 +100,7 @@
         Snackbar.Add("Thêm nhóm bài học thành công !", Severity.Success);
         _discussion = new();
     }
-    public  async Task<string> LogUsername()
+    private async Task<string> LogUsername()
     {
         var authState = await authenticationStateTask;
         var user = authState.User;
