@@ -1,83 +1,122 @@
 ﻿@page "/CreateDiscussion"
 @using CodeLearn.Component
 @using Microsoft.AspNetCore.Identity
-@using Microsoft.AspNetCore.Mvc.RazorPages;
-@using System.Security.Claims;
+@using Blazored.TextEditor
+@using System.ComponentModel.DataAnnotations
 @inject IDiscussionRepository DiscussionRepository
 @inject ISnackbar Snackbar
-@inject SignInManager<IdentityUser> SignInManager
-@inject UserManager<IdentityUser> UserManager
-@inject IUserRepository UserRepository
 
 <MudPaper Class="p-4 pb-1 mt-4 ">
     <MudContainer>
-        <MudItem>
-            <MudText Typo="Typo.h5">Tạo một cuộc thảo luận mới</MudText>
-            <MudText Style="font-size: small; font-style: oblique;" Color="Color.Secondary">*Mọi dữ liệu đều bắt buộc nhập</MudText>
-        </MudItem>
-        <br />
-        <br />
-        <MudItem xs="12" sm="12" md="12">
-            <MudText Typo="Typo.h6">Tiêu đề</MudText>
-            <MudTextField @bind-Value="_discussion.Question"
-                          Variant="Variant.Filled"
-                          Adornment="Adornment.End"
-                          Margin="Margin.Dense"
-                          Class="my-4"
-                          Lines="1" />
-        </MudItem>
-        <MudItem xs="12" sm="12" md="12">
-            <MudText Typo="Typo.h6">#Hashtag</MudText>
-            <MudGrid>
-                &emsp;
-                <MudTextField @bind-Value="@_searchString"
+        <MudForm @ref="_form" @bind-IsValid="@_sucess">
+            <MudItem>
+                <MudText Typo="Typo.h5">Tạo một cuộc thảo luận mới</MudText>
+                <MudText Style="font-size: small; font-style: oblique;" Color="Color.Secondary">*Mọi dữ liệu đều bắt buộc nhập</MudText>
+            </MudItem>
+            <br />
+            <br />
+            <MudItem xs="12" sm="12" md="12">
+                <MudText Typo="Typo.h6">Tiêu đề</MudText>
+                <MudTextField @bind-Value="_discussion.Question" Required="true" RequiredError="You must have your question!"
                               Variant="Variant.Filled"
                               Adornment="Adornment.End"
                               Margin="Margin.Dense"
-                              Class="my-4"
                               Lines="1" />
-                &emsp;
-                <MudIconButton Style="width: 50px; height: 50px; border-radius: 50%; margin-top: 15px;" Icon="@Icons.Material.Filled.Add" OnClick="Add"></MudIconButton>
-            </MudGrid>
-            <MudChipSet AllClosable="true" OnClose="Close">
+            </MudItem>
+            <MudItem xs="12" sm="12" md="12">
+                <MudText Typo="Typo.h6">#Hashtag</MudText>
+                <br />
+                <MudGrid>
+                    &emsp;
+                    <MudTextField @bind-Value="@_searchString" Label="Add hashtag for your post.."
+                                  Variant="Variant.Filled"
+                                  Adornment="Adornment.End"
+                                  Margin="Margin.Dense"
+                                  Lines="1" />
+                    &emsp;
+                    <MudIconButton Style="width: 50px; height: 50px; border-radius: 50%; margin-top: 15px;" Icon="@Icons.Material.Filled.Add" OnClick="Add"></MudIconButton>
+                </MudGrid>
+                <MudChipSet AllClosable="true" OnClose="Close">
                     @if (_hashTags != null)
-                    @foreach (var value in _hashTags)
-                    {
-                        <MudChip Text="@value"></MudChip>
-                    }
-            </MudChipSet>
-        </MudItem>
-        <MudItem xs="12" sm="12" md="12">
-            <MudText Typo="Typo.h6">Nội dung</MudText>
-            <MudTextField T="string" Label="Outlined" Variant="Variant.Outlined" @bind-Value="_discussion.Content" Lines="17" />
-        </MudItem>
-        <br />
-        <MudItem Style="text-align: end;">
-            <MudButton Link="Discussion" Variant="Variant.Filled">Hủy</MudButton>
-            &emsp;
-            @if (string.IsNullOrWhiteSpace(_discussion.Question) == false && string.IsNullOrWhiteSpace(_discussion.Content) == false && _hashTags != null && _isLogIn == true)
-            {
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddDiscussion">Đăng</MudButton>
-            }
-            else
-            {
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="true">Đăng</MudButton>
-            }
-        </MudItem>
+                        @foreach (var value in _hashTags)
+                        {
+                            <MudChip Text="@value"></MudChip>
+                        }
+                </MudChipSet>
+            </MudItem>
+            <MudItem xs="12" sm="12" md="12">
+                <MudText Typo="Typo.h6">Nội dung</MudText>
+                <div style="height: 254px; margin: 9px 0 0 0;">
+                <BlazoredTextEditor @ref="QuillHtml" Placeholder="Thêm nội dung bài viết..">
+                    <ToolbarContent>
+                        <select class="ql-header">
+                            <option selected=""></option>
+                            <option value="1"></option>
+                            <option value="2"></option>
+                            <option value="3"></option>
+                            <option value="4"></option>
+                        </select>
+                        <span class="ql-formats">
+                            <button class="ql-bold"></button>
+                            <button class="ql-italic"></button>
+                            <button class="ql-underline"></button>
+                            <button class="ql-strike"></button>
+                        </span>
+                        <span class="ql-formats">
+                            <select class="ql-color"></select>
+                            <select class="ql-background"></select>
+                        </span>
+                        <span class="ql-formats">
+                            <button class="ql-list" value="ordered"></button>
+                            <button class="ql-list" value="bullet"></button>
+                        </span>
+                    </ToolbarContent>
+                    <EditorContent>
+                    </EditorContent>
+                </BlazoredTextEditor>
+            </div>
+            </MudItem>
+            <br /> <br /> <br />
+            <MudItem Style="text-align: end;">
+                <MudButton Link="Discussion" Variant="Variant.Filled">Hủy</MudButton>
+                &emsp;
+                <AuthorizeView>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="GetHTML">Đăng</MudButton>
+                </AuthorizeView>
+            </MudItem>
+        </MudForm>
     </MudContainer>
 </MudPaper>
 @code {
-    List<Discussion> _discussions = new();
-    CodeLearn.Models.Discussion _discussion = new();
-    CodeLearn.Models.User _user = new();
-    [CascadingParameter]
-    private Task<AuthenticationState> authenticationStateTask { get; set; }
-    string _searchString = String.Empty;
-    IList<string> _hashTags;
-    private bool _isLogIn;
-    protected override void OnInitialized()
+    [CascadingParameter(Name = "_userId")]
+    private Guid _userId { get; set; }
+    private MudForm _form;
+    private BlazoredTextEditor QuillHtml;
+    private bool _sucess;
+    private string _searchString = String.Empty;
+    private List<Discussion> _discussions = new();
+    private CodeLearn.Models.Discussion _discussion = new();
+    private IList<string> _hashTags;
+
+    public async void GetHTML()
     {
-        LogUsername().Wait();
+        _discussion.Content = await QuillHtml.GetHTML();
+        StateHasChanged();
+        if (string.IsNullOrWhiteSpace(await QuillHtml.GetText()) == false && _sucess == true && _hashTags != null)
+        {
+            AddDiscussion();
+        }
+        else
+        {
+            Snackbar.Add("Thất bại khi thêm bài viết!", Severity.Error);
+        }
+    }
+
+    public async void SetHTML()
+    {
+        _discussion.Content = string.Empty;
+        await QuillHtml.LoadHTMLContent(_discussion.Content);
+        StateHasChanged();
     }
     private void Add()
     {
@@ -88,24 +127,13 @@
     private void Close(MudChip chip) => _hashTags.Remove(chip.Text);
     private void AddDiscussion()
     {
-        var user = UserRepository.GetUserByName(LogUsername().Result);
-        _discussion.UserId = user.Id;
+        _discussion.UserId = _userId;
         _discussion.HashTag = new List<string>();
-        foreach (var item in _hashTags)
-        {
-            _discussion.HashTag.Add(item);
-        }
+        _discussion.HashTag.AddRange(_hashTags);
         _hashTags.Clear();
         DiscussionRepository.AddDiscussion(_discussion);
-        Snackbar.Add("Thêm nhóm bài học thành công !", Severity.Success);
+        SetHTML();
+        Snackbar.Add("Thêm bài viết thành công!", Severity.Success);
         _discussion = new();
-    }
-    private async Task<string> LogUsername()
-    {
-        var authState = await authenticationStateTask;
-        var user = authState.User;
-        if (user.Identity.IsAuthenticated == true) _isLogIn = true;
-        else _isLogIn = false;
-        return user.Identity.Name;
     }
 }

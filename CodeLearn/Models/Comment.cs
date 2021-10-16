@@ -12,13 +12,13 @@ namespace CodeLearn.Models
         public Comment()
         {
             Id = new Guid();
-            CreateOn = DateTime.Now;
+            CreateAt = DateTime.Now;
         }
         [Column("id")]
         [Key]
         public Guid Id { get; set; }
-        [Column("create_on")]
-        public DateTime CreateOn { get; set; }
+        [Column("create_at")]
+        public DateTime CreateAt { get; set; }
         [Column("content")]
         public string Content { get; set; }
         [Column("user_id")]

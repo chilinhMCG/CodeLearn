@@ -30,12 +30,32 @@ namespace CodeLearn.Repositories
             context.Remove(discussion);
             context.SaveChanges();
         }
-        public List<Discussion> GetAllDiscussionType()
+        public List<Discussion> GetDiscussionPage(int pageNumbers, int pageSize, string search)
         {
             using var context = _applicationDBContext.CreateDbContext();
-            return context.Discussions.ToList();
+            List<Discussion> discussions = context.Discussions.ToList().Where(t => CheckContain(t, search)).OrderByDescending(t => t.CreateAt).Skip(pageSize * (pageNumbers - 1)).Take(pageSize).ToList();
+            return discussions;
         }
-
+        public int GetPageNumbers(int sizePage, string search)
+        {
+            using var context = _applicationDBContext.CreateDbContext();
+            return (context.Discussions.ToList().Where(t => CheckContain(t, search)).Count()/sizePage) + 1;
+        }
+        private bool CheckContain(Discussion discussion, string search)
+        {
+            if (discussion.Question.Contains(search) == true)
+            {
+                return true;
+            }
+            foreach (var n in discussion.HashTag.ToList())
+            {
+                if (n.Contains(search) == true)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
         public async Task<List<User>> GetAllUser()
         {
             using var context = _applicationDBContext.CreateDbContext();

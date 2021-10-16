@@ -12,13 +12,13 @@ namespace CodeLearn.Models
         public Discussion()
         {
             Id = new Guid();
-            CreateOn = DateTime.Now;
+            CreateAt = DateTime.Now;
         }
         [Column("id")]
         [Key]
         public Guid Id { get; set; }
-        [Column("create_on")]
-        public DateTime CreateOn { get; set; }
+        [Column("create_at")]
+        public DateTime CreateAt { get; set; }
         [Column("hashtag")]
         public List<string> HashTag { get; set; }
         [Column("question")]

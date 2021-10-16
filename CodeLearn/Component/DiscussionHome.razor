@@ -8,7 +8,7 @@
     <MudGrid Style="justify-content: space-between;">
         <MudItem lg="4">
             <MudTextField @bind-Value="_searchString"
-                          Label="Tìm cuộc thảo luận"
+                          Label="Tìm kiếm chủ đề của bạn.."
                           Variant="Variant.Outlined"
                           Adornment="Adornment.End"
                           AdornmentIcon="@Icons.Filled.Search"
@@ -17,14 +17,14 @@
                           Class="my-4" />
         </MudItem>
         <MudItem>
-            @if (_isLogIn == true)
-            {
-                <MudButton Link="CreateDiscussion" Variant="Variant.Filled" Color="Color.Secondary">Tạo bài viết</MudButton>
-            }
-            else
-            {
-                <MudLink Style="text-align: end;" Href="Identity/Account/Login" Underline="Underline.None" Color="Color.Secondary">Đăng nhập để tiếp tục</MudLink>
-            }
+            <AuthorizeView>
+                <Authorized>
+                    <MudButton Link="CreateDiscussion" Variant="Variant.Filled" Color="Color.Secondary">Tạo bài viết</MudButton>
+                </Authorized>
+                <NotAuthorized>                
+                    <MudLink Style="text-align: end;" Href="Identity/Account/Login" Underline="Underline.None" Color="Color.Secondary">Đăng nhập để tiếp tục</MudLink>
+                </NotAuthorized>
+            </AuthorizeView>
         </MudItem>
     </MudGrid>
 </MudPaper>
@@ -32,7 +32,7 @@
 <MudPaper Width="100%">
     <MudContainer Style="padding-top: 5%;">
     @{
-        for (int count = (_pageSelected * _sizePage) - _sizePage; count < (_pageSelected * _sizePage) - 1; count++)
+        for (int count = 0; count < _sizePage - 1; count++)
             if (count < _searchedDiscussion.Count())
             {
                 int i = count;
@@ -43,8 +43,8 @@
                         <MudLink Typo="Typo.h5" Href="@("/DetailDiscussion/" + _searchedDiscussion[i].Id)" Color="Color.Dark">@_searchedDiscussion[i].Question</MudLink>
                     </CardHeaderContent>
                 </MudCardHeader>
-                <MudCardContent Style="padding-top: 0px; margin-left: 45px;">
-                    <MudText Style="max-width: 67%;display: -webkit-box;-webkit-box-orient: vertical; -webkit-line-clamp: 3;overflow:hidden; text-overflow: ellipsis;" Typo="Typo.body2">@_searchedDiscussion[i].Content</MudText>
+                <MudCardContent Style="padding-top: 0px; margin-left: 45px; font-size:13px !important;">
+                    <MudText Class="content-home" Style="max-width: 67%;display: -webkit-box;-webkit-box-orient: vertical; -webkit-line-clamp: 3;overflow:hidden; text-overflow: ellipsis;" Typo="Typo.body2">@((MarkupString)_searchedDiscussion[i].Content)</MudText>
                 </MudCardContent>
                 <MudText Style="@($"color:{Colors.BlueGrey.Lighten4}; font-size: 13px;  margin-left: 45px;")">
                     &emsp;
@@ -54,7 +54,7 @@
                     </MudElement>
                     &emsp;Ngày đăng: <MudElement HtmlTag="a"
                                                  Style="@($"color:{Colors.BlueGrey.Lighten2};  font-weight:bold;")">
-                        @_searchedDiscussion[i].CreateOn
+                        @_searchedDiscussion[i].CreateAt
                     </MudElement>
                 </MudText>
                 <MudChipSet Style="margin-left: 53px;">
@@ -71,59 +71,36 @@
     }
     </MudContainer>
 </MudPaper>
-<MudPagination Style="margin-top: 14px;" Color="Color.Primary" Count="(_searchedDiscussion.Count() / _sizePage) + 1" @bind-Selected="@_pageSelected" />
+<MudPagination Class="pagination-style" Style="margin-top: 14px;" Color="Color.Primary" Count="_count" SelectedChanged="LoadPage"/>
 @code 
 {
     [CascadingParameter]
-    private Task<AuthenticationState> _authenticationStateTask { get; set; }
-    private int _pageSelected = 1, _sizePage = 7;
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    [CascadingParameter(Name = "_userId")]
+    private Guid _userId { get; set; }
+    private int _pageSelected = 1, _sizePage = 7, _count;
     private string _searchString = String.Empty;
-    CodeLearn.Models.User _user = new();
     IList<Discussion> _discussions, _searchedDiscussion;
-    bool _isLogIn;
     protected override void OnInitialized()
     {
-        _discussions = DiscussionRepository.GetAllDiscussionType().OrderByDescending(t => t.CreateOn).ToList();
-        LogUsername().Wait();
+        _discussions = DiscussionRepository.GetDiscussionPage(_pageSelected, _sizePage, _searchString).OrderByDescending(t => t.CreateAt).ToList();
+        _count = DiscussionRepository.GetPageNumbers(_sizePage, "");
         _searchedDiscussion = _discussions;
+    }
+    private void LoadPage(int page)
+    {
+        _pageSelected = page;
+        _searchedDiscussion = DiscussionRepository.GetDiscussionPage(_pageSelected, _sizePage, _searchString).OrderByDescending(t => t.CreateAt).ToList();
     }
     private string GetUserNamebyID(Guid id)
     {
         var user = UserRepository.GetUserById(id);
         return user.Name;
     }
-    private async Task<string> LogUsername()
-    {
-        var authState = await _authenticationStateTask;
-        var user = authState.User;
-        if (user.Identity.IsAuthenticated) _isLogIn = true;
-        else _isLogIn = false;
-        return user.Identity.Name;
-    }
-    private bool CheckContain(Discussion discussion)
-    {
-        if (discussion.Question.Contains(_searchString) == true)
-        {
-            return true;
-        }
-        foreach(var n in discussion.HashTag)
-        {
-            if (n.Contains(_searchString) == true)
-            {
-                return true;
-            }
-        }
-        return false;
-
-    }
     private void UpdateList()
     {
         _pageSelected = 1;
-        _searchedDiscussion = new List<Discussion>();
-        if(_discussions != null)
-        foreach(Discussion discussion in _discussions)
-        {
-            if(CheckContain(discussion) == true) _searchedDiscussion.Add(discussion);
-        }
+        _count = DiscussionRepository.GetPageNumbers(_sizePage, _searchString);
+        _searchedDiscussion = DiscussionRepository.GetDiscussionPage(_pageSelected, _sizePage, _searchString).OrderByDescending(t => t.CreateAt).ToList();
     }
 }
