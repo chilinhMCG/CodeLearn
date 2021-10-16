@@ -14,7 +14,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
 namespace CodeLearn
 {
     public class Startup
@@ -47,6 +46,7 @@ namespace CodeLearn
             services.AddMudServices();
             services.AddRazorPages();
             services.AddServerSideBlazor();
+            services.AddHttpContextAccessor();
             services.AddSingleton<WeatherForecastService>();
 
             //Repository

@@ -1,4 +1,8 @@
-﻿@inherits LayoutComponentBase
+﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor httpContextAccessor
+@inherits LayoutComponentBase
+@inject IUserRepository UserRepository
 
 <MudThemeProvider Theme="MCGTheme" />
 <MudDialogProvider />
@@ -7,14 +11,17 @@
 <MudLayout>
     <NavBar />
     <MudMainContent>
-        <MudContainer MaxWidth="MaxWidth.Large">
-            @Body
-        </MudContainer>
+        <CascadingValue Value="@_userId" Name="_userId">
+            <MudContainer MaxWidth="MaxWidth.Large">
+                @Body
+            </MudContainer>
+        </CascadingValue>
     </MudMainContent>
     <Footer />
 </MudLayout>
 
 @code{
+    Guid _userId;
     MudTheme MCGTheme = new()
     {
         Palette = new Palette()
@@ -23,4 +30,9 @@
             AppbarBackground = "#19B33D",
         }
     };
+    protected override async Task OnInitializedAsync()
+    {
+        if(httpContextAccessor.HttpContext.User.Identity.IsAuthenticated == true)
+        _userId = UserRepository.GetUserByName(httpContextAccessor.HttpContext.User.Identity.Name).Id;
+    }
 }
