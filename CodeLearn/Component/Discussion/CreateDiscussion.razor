@@ -17,7 +17,8 @@
             <br />
             <MudItem xs="12" sm="12" md="12">
                 <MudText Typo="Typo.h6">Tiêu đề</MudText>
-                <MudTextField @bind-Value="_discussion.Question" Required="true" RequiredError="You must have your question!"
+                <MudTextField @bind-Value="_discussion.Question" Label="Chủ đề của bạn.."
+                              Required="true" RequiredError="Bạn phải thêm chủ đề!"
                               Variant="Variant.Filled"
                               Adornment="Adornment.End"
                               Margin="Margin.Dense"
@@ -28,7 +29,7 @@
                 <br />
                 <MudGrid>
                     &emsp;
-                    <MudTextField @bind-Value="@_searchString" Label="Add hashtag for your post.."
+                    <MudTextField @bind-Value="@_searchString" Label="Thêm hashtag cho bài viết.."
                                   Variant="Variant.Filled"
                                   Adornment="Adornment.End"
                                   Margin="Margin.Dense"
@@ -130,7 +131,7 @@
         _discussion.UserId = _userId;
         _discussion.HashTag = new List<string>();
         _discussion.HashTag.AddRange(_hashTags);
-        _hashTags.Clear();
+        _hashTags = null;
         DiscussionRepository.AddDiscussion(_discussion);
         SetHTML();
         Snackbar.Add("Thêm bài viết thành công!", Severity.Success);

@@ -11,7 +11,8 @@
         <MudCard Style="position: relative; padding: 14px 5px 5px 0;">
             @if (_discussion.UserId.Value == _userId)
             {
-                <MudButton OnClick="OpenWarning" Variant="Variant.Filled" Style="@($"background:{Colors.Green.Darken3}; position: absolute; right: 13px;")">Xóa</MudButton>
+                @*<MudButton OnClick="OpenWarning" Variant="Variant.Filled" Style="@($"background:{Colors.Green.Darken3}; position: absolute; right: 13px;")">Xóa</MudButton>*@
+                <MudIconButton OnClick="OpenWarning" Icon="@Icons.Material.Filled.Delete" Size="Size.Medium" Style="@($"position: absolute; right: 13px;")"></MudIconButton>
             }
             <MudCardHeader>
                 <CardHeaderContent>
@@ -53,7 +54,7 @@
                 <MudItem xs="12" sm="12" md="12" Style="margin: 13px 0 13px 0;">
                     <AuthorizeView>
                         <NotAuthorized>
-                                <MudTextField Style="color: darkgray;" T="string" Label="Đăng nhập để bình luận" Disabled="true" Variant="Variant.Outlined" Lines="8" />
+                            <MudTextField Style="color: darkgray;" T="string" Label="Đăng nhập để bình luận" Disabled="true" Variant="Variant.Outlined" Lines="8" />
                         </NotAuthorized>
                         <Authorized>
                             @*<MudTextField T="string" Label="Comment.." Variant="Variant.Outlined" @bind-Value="@_sampleText" Lines="8" />*@
@@ -99,7 +100,7 @@
             @* Here for comment*@
             <MudCardContent>
                 <MudText Style="border-bottom: 1px solid darkgray;" Color="Color.Info">@_comments.Count() comments</MudText>
-                @for(int count=0; count < _comments.Count(); count++)
+                @for (int count = 0; count < _comments.Count(); count++)
                 {
                     int i = count;
                     <MudGrid Style="margin: 13px 4px 0 0;">
@@ -189,6 +190,16 @@
         var user = UserRepository.GetUserById(id);
         return user.Name;
     }
+    private int GetNumberofCommentinList(Comment comment)
+    {
+        int count = 0;
+        foreach(var cm in _comments)
+        {
+            if (comment == cm) return count;
+            else count++;
+        }
+        return 100;
+    }
     public async void GetHTML()
     {
         QuillHTMLContent = await QuillHtml.GetHTML();
@@ -230,6 +241,7 @@
     private void DeleteComment(Comment comment)
     {
         CommentRepository.DeleteCommentbyObject(comment);
+        _userNameComments.Remove(_userNameComments[GetNumberofCommentinList(comment)]);
         _comments.Remove(comment);
     }
     private void OpenWarning()

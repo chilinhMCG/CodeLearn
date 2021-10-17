@@ -9,7 +9,9 @@ html, body {
 .mud-link {
     font-size: 14px ;
 }
-
+.mud-input-control.mud-input-required > .mud-input-control-input-container > .mud-input-label::after {
+    content: none !important;
+}
 .btn-primary {
     color: #fff;
     background-color: #1b6ec2;

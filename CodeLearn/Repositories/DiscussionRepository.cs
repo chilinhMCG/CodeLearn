@@ -39,7 +39,9 @@ namespace CodeLearn.Repositories
         public int GetPageNumbers(int sizePage, string search)
         {
             using var context = _applicationDBContext.CreateDbContext();
-            return (context.Discussions.ToList().Where(t => CheckContain(t, search)).Count()/sizePage) + 1;
+            int count = context.Discussions.ToList().Where(t => CheckContain(t, search)).Count();
+            if (count % sizePage == 0) return (count / sizePage);
+            else return (count / sizePage) + 1;
         }
         private bool CheckContain(Discussion discussion, string search)
         {
