@@ -25,12 +25,6 @@ namespace CodeLearn.Models
         [Column("rating")]
         public double TotalRating { get; set; }
 
-        [Column("double_average_rating")]
-        public double DoubleAverageRate { get; set; }
-
-        [Column("int_average_rate")]
-        public int IntAverageRate { get; set; }
-
         [Column("rate_count")]
         public int RateCount { get; set; }
 
@@ -39,7 +33,7 @@ namespace CodeLearn.Models
         [Column("course_type_id")]
         public Guid CourseTypeId { get; set; }
         public CourseType CourseTypeNavigation { get; set; }
-        public virtual ICollection<CourseDetail> CourseDetails { get; set; }
+        public virtual ICollection<Lesson> Lessons { get; set; }
     }
     public enum CourseStatusEnum
     {

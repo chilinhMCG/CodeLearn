@@ -14,26 +14,26 @@
 </MudPaper>
 <br />
 <MudPaper Class="m-auto p-4">
-    <MudForm Model="_currentCourse" @bind-IsValid="@_formSuccess">
+    <MudForm Model="currentCourse" @bind-IsValid="@formSuccess">
         <MudItem>
-            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="_currentCourse.Name"
+            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="currentCourse.Name"
                           Label="Tên khóa học" Required="true"></MudTextField>
         </MudItem>
         <br />
 
 
         <MudItem>
-            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="_currentCourse.Author"
+            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="currentCourse.Author"
                           Label="Tác giả" Required="true"></MudTextField>
         </MudItem>
         <br />
 
 
         <MudItem>
-            <MudSelect T="Guid" Strict="true" Label="Thuộc loại khóa học" Required="true" @bind-Value="_currentCourse.CourseTypeId">
-                @foreach (var item in _courseTypes)
+            <MudSelect T="Guid" Strict="true" Label="Thuộc loại khóa học" Required="true" @bind-Value="currentCourse.CourseTypeId">
+                @foreach (var item in courseTypes)
                 {
-                    <MudSelectItem Value="item.Id">@item.Name</MudSelectItem>
+                    <MudSelectItem @key="item" Value="item.Id">@item.Name</MudSelectItem>
                 }
             </MudSelect>
         </MudItem>
@@ -44,10 +44,23 @@
 
 
         <MudItem>
-            <MudText Typo="Typo.caption">Thumbnail</MudText><br />
-            <InputFile required id="input-file" accept=".jpg, .jpeg" OnChange="_imgCourseFileAsync"></InputFile>
-            <br /><br />
-            <MudCardMedia Image="@($"images/CoursesImg/{_currentCourse.Thumbnail}")" Style="width:200px; height:200px;" />
+            <MudSelect T="string" Label="Thumbnail" Required="true" Strict="true" @bind-Value="currentCourse.Thumbnail">
+                @{
+                    DirectoryInfo directoryInfo = new DirectoryInfo("wwwroot/images/CoursesImg");
+                    FileInfo[] fileInfos = directoryInfo.GetFiles();
+                    foreach (var file in fileInfos)
+                    {
+                        <MudSelectItem @key="file" Value="@file.Name"></MudSelectItem>
+                    }
+                }
+            </MudSelect>
+            <br />
+            <MudLink Underline="Underline.None" Href="/admin/course-images-manager">Thêm hình ảnh mới vào kho</MudLink>
+            <br />
+            @if (currentCourse.Thumbnail != null)
+            {
+                <img src="@($"images/CoursesImg/{currentCourse.Thumbnail}")" width="250" height="210" alt="img" />
+            }
         </MudItem>
         <br />
 
@@ -56,7 +69,7 @@
 
 
         <MudItem>
-            <MudSelect T="CourseStatusEnum" Label="Status" Required="true" @bind-Value="_currentCourse.Status">
+            <MudSelect T="CourseStatusEnum" Label="Status" Required="true" @bind-Value="currentCourse.Status">
                 <MudSelectItem Value="CourseStatusEnum.Free" />
                 <MudSelectItem Value="CourseStatusEnum.Block" />
                 <MudSelectItem Value="CourseStatusEnum.Updating" />
@@ -67,7 +80,7 @@
 
 
         <MudItem>
-            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="_currentCourse.Description"
+            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="currentCourse.Description"
                           Label="Mô tả" Lines="10" Required="true"></MudTextField>
         </MudItem>
         <br />
@@ -75,7 +88,7 @@
 
 
         <MudItem Class="text-center">
-            <MudButton Color="Color.Success" @onclick="_editCourse" Disabled="@(!_formSuccess)">Update</MudButton>
+            <MudButton Color="Color.Success" @onclick="UpdateCourse" Disabled="@(!formSuccess)">Update</MudButton>
             <MudButton Color="Color.Dark">
                 <MudLink Color="Color.Dark" Underline="Underline.None" Href="admin/course-manager">Quay lại</MudLink>
             </MudButton>
@@ -88,38 +101,26 @@
     [Parameter]
     public string ID { get; set; }
 
-    private bool _formSuccess { get; set; }
+    bool formSuccess { get; set; }
 
-    private Course _currentCourse { get; set; } = new Course();
+    Course currentCourse { get; set; } = new Course();
 
-    private List<Course> _courses { get; set; } = new List<Course>();
-
-    private List<CourseType> _courseTypes { get; set; } = new List<CourseType>();
+    private List<CourseType> courseTypes { get; set; } = new List<CourseType>();
 
     protected override void OnInitialized()
     {
 
-        _courseTypes = CourseTypeRepository.GetAllCourseType();
-        _courses = CourseRepository.GetAllCourse();
-        _currentCourse = _courses.FirstOrDefault(x => x.Id.ToString() == this.ID);
+        courseTypes = CourseTypeRepository.GetAllCourseType();
+        currentCourse = CourseRepository.GetSingleCourse(this.ID);
 
 
     }
 
-    private void _editCourse()
+    void UpdateCourse()
     {
-        CourseRepository.UpdateCourse(_currentCourse);
+        CourseRepository.UpdateCourse(currentCourse);
         Snackbar.Add("Chỉnh sửa thành công!", Severity.Success);
         Navigation.NavigateTo("/admin/course-manager");
-    }
-
-    private async Task _imgCourseFileAsync(InputFileChangeEventArgs e)
-    {
-        _currentCourse.Thumbnail = e.File.Name;
-
-        var path = Path.Combine(Environment.ContentRootPath, "wwwroot\\images\\CoursesImg", e.File.Name);
-        await using FileStream fs = new(path, FileMode.OpenOrCreate);
-        await e.File.OpenReadStream().CopyToAsync(fs);
     }
 
 

@@ -18,15 +18,13 @@ namespace CodeLearn.Repositories
             _applicationDbContext = applicationDbContext;
         }
 
-        public void UpdateCourseRating(Course course, int value)
+        public void UpdateRating(Course course, int value)
         {
             using var context = _applicationDbContext.CreateDbContext();
             if (value > 0)
             {
                 course.TotalRating += value;
                 course.RateCount += 1;
-                course.DoubleAverageRate = course.TotalRating / course.RateCount;
-                course.IntAverageRate = (int)course.DoubleAverageRate;
 
                 context.Courses.Update(course);
                 context.SaveChanges();
@@ -58,6 +56,12 @@ namespace CodeLearn.Repositories
         {
             using var context = _applicationDbContext.CreateDbContext();
             return context.Courses.OrderBy(x => x.Name).ToList();
+        }
+
+        public Course GetSingleCourse(string id)
+        {
+            using var context = _applicationDbContext.CreateDbContext();
+            return context.Courses.FirstOrDefault(x => x.Id.ToString() == id);
         }
 
     }

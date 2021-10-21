@@ -2,37 +2,39 @@
 @attribute [Authorize(Roles = "Admin")]
 @inject ICourseTypeRepository CourseTypeRepository
 @inject ICourseRepository CourseRepository
+@inject IUserRepository UserRepository
 @inject ISnackbar Snackbar
 @inject IWebHostEnvironment Environment
 @inject NavigationManager Navigation
 
-<MudPaper Class="p-4">
+
+<MudPaper Class="p-4 mt-4">
     <MudItem>
         <MudText Class="text-center" Color="Color.Success" Typo="Typo.h3">Thêm khóa học mới</MudText>
     </MudItem>
 </MudPaper>
 <br />
 <MudPaper Class="m-auto p-4">
-    <MudForm Model="_newCourse" @bind-IsValid="@_formSuccess">
+    <MudForm Model="newCourse" @bind-IsValid="@formSuccess">
         <MudItem>
-            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="_newCourse.Name"
+            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="newCourse.Name"
                           Label="Tên khóa học" Required="true"></MudTextField>
         </MudItem>
         <br />
 
 
         <MudItem>
-            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="_newCourse.Author"
+            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="newCourse.Author"
                           Label="Tác giả" Required="true"></MudTextField>
         </MudItem>
         <br />
 
 
         <MudItem>
-            <MudSelect T="Guid" Label="Thuộc loại khóa học" Strict="true" Required="true" @bind-Value="_newCourse.CourseTypeId">
-                @foreach (var item in _courseTypes)
+            <MudSelect T="Guid" Label="Thuộc loại khóa học" Strict="true" Required="true" @bind-Value="newCourse.CourseTypeId">
+                @foreach (var item in courseTypes)
                 {
-                    <MudSelectItem Value="@item.Id">@item.Name</MudSelectItem>
+                    <MudSelectItem @key="item" Value="@item.Id">@item.Name</MudSelectItem>
                 }
             </MudSelect>
         </MudItem>
@@ -40,22 +42,22 @@
 
 
         <MudItem>
-            <MudSelect T="string" Label="Thumbnail" Required="true" Strict="true" @bind-Value="_newCourse.Thumbnail">
+            <MudSelect T="string" Label="Thumbnail" Required="true" Strict="true" @bind-Value="newCourse.Thumbnail">
                 @{ 
                     DirectoryInfo directoryInfo = new DirectoryInfo("wwwroot/images/CoursesImg");
                     FileInfo[] fileInfos = directoryInfo.GetFiles();
                     foreach (var file in fileInfos)
                     {
-                        <MudSelectItem Value="@file.Name"></MudSelectItem>
+                        <MudSelectItem @key="file" Value="@file.Name"></MudSelectItem>
                     }
                 }
             </MudSelect>
             <br />
             <MudLink Underline="Underline.None" Href="/admin/course-images-manager">Thêm hình ảnh mới vào kho</MudLink>
             <br />
-            @if (_newCourse.Thumbnail != null)
+            @if (newCourse.Thumbnail != null)
             {
-            <img src="@($"images/CoursesImg/{_newCourse.Thumbnail}")" width="250" height="210" alt="img" />
+            <img src="@($"images/CoursesImg/{newCourse.Thumbnail}")" width="250" height="210" alt="img" />
             }
         </MudItem>
         <br />
@@ -65,7 +67,7 @@
 
 
         <MudItem>
-            <MudSelect T="CourseStatusEnum" Label="Status" Required="true" @bind-Value="_newCourse.Status">
+            <MudSelect T="CourseStatusEnum" Label="Status" Required="true" @bind-Value="newCourse.Status">
                 <MudSelectItem Value="CourseStatusEnum.Free" />
                 <MudSelectItem Value="CourseStatusEnum.Block" />
                 <MudSelectItem Value="CourseStatusEnum.Updating" />
@@ -76,7 +78,7 @@
 
 
         <MudItem>
-            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="_newCourse.Description"
+            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="newCourse.Description"
                           Label="Mô tả" Lines="10" Required="true"></MudTextField>
         </MudItem>
         <br />
@@ -84,7 +86,7 @@
 
 
         <MudItem Class="text-center">
-            <MudButton Color="Color.Success" OnClick="_addCourse" Disabled="@(!_formSuccess)">Thêm</MudButton>
+            <MudButton Color="Color.Success" OnClick="_addCourse" Disabled="@(!formSuccess)">Thêm</MudButton>
             <MudButton Color="Color.Dark">
                 <MudLink Color="Color.Dark" Underline="Underline.None" Href="admin/course-manager">Quay lại</MudLink>
             </MudButton>
@@ -96,29 +98,31 @@
 
 @code {
 
-    private bool _formSuccess { get; set; }
+    bool formSuccess { get; set; }
 
-    private Course _newCourse { get; set; } = new();
+    Course newCourse { get; set; } = new();
 
-    private List<CourseType> _courseTypes { get; set; }
+    List<CourseType> courseTypes { get; set; }
+
+    List<User> users { get; set; }
 
     protected override void OnInitialized()
     {
-        _courseTypes = CourseTypeRepository.GetAllCourseType();
+        courseTypes = CourseTypeRepository.GetAllCourseType();
     }
 
 
     private void _addCourse()
     {
-        if (_newCourse is not null)
+        if (newCourse is not null)
         {
-            CourseRepository.AddCourse(_newCourse);
+            CourseRepository.AddCourse(newCourse);
             Snackbar.Add("Thêm thành công!", Severity.Success);
             Navigation.NavigateTo("/admin/course-manager");
         }
     }
 
 
-    
+
 
 }

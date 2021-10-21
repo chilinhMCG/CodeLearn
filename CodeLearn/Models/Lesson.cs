@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CodeLearn.Models
 {
-    public class CourseDetail
+    public class Lesson
     {
         [Column("id")]
         public Guid Id { get; set; }

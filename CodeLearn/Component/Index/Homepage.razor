@@ -1,6 +1,7 @@
 ﻿@page "/"
 @inject ICourseTypeRepository CourseTypeRepository
 @inject ICourseRepository CourseRepository
+@inject ISnackbar Snackbar
 
 
 <MudPaper Class="p-4 pb-1 mt-4 ">
@@ -9,7 +10,7 @@
     </MudText>
     <MudGrid>
         <MudItem lg="4">
-            <MudTextField @bind-Value="_searchString"
+            <MudTextField @bind-Value="searchString"
                           Label="Tìm kiếm khóa học"
                           Variant="Variant.Outlined"
                           Adornment="Adornment.End"
@@ -20,76 +21,57 @@
     </MudGrid>
 </MudPaper>
 <br />
-@foreach (var item in _courseTypes)
+@foreach (var item in courseTypes)
 {
-    @if (_searchCourses.Any(x => x.CourseTypeId == item.Id))
+    @if (searchCourses.Any(x => x.CourseTypeId == item.Id && x.Status == CourseStatusEnum.Free))
     {
-        <MudPaper Class="p-4">
+        <MudPaper @key="item" Class="p-4">
             <MudText Typo="Typo.h5">@item.Name</MudText>
             <br />
             <MudGrid>
-                @foreach (var course in _searchCourses.Where(x => x.CourseTypeId == item.Id && x.Status == CourseStatusEnum.Free))
-                {
+                @foreach (var course in searchCourses.Where(x => x.CourseTypeId == item.Id && x.Status == CourseStatusEnum.Free))
+                 {
 
-                    <MudItem lg="3">
-                        <MudLink Href="@("/course/" + course.Id.ToString())" Underline="Underline.None">
-                            <MudCard Elevation="0">
-                                <!-- khoa hoc -->
-                                <MudCardMedia Image="@($"images/CoursesImg/{course.Thumbnail}")" Height="200" />
-                                <MudCardContent>
-                                    <MudText Typo="Typo.h6">@course.Name</MudText>
-                                    <MudText Typo="Typo.caption">@course.Author</MudText>
-                                    <!-- if length of description > 44 then just show 44 letters else show all-->
-                                    @if (course.Description.Length > 44)
-                                     {
-                                        <MudText Typo="Typo.body2">@((MarkupString)(course.Description.Substring(0, 44) + "..."))</MudText>
-                                     }
-                                    else
-                                    {
-                                        <MudText Typo="Typo.body2">@course.Description</MudText>
-                                    }
-                                    <br />
-
-
-                                </MudCardContent>
-                                <MudDivider></MudDivider>
-                                <MudCardActions>
-                                    <MudButton Variant="Variant.Text" Color="Color.Info">@course.Status</MudButton>
-                                </MudCardActions>
-                            </MudCard>
-                        </MudLink>
-                        <MudRating @bind-SelectedValue="@course.IntAverageRate" @onclick="(() => UpdateRating(course, course.IntAverageRate))" Size="Size.Small" />
-                        @course.RateCount vote(s)
-                    </MudItem>
-                }
+                    
+                 <MudItem @key="course" lg="3">
+                     <CourseCard course="course"></CourseCard>
+                 </MudItem>
+                } 
             </MudGrid>
         </MudPaper>
         <br>
     }
 }
 @code {
-    private string _searchString = String.Empty;
+    string searchString = String.Empty;
 
-    private List<CourseType> _courseTypes { get; set; }
+    List<CourseType> courseTypes { get; set; }
 
-    protected IEnumerable<Course> _searchCourses { get; set; }
+    IEnumerable<Course> searchCourses { get; set; }
 
-    private int _courseRating { get; set; }
-
-    private int _rating { get; set; }
 
     protected override void OnInitialized()
     {
-        _courseTypes = CourseTypeRepository.GetAllCourseType();
-        _searchCourses = CourseRepository.GetAllCourse()
-            .Where(x => string.IsNullOrEmpty(_searchString) ||
-                x.Name.ToLower().Contains(_searchString.ToLower())
+        courseTypes = CourseTypeRepository.GetAllCourseType();
+        searchCourses = CourseRepository.GetAllCourse()
+            .Where(x => string.IsNullOrEmpty(searchString) ||
+                x.Name.ToLower().Contains(searchString.ToLower())
         );
 
+
+
     }
 
-    public void UpdateRating(Course course, int value)
+    int intRating = 0;
+
+    int temp = 0;
+
+    void UpdateRating(Course course, int value)
     {
-            CourseRepository.UpdateCourseRating(course, value);
+        CourseRepository.UpdateRating(course, value);
+        Snackbar.Add("Vote thành công!", Severity.Success);
+
+        StateHasChanged();
     }
+
 }

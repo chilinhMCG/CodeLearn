@@ -20,6 +20,6 @@ namespace CodeLearn.Models
 
         [Column("is_blocked")]
         public bool IsBlocked { get; set; }
-        public ICollection<CourseDetail> CourseDetails { get; set; }
+        public ICollection<Lesson> Lessons { get; set; }
     }
 }

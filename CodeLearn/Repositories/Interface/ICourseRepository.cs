@@ -8,6 +8,7 @@ namespace CodeLearn.Repositories.Interface
 {
     public interface ICourseRepository
     {
+        Course GetSingleCourse(string id);
 
         List<Course> GetAllCourse();
 
@@ -17,9 +18,7 @@ namespace CodeLearn.Repositories.Interface
 
         void DeleteCourse(Course course);
 
-        //int GetCourseRating(Course course);
-
-        void UpdateCourseRating(Course course, int value);
+        void UpdateRating(Course course, int value);
 
     }
 }

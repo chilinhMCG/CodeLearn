@@ -1,5 +1,5 @@
 ﻿@page "/course/{id}"
-@inject ICourseDetailRepository CourseDetailRepository
+@inject ILessonRepository LessonRepository
 @inject ICourseRepository CourseRepository
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
@@ -7,15 +7,16 @@
 
 <MudPaper Class="d-flex justify-space-around p-4">
     <MudItem Style="float:left; width:20%">
-        <MudText Typo="Typo.h4">@_currentCourse.Name</MudText>
+        <MudText Typo="Typo.h4">@currentCourse.Name</MudText>
         <MudText Typo="Typo.subtitle1">
-            @_currentCourse.Author
-            <MudRating @bind-SelectedValue="@_currentCourse.IntAverageRate" @onclick="(() => UpdateRating(_currentCourse, _currentCourse.IntAverageRate))" Size="Size.Small" />
-            @_currentCourse.RateCount vote(s)
-            <AuthorizeView Roles="Admin">
-                <MudButton Color="Color.Error" Variant="Variant.Filled" @onclick="_deleteCourseAsync">Delete</MudButton>
-                <MudButton Color="Color.Dark" Style="text-decoration:none" Variant="Variant.Filled" Link="@($"/admin/course/edit/{_currentCourse.Id}")">Edit</MudButton>
-            </AuthorizeView>
+            @currentCourse.Author
+            @{ 
+                double ratingToShow = currentCourse.TotalRating / currentCourse.RateCount;
+            }
+            <MudRating @bind-SelectedValue="integerRating" @onclick="(() => UpdateRating(currentCourse, integerRating))" Size="Size.Small" />
+            <span>
+                @ratingToShow.ToString("#.#") (@currentCourse.RateCount)
+            </span>
         </MudText>
 
     </MudItem>
@@ -23,25 +24,53 @@
     <MudDivider Vertical="true" FlexItem="true" Class="mr-3" />
     <MudItem Style="float:right; width:80%">
         <MudText Align="Align.Justify">
-            @((MarkupString) _currentCourse.Description)
+            @((MarkupString) currentCourse.Description)
         </MudText>
     </MudItem>
 
 </MudPaper>
-<br />
+<br>
+
+
 <!-- bai hoc -->
-<MudPaper Class="d-flex justify-space-around p-4">
-    <MudItem Style="width:600px">
-        @foreach (var item in _courseDetails)
+<MudPaper Class="d-flex p-4 text-center">
+    
+    <MudItem> 
+        @foreach (var item in lessons)
         {
-            <MudCard Style="width: 150px; float:left;" Class="m-3 text-center">
+            <MudCard @key="item" Style="width:155px;margin:20px;" Class="float-left">
                 <MudCardContent>
-                    <MudLink Underline="Underline.None" Href="@($"/course-detail/{item.Id}")">@item.Name</MudLink>
+                    <MudLink Underline="Underline.None" Href="@($"/lesson/{item.Id}")">@item.Name</MudLink>
                 </MudCardContent>
+                <AuthorizeView Roles="Admin">
+                    <MudCardActions>
+                        <p>
+                            <MudButton OnClick="(() => DeleteLessonAsync(item))" Variant="Variant.Outlined" Color="Color.Error" 
+                                       Size="Size.Small">Xóa</MudButton>
+                            <MudButton Variant="Variant.Outlined" Color="Color.Default" Size="Size.Small"
+                                       Link="@($"/admin/lesson/edit/{item.Id}")" Class="text-decoration-none">Sửa</MudButton>
+                        </p>
+                    </MudCardActions>
+                </AuthorizeView>
             </MudCard>
         }
     </MudItem>
 </MudPaper>
+<br />
+
+<AuthorizeView Roles="Admin">
+    <MudPaper Class="d-flex p-4 justify-space-around">
+        <MudItem>
+            <MudButton Color="Color.Error" Variant="Variant.Outlined" @onclick="DeleteCourseAsync">Xóa khóa học</MudButton>
+
+            <MudButton Color="Color.Default" Class="text-decoration-none"
+                       Variant="Variant.Outlined" Link="@($"/admin/course/edit/{currentCourse.Id}")">Chỉnh sửa khóa học</MudButton>
+
+            <MudButton Color="Color.Primary" Class="text-decoration-none"  
+                       Variant="Variant.Outlined" Link="admin/lesson/add-new">Tạo bài học mới</MudButton>
+        </MudItem>
+    </MudPaper>
+</AuthorizeView>
 
 
 
@@ -52,34 +81,40 @@
     [Parameter]
     public string Id { get; set; }
 
-    private List<Course> _courses { get; set; } = new List<Course>();
+    List<Course> courses { get; set; } = new List<Course>();
 
-    private Course _currentCourse { get; set; } = new Course();
+    Course currentCourse { get; set; } = new Course();
 
-    private List<CourseDetail> _courseDetails { get; set; } = new List<CourseDetail>();
+    List<Lesson> lessons { get; set; } = new List<Lesson>();
+
+    int integerRating = 0;
 
     protected override void OnInitialized()
     {
-        _courses = CourseRepository.GetAllCourse();
-        _currentCourse = _courses.FirstOrDefault(x => x.Id.ToString() == this.Id);
-        _courseDetails = CourseDetailRepository.GetAllCourseDetailsByCourseID(this.Id);
+        currentCourse = CourseRepository.GetSingleCourse(this.Id);
+        lessons = LessonRepository.GetAllLessonByCourseID(this.Id);
+        if (currentCourse.RateCount != 0)
+        {
+            integerRating = (int)currentCourse.TotalRating / currentCourse.RateCount;
+        }
+
     }
 
 
-    private async Task _deleteCourseAsync()
+    async Task DeleteCourseAsync()
     {
         var dialog = DialogService.Show<DeleteDialog>("Xóa khóa học");
         var result = await dialog.Result;
 
         if (!result.Cancelled)
         {
-            if (_courseDetails.Any(x => x.CourseId == _currentCourse.Id))
+            if (lessons.Any(x => x.CourseId == currentCourse.Id))
             {
                 Snackbar.Add("Bạn cần phải xóa tất cả bài học trong khóa này trước!", Severity.Warning);
             }
             else
             {
-                CourseRepository.DeleteCourse(_currentCourse);
+                CourseRepository.DeleteCourse(currentCourse);
                 Snackbar.Add("Xóa thành công", Severity.Success);
                 Navigation.NavigateTo("/");
             }
@@ -89,10 +124,29 @@
 
     }
 
-    public void UpdateRating(Course course, int value)
+    async Task DeleteLessonAsync(Lesson lesson)
     {
-        CourseRepository.UpdateCourseRating(course, value);
+        var dialog = DialogService.Show<DeleteDialog>("Xóa bài học");
+        var result = await dialog.Result;
 
+        if (!result.Cancelled)
+        {
+            LessonRepository.DeleteLesson(lesson);
+            Snackbar.Add("Xóa thành công", Severity.Success);
+
+            await Task.Delay(1500);
+            Navigation.NavigateTo($"course/{lesson.CourseId}", true);
+        }
+
+
+    }
+
+    void UpdateRating(Course course, int value)
+    {
+        CourseRepository.UpdateRating(course, integerRating);
+        Snackbar.Add("Vote thành công!", Severity.Success);
+
+        integerRating = (int)course.TotalRating / course.RateCount;
     }
 
 

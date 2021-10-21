@@ -11,7 +11,7 @@ namespace CodeLearn.Repositories.Interface
         Task<List<User>> GetAllUser();
 
         List<User> GetUser();
-        User GetUserById(Guid id);
+        User GetUserById(string id);
         void AddUser(User user);
         void UpdateUser(User user);
     }

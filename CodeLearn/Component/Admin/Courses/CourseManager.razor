@@ -13,9 +13,9 @@
     </MudItem>
     <br />
     <MudItem lg="12">
-        @foreach (var item in _courseTypes)
+        @foreach (var item in courseTypes)
         {
-            <MudTable Hover="true" Items="_courses.Where(x => x.CourseTypeId == item.Id)" Bordered="true" Dense="true">
+            <MudTable @key="item" Hover="true" Items="courses.Where(x => x.CourseTypeId == item.Id)" Bordered="true" Dense="true">
                 <HeaderContent>
                     <!-- ten nhom khoa hoc -->
                     <MudTh>@item.Name</MudTh>
@@ -25,7 +25,7 @@
                     <!-- khoa hoc -->
                     <MudTd DataLabel="name" Class="text-center">
                         <MudLink Underline="Underline.None" Color="Color.Success"
-                                 Href="@($"/course/{context.Id}")">@context.Name</MudLink>
+                                 Href="@($"/course/{context.Id}")">@context.Name (@context.Status)</MudLink>
                             </MudTd>
                             <MudTd DataLabel="crud" Class="text-center">
                                 <MudButton Variant="Variant.Text">
@@ -44,13 +44,13 @@
 
 @code {
 
-    private List<Course> _courses { get; set; }
-    private List<CourseType> _courseTypes { get; set; }
+    private List<Course> courses { get; set; }
+    private List<CourseType> courseTypes { get; set; }
 
     protected override void OnInitialized()
     {
-        _courses = CourseRepository.GetAllCourse();
-        _courseTypes = CourseTypeRepository.GetAllCourseType();
+        courses = CourseRepository.GetAllCourse();
+        courseTypes = CourseTypeRepository.GetAllCourseType();
 
     }
 }

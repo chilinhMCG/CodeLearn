@@ -14,7 +14,7 @@
                     <MudText Color="Color.Success">Thêm nhóm khóa học</MudText>
                 </MudItem>
                 <MudItem lg="9">
-                    <MudTextField @bind-Value="_newCourseType.Name" Label="Tên nhóm khóa học"
+                    <MudTextField @bind-Value="newCourseType.Name" Label="Tên nhóm khóa học"
                                   Variant="Variant.Outlined"
                                   Margin="Margin.Dense">
                     </MudTextField>
@@ -28,76 +28,88 @@
     </MudItem>
     <MudItem lg="12">
         <MudPaper Class="p-3">
-            <MudTable Items="@_courseTypes" Hover="true" Bordered="true">
-                <HeaderContent>
-                    <MudTh Style="text-align:center">Tên nhóm khóa học</MudTh>
-                    <MudTh></MudTh>
-                </HeaderContent>
-                <RowTemplate>
-                    
-                    <MudTd DataLabel="Name">
-                        <MudTextField @bind-Value="context.Name" Variant="Variant.Outlined"
-                                      Margin="Margin.Dense" Required="true" @onfocusout="(() => EditCourseType(context))"></MudTextField>
-                    </MudTd>
-                    <MudTd DataLabel="Delete" Class="text-center">
-                        <MudButton Color="Color.Error" @onclick="(() => _deleteCourseTypeAsync(context))">Delete</MudButton>
-                    </MudTd>
-                </RowTemplate>
+            <MudSimpleTable Hover="true" Bordered="true">
+                <thead>
+                    <tr>
+                        <td class="text-center font-weight-bold">Tên nhóm khóa học</td>
+                        <td></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var context in courseTypes)
+                    {
+                        <tr @key="context">
+                            <td>
+                                <MudTextField @bind-Value="context.Name" Variant="Variant.Outlined"
+                                              Margin="Margin.Dense" Required="true" @onfocusout="(() => Edit(context))"></MudTextField>
+                            </td>
+                            <td class="text-center">
+                                <MudButton Color="Color.Error" @onclick="(() => DeleteAsync(context))">Delete</MudButton>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </MudSimpleTable>
 
-            </MudTable>
         </MudPaper>
     </MudItem>
 </MudGrid>
 
 @code {
 
-    private CourseType _newCourseType = new();
+    CourseType newCourseType = new();
 
-    private List<CourseType> _courseTypes = new();
+    List<CourseType> courseTypes = new();
 
-    private List<Course> _courses { get; set; }
+    List<Course> courses { get; set; }
 
     protected override void OnInitialized()
     {
 
-        _courseTypes = CourseTypeRepository.GetAllCourseType();
-        _courses = CourseRepository.GetAllCourse();
+        courseTypes = CourseTypeRepository.GetAllCourseType();
+        courses = CourseRepository.GetAllCourse();
     }
 
-    protected void Add()
+    void Add()
     {
-        if (!string.IsNullOrWhiteSpace(_newCourseType.Name))
+        if (!string.IsNullOrWhiteSpace(newCourseType.Name))
         {
-            CourseTypeRepository.AddCourseType(_newCourseType);
+            CourseTypeRepository.AddCourseType(newCourseType);
             Snackbar.Add("Thêm nhóm bài học thành công !", Severity.Success);
-            _newCourseType = new();
+            newCourseType = new();
         }
 
-        _courseTypes = CourseTypeRepository.GetAllCourseType();
+        courseTypes = CourseTypeRepository.GetAllCourseType();
 
     }
 
-    protected void EditCourseType(CourseType courseType)
+    void Edit(CourseType courseType)
     {
-        CourseTypeRepository.UpdateCourseType(courseType);
-        Snackbar.Add("Chỉnh sửa thành công!", Severity.Success);
+        CourseType currentCourseType = CourseTypeRepository.GetSingleCourseType(courseType.Id.ToString());
+
+        if (currentCourseType.Name != courseType.Name)
+        {
+            CourseTypeRepository.UpdateCourseType(courseType);
+            Snackbar.Add("Thay đổi thành công!", Severity.Success);
+        }
+
     }
 
 
-    private async Task _deleteCourseTypeAsync(CourseType courseType)
+    async Task DeleteAsync(CourseType courseType)
     {
         var dialog = DialogService.Show<DeleteDialog>("Xóa loại khóa học");
         var result = await dialog.Result;
         if (!result.Cancelled)
         {
-            if (_courses.Any(x => x.CourseTypeId == courseType.Id))
+            if (courses.Any(x => x.CourseTypeId == courseType.Id))
             {
                 Snackbar.Add("Bạn phải xóa hết tất cả các khóa học trong loại khóa học này trước!", Severity.Warning);
             }
             else
             {
                 CourseTypeRepository.DeleteCourseType(courseType);
-                _courseTypes = CourseTypeRepository.GetAllCourseType();
+                courseTypes = CourseTypeRepository.GetAllCourseType();
 
             }
         }

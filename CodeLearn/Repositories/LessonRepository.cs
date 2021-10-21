@@ -9,46 +9,52 @@ using System.Threading.Tasks;
 
 namespace CodeLearn.Repositories
 {
-    public class CourseDetailRepository : ICourseDetailRepository
+    public class LessonRepository : ILessonRepository
     {
         private readonly IDbContextFactory<ApplicationDBContext> _applicationDbContext;
 
-        public CourseDetailRepository(IDbContextFactory<ApplicationDBContext> applicationDbContext)
+        public LessonRepository(IDbContextFactory<ApplicationDBContext> applicationDbContext)
         {
             _applicationDbContext = applicationDbContext;
         }
 
-        public void AddCourseDetail(CourseDetail courseDetail)
+        public void AddLesson(Lesson lesson)
         {
             using var context = _applicationDbContext.CreateDbContext();
-            context.CourseDetails.Add(courseDetail);
+            context.Lessons.Add(lesson);
             context.SaveChanges();
         }
 
-        public void UpdateCourseDetail(CourseDetail courseDetail)
+        public void UpdateLesson(Lesson lesson)
         {
             using var context = _applicationDbContext.CreateDbContext();
-            context.CourseDetails.Update(courseDetail);
+            context.Lessons.Update(lesson);
             context.SaveChanges();
         }
 
-        public void DeleteCourseDetail(CourseDetail courseDetail)
+        public void DeleteLesson(Lesson lesson)
         {
             using var context = _applicationDbContext.CreateDbContext();
-            context.CourseDetails.Remove(courseDetail);
+            context.Lessons.Remove(lesson);
             context.SaveChanges();
         }
 
-        public List<CourseDetail> GetAllCourseDetail()
+        public List<Lesson> GetAllLesson()
         {
             using var context = _applicationDbContext.CreateDbContext();
-            return context.CourseDetails.OrderBy(x => x.Name).ToList();
+            return context.Lessons.OrderBy(x => x.CreatedAt).ToList();
         }
 
-        public List<CourseDetail> GetAllCourseDetailsByCourseID(string courseID)
+        public List<Lesson> GetAllLessonByCourseID(string courseID)
         {
             using var context = _applicationDbContext.CreateDbContext();
-            return context.CourseDetails.Where(x => x.CourseId.ToString() == courseID).OrderBy(x => x.CreatedAt).ToList();
+            return context.Lessons.Where(x => x.CourseId.ToString() == courseID).OrderBy(x => x.CreatedAt).ToList();
+        }
+
+        public Lesson GetSingleLesson(string id)
+        {
+            using var context = _applicationDbContext.CreateDbContext();
+            return context.Lessons.FirstOrDefault(x => x.Id.ToString() == id);
         }
     }
 }

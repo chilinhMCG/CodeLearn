@@ -36,10 +36,11 @@ namespace CodeLearn.Repositories
             return context.Users.ToList();
         }
 
-        public User GetUserById(Guid id)
+        public User GetUserById(string id)
         {
             using var context = _applicationDBContext.CreateDbContext();
-            return context.Users.Where(h => h.Id == id).FirstOrDefault();
+            return context.Users.Where(h => h.Id.ToString() == id).FirstOrDefault();
+            
         }
 
         public void UpdateUser(User user)

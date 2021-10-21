@@ -1,3 +1,4 @@
+
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
@@ -20,8 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Component\Admin\Accounts\UserRoles\" />
-    <Folder Include="Component\Admin\Accounts\Roles\" />
     <Folder Include="wwwroot\images\CoursesImg\" />
   </ItemGroup>
 

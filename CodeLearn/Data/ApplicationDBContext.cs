@@ -13,11 +13,9 @@ namespace CodeLearn.Data
         public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options) : base(options)
         { }
         public DbSet<Course> Courses { get; set; }
-        public DbSet<CourseDetail> CourseDetails { get; set; }
+        public DbSet<Lesson> Lessons { get; set; }
         public DbSet<CourseType> CourseTypes { get; set; }
         public DbSet<User> Users { get; set; }
-
-        public DbSet<Role> Roles { get; set; }
 
         static ApplicationDBContext() => NpgsqlConnection.GlobalTypeMapper.MapEnum<CourseStatusEnum>();
 
@@ -35,22 +33,22 @@ namespace CodeLearn.Data
                 .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("fk_courses_coursestype");
 
-            modelBuilder.Entity<CourseDetail>(entity =>
+            modelBuilder.Entity<Lesson>(entity =>
                 entity.Property(p => p.CreatedAt)
                       .HasDefaultValueSql("CURRENT_TIMESTAMP"));
-            modelBuilder.Entity<CourseDetail>()
+            modelBuilder.Entity<Lesson>()
                 .HasOne(h => h.CourseNavigation)
-                .WithMany(h => h.CourseDetails)
+                .WithMany(h => h.Lessons)
                 .HasForeignKey(h => h.CourseId)
                 .OnDelete(DeleteBehavior.SetNull)
-                .HasConstraintName("fk_coursedetail_course");
+                .HasConstraintName("fk_Lesson_course");
 
-            modelBuilder.Entity<CourseDetail>()
+            modelBuilder.Entity<Lesson>()
                 .HasOne(h => h.UserNavigation)
-                .WithMany(h => h.CourseDetails)
+                .WithMany(h => h.Lessons)
                 .HasForeignKey(h => h.CreatorId)
                 .OnDelete(DeleteBehavior.SetNull)
-                .HasConstraintName("fk_coursedetial_user");
+                .HasConstraintName("fk_lesson_user");
         }
     }
 }

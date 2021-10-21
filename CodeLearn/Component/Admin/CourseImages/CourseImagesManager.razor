@@ -25,7 +25,7 @@
     <MudItem lg="12">
             @foreach (var file in fileInfos)
             {
-                <MudCard Style="width:250px;" Class="float-left m-3 text-center">
+                <MudCard @key="file" Style="width:250px;" Class="float-left m-3 text-center">
                     <MudCardMedia Image="@($"images/CoursesImg/{file.Name}")" Style="width:250px;height:210px;"></MudCardMedia>
                     <MudCardContent Style="height:50px;">
                         @file.Name

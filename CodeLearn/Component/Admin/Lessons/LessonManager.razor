@@ -1,6 +1,6 @@
-﻿@page "/admin/course-detail-manager"
+﻿@page "/admin/lesson-manager"
 @attribute [Authorize(Roles = "Admin")]
-@inject ICourseDetailRepository CourseDetailRepository
+@inject ILessonRepository LessonRepository
 @inject ICourseRepository CourseRepository
 
 
@@ -12,9 +12,9 @@
     </MudItem>
     <br />
     <MudItem lg="12">
-        @foreach (var item in _courses)
+        @foreach (var item in courses)
         {
-            <MudTable Hover="true" Items="_courseDetails.Where(x => x.CourseId == item.Id)" Bordered="true" Dense="true">
+            <MudTable @key="item" Hover="true" Items="lessons.Where(x => x.CourseId == item.Id)" Bordered="true" Dense="true">
                 <HeaderContent>
                     <!-- khoa hoc -->
                     <MudTh>
@@ -26,17 +26,17 @@
                     <!-- bai hoc -->
                     <MudTd DataLabel="name" Class="text-center">
                         <MudLink Color="Color.Success" Underline="Underline.None"
-                                 Href="@($"course-detail/{context.Id}")">@context.Name</MudLink>
+                                 Href="@($"lesson/{context.Id}")">@context.Name</MudLink>
                             </MudTd>
                             <MudTd DataLabel="crud" Class="text-center">
                                 <MudButton Variant="Variant.Text">
-                                    <MudLink Underline="Underline.None" Href="@($"/admin/course-detail/edit/{context.Id}")">Edit</MudLink>
+                                    <MudLink Underline="Underline.None" Href="@($"/admin/lesson/edit/{context.Id}")">Edit</MudLink>
                                 </MudButton>
                             </MudTd>
                         </RowTemplate>
                     </MudTable>
                     <br />
-                }
+        }
 
     </MudItem>
 </MudPaper>
@@ -44,13 +44,14 @@
 
 
 @code {
-    private List<Course> _courses { get; set; } = new List<Course>();
+        List<Course> courses { get; set; } = new List<Course>();
 
-    private List<CourseDetail> _courseDetails { get; set; } = new List<CourseDetail>();
+        List<Lesson> lessons { get; set; } = new List<Lesson>();
 
     protected override void OnInitialized()
     {
-        _courses = CourseRepository.GetAllCourse();
-        _courseDetails = CourseDetailRepository.GetAllCourseDetail();
+        courses = CourseRepository.GetAllCourse();
+        lessons = LessonRepository.GetAllLesson();
+
     }
 }

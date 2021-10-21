@@ -1,0 +1,67 @@
+﻿@inject ICourseRepository CourseRepository
+@inject ISnackbar Snackbar
+
+<MudItem @key="course">
+    <MudLink Href="@("/course/" + course.Id.ToString())" Underline="Underline.None">
+        <MudCard Elevation="0">
+            <!-- khoa hoc -->
+            <MudCardMedia Image="@($"images/CoursesImg/{course.Thumbnail}")" Height="200" />
+            <MudCardContent>
+                <MudText Typo="Typo.h6">@course.Name</MudText>
+                <MudText Typo="Typo.caption">@course.Author</MudText>
+                <!-- if length of description > 44 then just show 44 letters else show all-->
+                @if (course.Description.Length > 44)
+                {
+                    <MudText Typo="Typo.body2">@((MarkupString)(course.Description.Substring(0, 44) + "..."))</MudText>
+                }
+                else
+                {
+                    <MudText Typo="Typo.body2">@course.Description</MudText>
+                }
+                <br />
+
+
+            </MudCardContent>
+            <MudDivider></MudDivider>
+            <MudCardActions>
+                <MudButton Variant="Variant.Text" Color="Color.Info">@course.Status</MudButton>
+            </MudCardActions>
+        </MudCard>
+    </MudLink>
+    @{
+        double ratingToShow = 0;
+        if (course.RateCount != 0)
+        {
+            ratingToShow = course.TotalRating / course.RateCount;
+        }
+    }
+    <MudRating @bind-SelectedValue="integerRating" @onclick="(() => UpdateRating(course, integerRating))" Size="Size.Small" />
+    <span>
+        @ratingToShow.ToString("#.#") (@course.RateCount)
+    </span>
+
+</MudItem>
+
+@code {
+
+        [Parameter]
+        public Course course { get; set; } = new Course();
+
+        int integerRating { get; set; } = 0;
+
+        protected override void OnInitialized()
+        {
+            if (course.RateCount != 0)
+            {
+                integerRating = (int)course.TotalRating / course.RateCount;
+            }
+        }
+
+        void UpdateRating(Course course, int value)
+        {
+            CourseRepository.UpdateRating(course, integerRating);
+            Snackbar.Add("Vote thành công!", Severity.Success);
+
+            integerRating = (int)course.TotalRating / course.RateCount;
+        }
+}
