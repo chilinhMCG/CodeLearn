@@ -7,9 +7,6 @@
 
 <MudPaper Class="p-4">
 
-    <MudItem>
-        <MudLink Href="/admin/course-detail/add-new" Color="Color.Success" Typo="Typo.h5">Thêm bài học mới</MudLink>
-    </MudItem>
     <br />
     <MudItem lg="12">
         @foreach (var item in courses)
@@ -44,9 +41,9 @@
 
 
 @code {
-        List<Course> courses { get; set; } = new List<Course>();
+    List<Course> courses { get; set; } = new List<Course>();
 
-        List<Lesson> lessons { get; set; } = new List<Lesson>();
+    List<Lesson> lessons { get; set; } = new List<Lesson>();
 
     protected override void OnInitialized()
     {

@@ -20,12 +20,7 @@
         </MudItem>
         <br />
         <MudItem>
-            <MudSelect T="Guid" Label="Thuộc khóa học" Strict="true" Required="true" @bind-Value="currentLesson.CourseId">
-                @foreach (var course in courses)
-                {
-                    <MudSelectItem @key="course" Value="course.Id">@course.Name</MudSelectItem>
-                }
-            </MudSelect>
+            <MudTextField Disabled="true" T="string" @bind-Value="courseName" Label=" Thuộc khóa học"></MudTextField>
         </MudItem>
         <br />
 
@@ -62,17 +57,21 @@
 
     bool formSuccess { get; set; }
 
-    List<Course> courses { get; set; } = new List<Course>();
-
     Lesson currentLesson { get; set; } = new Lesson();
 
     List<User> users { get; set; } = new List<User>();
 
+    string courseName { get; set; }
+
+    string nameOfUser { get; set; }
+
     protected override void OnInitialized()
     {
-        courses = CourseRepository.GetAllCourse();
         users = UserRepository.GetUser();
         currentLesson = LessonRepository.GetSingleLesson(this.ID);
+        courseName = CourseRepository.GetSingleCourseNameById(currentLesson.CourseId.ToString());
+
+        nameOfUser = UserRepository.GetNameOfUserById(currentLesson.CreatorId.ToString());
 
     }
 

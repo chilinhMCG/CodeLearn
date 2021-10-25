@@ -1,4 +1,5 @@
-﻿@page "/admin/lesson/add-new"
+﻿
+@page "/admin/lesson/add-new/{courseId:guid}" 
 @attribute [Authorize(Roles = "Admin")]
 @inject ICourseRepository CourseRepository
 @inject ILessonRepository LessonRepository  
@@ -21,22 +22,15 @@
         </MudItem>
         <br />
         <MudItem>
-            <MudSelect T="Guid" Label="Thuộc khóa học" Strict="true" Required="true" @bind-Value="newLesson.CourseId">
-                @foreach (var course in courses)
-                {
-                    <MudSelectItem Value="course.Id">@course.Name</MudSelectItem>
-                }
-            </MudSelect>
+            <MudTextField Disabled="true" Margin="Margin.Dense" Variant="Variant.Outlined"
+                                Label="Thuộc khóa học" Value="currentCourseName"></MudTextField>
+
         </MudItem>
         <br />
 
         <MudItem>
-            <MudSelect T="Guid" Label="Người tạo" Required="true" Strict="true" @bind-Value="newLesson.CreatorId">
-                @foreach (var user in users)
-                {
-                    <MudSelectItem Value="user.Id">@user.Name</MudSelectItem>
-                }
-            </MudSelect>
+            <MudTextField Disabled="true" Margin="Margin.Dense" Variant="Variant.Outlined"
+                          Label="Người tạo" Value="nameOfUser"></MudTextField>
         </MudItem>
         <br />
 
@@ -57,20 +51,30 @@
 
 
 @code {
+    [Parameter]
+    public Guid courseId { get; set; }
+
+    [CascadingParameter]
+    Guid userId { get; set; }
 
     bool formSuccess { get; set; }
 
-    List<Course> courses { get; set; } = new List<Course>();
+    string currentCourseName { get; set; }
 
     Lesson newLesson { get; set; } = new Lesson();
 
     List<User> users { get; set; } = new List<User>();
 
+    string nameOfUser;
+
 
     protected override void OnInitialized()
     {
-        courses = CourseRepository.GetAllCourse();
         users = UserRepository.GetUser();
+        currentCourseName = CourseRepository.GetSingleCourseNameById(this.courseId.ToString());
+        newLesson.CourseId = courseId;
+        newLesson.CreatorId = userId;
+        nameOfUser = UserRepository.GetNameOfUserById(userId.ToString());
 
     }
 

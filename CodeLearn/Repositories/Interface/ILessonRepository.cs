@@ -14,6 +14,8 @@ namespace CodeLearn.Repositories.Interface
 
         List<Lesson> GetAllLessonByCourseID(string courseID);
 
+        List<string> GetLessonsName();
+
         void AddLesson(Lesson lesson);
 
         void UpdateLesson(Lesson lesson);

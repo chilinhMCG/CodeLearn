@@ -64,5 +64,34 @@ namespace CodeLearn.Repositories
             return context.Courses.FirstOrDefault(x => x.Id.ToString() == id);
         }
 
+        public string GetSingleCourseNameById(string id)
+        {
+            using var context = _applicationDbContext.CreateDbContext();
+            return context.Courses.FirstOrDefault(x => x.Id.ToString() == id).Name;
+        }
+
+        public List<string> GetCoursesName()
+        {
+            using var context = _applicationDbContext.CreateDbContext();
+            List<string> courseName = new List<string>();
+            foreach (var course in context.Courses)
+            {
+                courseName.Add(course.Name);
+            }
+            return courseName;
+        }
+
+        public List<Guid> GetCourseTypeId()
+        {
+            using var context = _applicationDbContext.CreateDbContext();
+            List<Guid> courseTypeId = new List<Guid>();
+            foreach (var item in context.Courses)
+            {
+                courseTypeId.Add(item.CourseTypeId);
+            }
+            return courseTypeId;
+        }
+
+        
     }
 }

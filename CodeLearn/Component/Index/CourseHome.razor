@@ -67,7 +67,7 @@
                        Variant="Variant.Outlined" Link="@($"/admin/course/edit/{currentCourse.Id}")">Chỉnh sửa khóa học</MudButton>
 
             <MudButton Color="Color.Primary" Class="text-decoration-none"  
-                       Variant="Variant.Outlined" Link="admin/lesson/add-new">Tạo bài học mới</MudButton>
+                       Variant="Variant.Outlined" Link="@($"admin/lesson/add-new/{currentCourse.Id}")">Tạo bài học mới</MudButton>
         </MudItem>
     </MudPaper>
 </AuthorizeView>

@@ -43,6 +43,17 @@ namespace CodeLearn.Repositories
             
         }
 
+        public string GetNameOfUserById(string id)
+        {
+            using var context = _applicationDBContext.CreateDbContext();
+            return context.Users.Where(h => h.Id.ToString() == id).FirstOrDefault().Name;
+        }
+
+        public User GetUserByName(string name)
+        {
+            using var context = _applicationDBContext.CreateDbContext();
+            return context.Users.Where(h => h.Name == name).FirstOrDefault();
+        }
         public void UpdateUser(User user)
         {
             using var context = _applicationDBContext.CreateDbContext();

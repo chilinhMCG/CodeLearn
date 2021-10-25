@@ -10,6 +10,12 @@ namespace CodeLearn.Repositories.Interface
     {
         Course GetSingleCourse(string id);
 
+        string GetSingleCourseNameById(string id);
+
+        List<string> GetCoursesName();
+
+        List<Guid> GetCourseTypeId();
+
         List<Course> GetAllCourse();
 
         void AddCourse(Course course);

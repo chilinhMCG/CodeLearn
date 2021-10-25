@@ -12,7 +12,14 @@ namespace CodeLearn.Repositories.Interface
 
         List<User> GetUser();
         User GetUserById(string id);
+
+        User GetUserByName(string name);
+
+        string GetNameOfUserById(string id);
+        
         void AddUser(User user);
         void UpdateUser(User user);
+
+        
     }
 }

@@ -56,5 +56,16 @@ namespace CodeLearn.Repositories
             using var context = _applicationDbContext.CreateDbContext();
             return context.Lessons.FirstOrDefault(x => x.Id.ToString() == id);
         }
+
+        public List<string> GetLessonsName()
+        {
+            using var context = _applicationDbContext.CreateDbContext();
+            List<string> names = new List<string>();
+            foreach (var item in context.Lessons)
+            {
+                names.Add(item.Name);
+            }
+            return names;
+        }
     }
 }
