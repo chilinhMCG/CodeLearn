@@ -35,15 +35,21 @@
         <br />
 
         <MudItem>
-            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" Lines="10" Placeholder="Có thể sử dụng các thẻ html"
-                          @bind-Value="newLesson.Content" Label="Nội dung" Required="true"></MudTextField>
+            <MudText Typo="Typo.body1">Nội dung khóa học</MudText>
+            <BlazoredTextEditor @ref="QuillHtml" Placeholder="type something...">
+                <ToolbarContent>
+                    <BasicTextEditor></BasicTextEditor>
+                </ToolbarContent>
+                <EditorContent></EditorContent>
+            </BlazoredTextEditor>
         </MudItem>
         <br />
 
+
         <MudItem Class="text-center">
-            <MudButton Color="Color.Success" @onclick="AddAsync" Disabled="@(!formSuccess)">Thêm</MudButton>
+            <MudButton Color="Color.Success" @onclick="AddContent" Disabled="@(!formSuccess)">Thêm</MudButton>
             <MudButton Color="Color.Dark">
-                <MudLink Color="Color.Dark" Underline="Underline.None" Href="admin/course-detail-manager">Quay lại</MudLink>
+                <MudLink Color="Color.Dark" Underline="Underline.None" Href="@($"course/{this.courseId}")">Quay lại</MudLink>
             </MudButton>
         </MudItem>
     </MudForm>
@@ -51,24 +57,26 @@
 
 
 @code {
-    [Parameter]
-    public Guid courseId { get; set; }
+        [Parameter]
+        public Guid courseId { get; set; }
 
-    [CascadingParameter]
-    Guid userId { get; set; }
+        [CascadingParameter]
+        Guid userId { get; set; }
 
-    bool formSuccess { get; set; }
+        BlazoredTextEditor QuillHtml { get; set; }
 
-    string currentCourseName { get; set; }
+        bool formSuccess { get; set; }
 
-    Lesson newLesson { get; set; } = new Lesson();
+        string currentCourseName { get; set; }
 
-    List<User> users { get; set; } = new List<User>();
+        Lesson newLesson { get; set; } = new Lesson();
 
-    string nameOfUser;
+        List<User> users { get; set; } = new List<User>();
+
+        string nameOfUser;
 
 
-    protected override void OnInitialized()
+        protected override void OnInitialized()
     {
         users = UserRepository.GetUser();
         currentCourseName = CourseRepository.GetSingleCourseNameById(this.courseId.ToString());
@@ -79,7 +87,7 @@
     }
 
 
-    void AddAsync()
+    void AddNew()
     {
         if (newLesson is not null)
         {
@@ -87,6 +95,18 @@
             Snackbar.Add("Thêm thành công!", Severity.Success);
         }
         Navigation.NavigateTo($"/course/{newLesson.CourseId}", false);
+    }
 
+    async Task AddContent()
+    {
+        if (!string.IsNullOrWhiteSpace(await QuillHtml.GetText()))
+        {
+            newLesson.Content = await QuillHtml.GetHTML();
+            AddNew();
+        }
+        else
+        {
+            Snackbar.Add("Nội dung còn thiếu!", Severity.Warning);
+        }
     }
 }

@@ -16,6 +16,7 @@ namespace CodeLearn.Data
         public DbSet<Lesson> Lessons { get; set; }
         public DbSet<CourseType> CourseTypes { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<CourseRating> CourseRatings { get; set; }
 
         static ApplicationDBContext() => NpgsqlConnection.GlobalTypeMapper.MapEnum<CourseStatusEnum>();
 
@@ -49,6 +50,9 @@ namespace CodeLearn.Data
                 .HasForeignKey(h => h.CreatorId)
                 .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("fk_lesson_user");
+
+            modelBuilder.Entity<CourseRating>()
+                .HasKey(nameof(CourseRating.CourseId), nameof(CourseRating.UserId));
         }
     }
 }

@@ -30,12 +30,8 @@
 
 
         <MudItem>
-            <MudSelect T="Guid" Strict="true" Label="Thuộc loại khóa học" Required="true" @bind-Value="currentCourse.CourseTypeId">
-                @foreach (var item in courseTypes)
-                {
-                    <MudSelectItem @key="item" Value="item.Id">@item.Name</MudSelectItem>
-                }
-            </MudSelect>
+            <MudTextField Disabled="true" Margin="Margin.Dense" Variant="Variant.Outlined" Value="courseTypeName" 
+                          Label="Thuộc loại khóa học"></MudTextField>
         </MudItem>
         <br />
 
@@ -78,17 +74,22 @@
         </MudItem>
         <br />
 
-
         <MudItem>
-            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="currentCourse.Description"
-                          Label="Mô tả" Lines="10" Required="true"></MudTextField>
+            <MudText Typo="Typo.body1">Mô tả</MudText>
+            <BlazoredTextEditor @ref="QuillHtml" Placeholder="type something...">
+                <ToolbarContent>
+                    <BasicTextEditor></BasicTextEditor>
+                </ToolbarContent>
+                <EditorContent>
+                    @((MarkupString)currentCourse.Description)
+                </EditorContent>
+            </BlazoredTextEditor>
         </MudItem>
-        <br />
 
 
 
         <MudItem Class="text-center">
-            <MudButton Color="Color.Success" @onclick="UpdateCourse" Disabled="@(!formSuccess)">Update</MudButton>
+            <MudButton Color="Color.Success" @onclick="GetDescription" Disabled="@(!formSuccess)">Update</MudButton>
             <MudButton Color="Color.Dark">
                 <MudLink Color="Color.Dark" Underline="Underline.None" Href="admin/course-manager">Quay lại</MudLink>
             </MudButton>
@@ -103,16 +104,17 @@
 
     bool formSuccess { get; set; }
 
+    BlazoredTextEditor QuillHtml { get; set; }
+
     Course currentCourse { get; set; } = new Course();
 
-    private List<CourseType> courseTypes { get; set; } = new List<CourseType>();
+    string courseTypeName { get; set; }
 
     protected override void OnInitialized()
     {
-
-        courseTypes = CourseTypeRepository.GetAllCourseType();
         currentCourse = CourseRepository.GetSingleCourse(this.ID);
 
+        courseTypeName = CourseTypeRepository.GetSingleCourseTypeNameByID(currentCourse.CourseTypeId.ToString());
 
     }
 
@@ -121,6 +123,16 @@
         CourseRepository.UpdateCourse(currentCourse);
         Snackbar.Add("Chỉnh sửa thành công!", Severity.Success);
         Navigation.NavigateTo("/admin/course-manager");
+    }
+
+
+    async Task GetDescription()
+    {
+        if (!string.IsNullOrWhiteSpace(await QuillHtml.GetText()))
+        {
+            currentCourse.Description = await QuillHtml.GetHTML();
+            UpdateCourse();
+        }
     }
 
 

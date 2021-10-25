@@ -57,6 +57,7 @@ namespace CodeLearn
             services.AddScoped<ICourseTypeRepository, CourseTypeRepository>();
             services.AddScoped<ICourseRepository, CourseRepository>();
             services.AddScoped<ILessonRepository, LessonRepository>();
+            services.AddScoped<ICourseRatingRepository, CourseRatingRepository>();
             services.AddScoped<IdentityUser>();
         }
 

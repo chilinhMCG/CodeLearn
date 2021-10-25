@@ -76,17 +76,19 @@
         </MudItem>
         <br />
 
-
         <MudItem>
-            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="newCourse.Description"
-                          Label="Mô tả" Lines="10" Required="true"></MudTextField>
+            <MudText Typo="Typo.body1">Mô tả</MudText>
+            <BlazoredTextEditor @ref="QuillHtml">
+                <ToolbarContent>
+                    <BasicTextEditor></BasicTextEditor>
+                </ToolbarContent>
+                <EditorContent></EditorContent>
+            </BlazoredTextEditor>
         </MudItem>
         <br />
 
-
-
         <MudItem Class="text-center">
-            <MudButton Color="Color.Success" OnClick="_addCourse" Disabled="@(!formSuccess)">Thêm</MudButton>
+            <MudButton Color="Color.Success" OnClick="GetDescription" Disabled="@(!formSuccess)">Thêm</MudButton>
             <MudButton Color="Color.Dark">
                 <MudLink Color="Color.Dark" Underline="Underline.None" Href="admin/course-manager">Quay lại</MudLink>
             </MudButton>
@@ -96,7 +98,12 @@
 </MudPaper>
 
 
+@newCourse.Description
+
+
 @code {
+
+    BlazoredTextEditor QuillHtml { get; set; }
 
     bool formSuccess { get; set; }
 
@@ -119,6 +126,19 @@
             CourseRepository.AddCourse(newCourse);
             Snackbar.Add("Thêm thành công!", Severity.Success);
             Navigation.NavigateTo("/admin/course-manager");
+        }
+    }
+
+    async Task GetDescription()
+    {
+        if (!string.IsNullOrWhiteSpace(await QuillHtml.GetText()))
+        {
+            newCourse.Description = await QuillHtml.GetHTML();
+            _addCourse();
+        }
+        else
+        {
+            Snackbar.Add("Nội dung còn thiếu!", Severity.Warning);
         }
     }
 

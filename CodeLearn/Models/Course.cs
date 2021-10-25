@@ -22,12 +22,6 @@ namespace CodeLearn.Models
         [Column("created_at")]
         public DateTime CreatedAt { get; set; }
 
-        [Column("rating")]
-        public double TotalRating { get; set; }
-
-        [Column("rate_count")]
-        public int RateCount { get; set; }
-
         [Column("status")]
         public CourseStatusEnum Status { get; set; }
         [Column("course_type_id")]

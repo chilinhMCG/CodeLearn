@@ -12,11 +12,15 @@ namespace CodeLearn.Repositories.Interface
 
         CourseType GetSingleCourseType(string id);
 
+        string GetSingleCourseTypeNameByID(string id);
+
         void AddCourseType(CourseType courseType);
 
         void UpdateCourseType(CourseType courseType);
 
         void DeleteCourseType(CourseType courseType);
+
+
 
 
     }

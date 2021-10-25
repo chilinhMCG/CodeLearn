@@ -1,22 +1,40 @@
 ﻿@page "/course/{id}"
 @inject ILessonRepository LessonRepository
 @inject ICourseRepository CourseRepository
+@inject ICourseRatingRepository CourseRatingRepository
+@inject IUserRepository UserRepository
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 @inject NavigationManager Navigation
+@inject IHttpContextAccessor httpContextAccessor
 
 <MudPaper Class="d-flex justify-space-around p-4">
     <MudItem Style="float:left; width:20%">
         <MudText Typo="Typo.h4">@currentCourse.Name</MudText>
         <MudText Typo="Typo.subtitle1">
             @currentCourse.Author
-            @{ 
-                double ratingToShow = currentCourse.TotalRating / currentCourse.RateCount;
+            @* @{
+            double ratingToShow = 0;
+            if (currentCourse.RateCount != 0)
+            {
+                ratingToShow = currentCourse.TotalRating / currentCourse.RateCount;
             }
-            <MudRating @bind-SelectedValue="integerRating" @onclick="(() => UpdateRating(currentCourse, integerRating))" Size="Size.Small" />
-            <span>
-                @ratingToShow.ToString("#.#") (@currentCourse.RateCount)
-            </span>
+        }
+        <MudRating @bind-SelectedValue="integerRating" @onclick="(() => UpdateRating(currentCourse, integerRating))" Size="Size.Small" />
+        <span>
+            @ratingToShow.ToString("#.#") (@currentCourse.RateCount)
+        </span> --> *@
+            @if (!httpContextAccessor.HttpContext.User.Identity.IsAuthenticated)
+            {
+                <MudRating @bind-SelectedValue="averageRate" ReadOnly="true"
+                           Size="Size.Small"></MudRating>
+                <MudText Typo="Typo.body2" Class="font-italic">Vui lòng đăng nhập để vote!</MudText>
+            }
+            else
+            {
+                <MudRating @bind-SelectedValue="averageRate" Disabled="true"
+                           Size="Size.Small" @onclick="HandleCourseRating"></MudRating>
+            }
         </MudText>
 
     </MudItem>
@@ -78,24 +96,40 @@
 
 
 @code {
-    [Parameter]
-    public string Id { get; set; }
+        [Parameter]
+        public string Id { get; set; }
 
-    List<Course> courses { get; set; } = new List<Course>();
+        List<Course> courses { get; set; } = new List<Course>();
 
-    Course currentCourse { get; set; } = new Course();
+        Course currentCourse { get; set; } = new Course();
 
-    List<Lesson> lessons { get; set; } = new List<Lesson>();
+        List<Lesson> lessons { get; set; } = new List<Lesson>();
 
-    int integerRating = 0;
+        List<CourseRating> courseRatings { get; set; } = new List<CourseRating>();
+
+        int allCourseRating { get; set; }
+
+        int allCourseRateCount { get; set; }
+
+        int averageRate { get; set; }
+
+        double ratingToShow { get; set; }
 
     protected override void OnInitialized()
     {
         currentCourse = CourseRepository.GetSingleCourse(this.Id);
         lessons = LessonRepository.GetAllLessonByCourseID(this.Id);
-        if (currentCourse.RateCount != 0)
+        courseRatings = CourseRatingRepository.GetAllCourseRatingByCourseId(currentCourse.Id.ToString());
+
+        if (courseRatings.Count > 0)
         {
-            integerRating = (int)currentCourse.TotalRating / currentCourse.RateCount;
+            foreach (var item in courseRatings)
+            {
+                allCourseRating += item.TotalRating;
+                allCourseRateCount += item.RateCount;
+                averageRate = (int)allCourseRating / allCourseRateCount;
+                ratingToShow = allCourseRating / allCourseRateCount;
+            }
         }
 
     }
@@ -141,12 +175,14 @@
 
     }
 
-    void UpdateRating(Course course, int value)
+    void HandleCourseRating()
     {
-        CourseRepository.UpdateRating(course, integerRating);
-        Snackbar.Add("Vote thành công!", Severity.Success);
+        if (httpContextAccessor.HttpContext.User.Identity.IsAuthenticated == false)
+        {
+            Snackbar.Add("Vui lòng đăng nhập để vote!!", Severity.Warning);
 
-        integerRating = (int)course.TotalRating / course.RateCount;
+        }
+        
     }
 
 
