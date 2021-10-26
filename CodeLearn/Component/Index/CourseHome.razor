@@ -2,7 +2,6 @@
 @inject ILessonRepository LessonRepository
 @inject ICourseRepository CourseRepository
 @inject ICourseRatingRepository CourseRatingRepository
-@inject IUserRepository UserRepository
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 @inject NavigationManager Navigation
@@ -13,27 +12,22 @@
         <MudText Typo="Typo.h4">@currentCourse.Name</MudText>
         <MudText Typo="Typo.subtitle1">
             @currentCourse.Author
-            @* @{
-            double ratingToShow = 0;
-            if (currentCourse.RateCount != 0)
-            {
-                ratingToShow = currentCourse.TotalRating / currentCourse.RateCount;
-            }
-        }
-        <MudRating @bind-SelectedValue="integerRating" @onclick="(() => UpdateRating(currentCourse, integerRating))" Size="Size.Small" />
-        <span>
-            @ratingToShow.ToString("#.#") (@currentCourse.RateCount)
-        </span> --> *@
             @if (!httpContextAccessor.HttpContext.User.Identity.IsAuthenticated)
             {
                 <MudRating @bind-SelectedValue="averageRate" ReadOnly="true"
                            Size="Size.Small"></MudRating>
+                <span>
+                    @ratingToShow.ToString("#.##") (@allCourseRateCount)
+                </span>
                 <MudText Typo="Typo.body2" Class="font-italic">Vui lòng đăng nhập để vote!</MudText>
             }
             else
             {
-                <MudRating @bind-SelectedValue="averageRate" Disabled="true"
-                           Size="Size.Small" @onclick="HandleCourseRating"></MudRating>
+                <MudRating @bind-SelectedValue="averageRate"
+                           Size="Size.Small" @onclick="(() => HandleCourseRating(averageRate))"></MudRating>
+                <span>
+                    @ratingToShow.ToString("#.##") (@allCourseRateCount)
+                </span>
             }
         </MudText>
 
@@ -96,24 +90,27 @@
 
 
 @code {
-        [Parameter]
-        public string Id { get; set; }
+    [Parameter]
+    public string Id { get; set; }
 
-        List<Course> courses { get; set; } = new List<Course>();
+    [CascadingParameter]
+    Guid userId { get; set; }
 
-        Course currentCourse { get; set; } = new Course();
+    List<Course> courses { get; set; } = new List<Course>();
 
-        List<Lesson> lessons { get; set; } = new List<Lesson>();
+    Course currentCourse { get; set; } = new Course();
 
-        List<CourseRating> courseRatings { get; set; } = new List<CourseRating>();
+    List<Lesson> lessons { get; set; } = new List<Lesson>();
 
-        int allCourseRating { get; set; }
+    List<CourseRating> courseRatings { get; set; } = new List<CourseRating>();
 
-        int allCourseRateCount { get; set; }
+    int allCourseRating { get; set; } = 0;
 
-        int averageRate { get; set; }
+    int allCourseRateCount { get; set; } = 0;
 
-        double ratingToShow { get; set; }
+    int averageRate { get; set; } = 0;
+
+    double ratingToShow { get; set; } = 0;
 
     protected override void OnInitialized()
     {
@@ -175,15 +172,33 @@
 
     }
 
-    void HandleCourseRating()
+    void HandleCourseRating(int value)
     {
-        if (httpContextAccessor.HttpContext.User.Identity.IsAuthenticated == false)
+        if (value > 0)
         {
-            Snackbar.Add("Vui lòng đăng nhập để vote!!", Severity.Warning);
+            if (!courseRatings.Any(x => x.UserId == this.userId))
+            {
+                CourseRating newCourseRating = new CourseRating
+                {
+                    CourseId = currentCourse.Id,
+                    UserId = this.userId,
+                    TotalRating = value,
+                    RateCount = 1
+                };
+                CourseRatingRepository.CreateNewRating(newCourseRating);
+            }
+            else
+            {
+                CourseRating currentCourseRating = courseRatings.Where(x => x.UserId == this.userId).FirstOrDefault();
+                CourseRatingRepository.UpdateRating(currentCourseRating, value);
+            }
+            Snackbar.Add("Vote thành công!", Severity.Success);
+
 
         }
-        
+        Navigation.NavigateTo($"/course/{currentCourse.Id}", true); 
+    }
+
     }
 
 
-}

@@ -1,5 +1,8 @@
 ﻿@inject ICourseRepository CourseRepository
+@inject ICourseRatingRepository CourseRatingRepository
 @inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+@inject IHttpContextAccessor httpContextAccessor
 
 <MudItem @key="course">
     <MudLink Href="@("/course/" + course.Id.ToString())" Underline="Underline.None">
@@ -11,7 +14,7 @@
                 <MudText Typo="Typo.caption">@course.Author</MudText>
                 <!-- if length of description > 44 then just show 44 letters else show all-->
                 @if (!string.IsNullOrEmpty(course.Description))
-                 {
+                {
                     @if (course.Description.Length > 44)
                     {
                         <MudText Typo="Typo.body2">@((MarkupString)(course.Description.Substring(0, 44) + "..."))</MudText>
@@ -20,7 +23,7 @@
                     {
                         <MudText Typo="Typo.body2">@((MarkupString)course.Description)</MudText>
                     }
-                 }
+                }
                 <br />
 
 
@@ -31,40 +34,83 @@
             </MudCardActions>
         </MudCard>
     </MudLink>
-   <!-- @{
-        double ratingToShow = 0;
-        if (course.RateCount != 0)
-        {
-            ratingToShow = course.TotalRating / course.RateCount;
-        }
+    @if (!httpContextAccessor.HttpContext.User.Identity.IsAuthenticated)
+    {
+        <MudRating @bind-SelectedValue="averageRate" ReadOnly="true"
+                   Size="Size.Small"></MudRating>
+        <span>
+            @ratingToShow.ToString("#.##") (@allCourseRateCount)
+        </span>
+        <MudText Typo="Typo.body2" Class="font-italic">Vui lòng đăng nhập để vote!</MudText>
     }
-    <MudRating @bind-SelectedValue="integerRating" @onclick="(() => UpdateRating(course, integerRating))" Size="Size.Small" />
-    <span>
-        @ratingToShow.ToString("#.#") (@course.RateCount)
-    </span> -->
+    else
+    {
+        <MudRating @bind-SelectedValue="averageRate"
+                   Size="Size.Small" @onclick="(() => HandleCourseRating(averageRate))"></MudRating>
+        <span>
+            @ratingToShow.ToString("#.##") (@allCourseRateCount)
+        </span>
+    }
 
 </MudItem>
 
 @code {
 
-        [Parameter]
-        public Course course { get; set; } = new Course();
+    [Parameter]
+    public Course course { get; set; } = new Course();
 
-        int integerRating { get; set; } = 0;
+    [CascadingParameter]
+    Guid userId { get; set; }
 
-        protected override void OnInitialized()
+    List<CourseRating> courseRatings { get; set; } = new List<CourseRating>();
+
+    int allCourseRating { get; set; } = 0;
+
+    int allCourseRateCount { get; set; } = 0;
+
+    int averageRate { get; set; } = 0;
+
+    double ratingToShow { get; set; } = 0;
+
+    protected override void OnInitialized()
+    {
+        courseRatings = CourseRatingRepository.GetAllCourseRatingByCourseId(course.Id.ToString());
+        if (courseRatings.Count > 0)
         {
-            //if (course.RateCount != 0)
-            //{
-              //  integerRating = (int)course.TotalRating / course.RateCount;
-            //}
+            foreach (var item in courseRatings)
+            {
+                allCourseRating += item.TotalRating;
+                allCourseRateCount += item.RateCount;
+                averageRate = (int)allCourseRating / allCourseRateCount;
+                ratingToShow = allCourseRating / allCourseRateCount;
+            }
         }
+    }
 
-        void UpdateRating(Course course, int value)
+    void HandleCourseRating(int value)
+    {
+        if (value > 0)
         {
-            CourseRepository.UpdateRating(course, integerRating);
+            if (!courseRatings.Any(x => x.UserId == this.userId))
+            {
+                CourseRating newCourseRating = new CourseRating
+                {
+                    CourseId = course.Id,
+                    UserId = this.userId,
+                    TotalRating = value,
+                    RateCount = 1
+                };
+                CourseRatingRepository.CreateNewRating(newCourseRating);
+            }
+            else
+            {
+                CourseRating currentCourseRating = courseRatings.Where(x => x.UserId == this.userId).FirstOrDefault();
+                CourseRatingRepository.UpdateRating(currentCourseRating, value);
+            }
             Snackbar.Add("Vote thành công!", Severity.Success);
 
-            //integerRating = (int)course.TotalRating / course.RateCount;
+
         }
+        Navigation.NavigateTo("/", true);
+    }
 }

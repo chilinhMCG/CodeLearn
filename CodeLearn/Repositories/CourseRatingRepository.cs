@@ -18,13 +18,9 @@ namespace CodeLearn.Repositories
             this._applicationDbContext = applicationDbContext;
         }
 
-        public void CreateNewRating(CourseRating courseRating, int value)
+        public void CreateNewRating(CourseRating courseRating)
         {
             using var context = _applicationDbContext.CreateDbContext();
-            if (value > 0) { 
-                courseRating.TotalRating = value;
-                courseRating.RateCount = 1;
-            }
             context.CourseRatings.Add(courseRating);
             context.SaveChanges();
         }
@@ -50,7 +46,12 @@ namespace CodeLearn.Repositories
         public List<CourseRating> GetAllCourseRatingByCourseId(string courseId)
         {
             using var context = _applicationDbContext.CreateDbContext();
-            return context.CourseRatings.Where(x => x.CourseId.ToString() == courseId).ToList();
+            List<CourseRating> courseRatings = new List<CourseRating>();
+            if (context.CourseRatings.Count() > 0)
+            {
+                courseRatings = context.CourseRatings.Where(x => x.CourseId.ToString() == courseId).ToList();
+            }
+            return courseRatings;
         }
     }
 }

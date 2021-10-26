@@ -8,7 +8,7 @@ namespace CodeLearn.Repositories.Interface
 {
     public interface ICourseRatingRepository
     {
-        void CreateNewRating(CourseRating courseRating, int value);
+        void CreateNewRating(CourseRating courseRating);
 
         void UpdateRating(CourseRating courseRating, int value);
 

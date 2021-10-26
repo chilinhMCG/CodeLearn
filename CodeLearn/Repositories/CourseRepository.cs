@@ -61,13 +61,13 @@ namespace CodeLearn.Repositories
         public Course GetSingleCourse(string id)
         {
             using var context = _applicationDbContext.CreateDbContext();
-            return context.Courses.FirstOrDefault(x => x.Id.ToString() == id);
+            return context.Courses.Where(x => x.Id.ToString() == id).FirstOrDefault();
         }
 
         public string GetSingleCourseNameById(string id)
         {
             using var context = _applicationDbContext.CreateDbContext();
-            return context.Courses.FirstOrDefault(x => x.Id.ToString() == id).Name;
+            return context.Courses.Where(x => x.Id.ToString() == id).FirstOrDefault().Name;
         }
 
         public List<string> GetCoursesName()
