@@ -31,6 +31,7 @@ namespace CodeLearn.Repositories
             if (value > 0)
             {
                 courseRating.TotalRating = value;
+                
             }
             context.CourseRatings.Update(courseRating);
             context.SaveChanges();
