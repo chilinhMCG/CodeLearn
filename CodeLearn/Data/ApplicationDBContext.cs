@@ -12,10 +12,18 @@ namespace CodeLearn.Data
     {
         public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options) : base(options)
         { }
+
         public DbSet<Course> Courses { get; set; }
         public DbSet<CourseDetail> CourseDetails { get; set; }
         public DbSet<CourseType> CourseTypes { get; set; }
         public DbSet<User> Users { get; set; }
+
+
+        public DbSet<Post> Posts { get; set; }
+        public DbSet<PostRating> PostRatings { get; set; }
+        public DbSet<Comment> Comments { get; set; }
+        public DbSet<CommentStar> CommentStars { get; set; }
+
 
         static ApplicationDBContext() => NpgsqlConnection.GlobalTypeMapper.MapEnum<CourseStatusEnum>();
 
@@ -49,6 +57,12 @@ namespace CodeLearn.Data
                 .HasForeignKey(h => h.CreatorId)
                 .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("fk_coursedetial_user");
+
+            modelBuilder.Entity<CommentStar>()
+               .HasKey(cs => new { cs.UserId, cs.CommentId });
+
+            modelBuilder.Entity<PostRating>()
+                        .HasKey(pr => new { pr.UserId, pr.PostId });
         }
     }
 }

@@ -17,5 +17,22 @@ namespace CodeLearn.Models
         [Column("is_blocked")]
         public bool IsBlocked { get; set; }
         public ICollection<CourseDetail> CourseDetails { get; set; }
+
+        [Column("bio")]
+        public string Bio { get; set; }
+
+        [Column("date_joined")]
+        public DateTime DateJoined { get; set; }
+
+        [Column("profile_picture_path", TypeName = "varchar(260)")]
+        public string ProfilePicturePath { get; set; }
+
+        public List<Post> Posts { get; set; }
+
+        public List<Comment> Comments { get; set; }
+
+        public List<PostRating> PostRatings { get; set; }
+
+        public List<CommentStar> CommentStars { get; set; }
     }
 }
