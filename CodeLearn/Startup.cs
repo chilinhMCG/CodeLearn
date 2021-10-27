@@ -1,10 +1,12 @@
 using CodeLearn.Data;
 using CodeLearn.Repositories;
 using CodeLearn.Repositories.Interface;
+using CodeLearn.Seeders;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -49,17 +51,19 @@ namespace CodeLearn
             services.AddServerSideBlazor();
             services.AddSingleton<WeatherForecastService>();
 
+            services.AddScoped<IApplicationDbSeeder, ApplicationDbSeeder>();
             //Repository
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<ICourseTypeRepository, CourseTypeRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IApplicationDbSeeder seeder)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                seeder.SeedPostManagerData().Wait();
             }
             else
             {

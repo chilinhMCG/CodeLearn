@@ -14,13 +14,16 @@ namespace CodeLearn.Areas.Identity
     {
         public void Configure(IWebHostBuilder builder)
         {
-            builder.ConfigureServices((context, services) => {
+            builder.ConfigureServices((context, services) =>
+            {
                 services.AddDbContext<IdentityDbContext>(options =>
                     options.UseNpgsql(
                         context.Configuration.GetConnectionString("DefaultConnection")));
 
                 services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                    .AddEntityFrameworkStores<IdentityDbContext>();
+                        .AddRoles<IdentityRole>()
+                        .AddEntityFrameworkStores<IdentityDbContext>();
+
                 services.Configure<IdentityOptions>(options =>
                 {
                     // Password settings.
