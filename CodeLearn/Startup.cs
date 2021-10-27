@@ -55,15 +55,18 @@ namespace CodeLearn
             //Repository
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<ICourseTypeRepository, CourseTypeRepository>();
+            services.AddScoped<IPostRepository, PostRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IApplicationDbSeeder seeder)
         {
+            Task seederTask = null;
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                seeder.SeedPostManagerData().Wait();
+                seederTask = seeder.SeedPostManagerData();
             }
             else
             {
@@ -87,6 +90,8 @@ namespace CodeLearn
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
             });
+
+            seederTask?.Wait();
         }
     }
 }
