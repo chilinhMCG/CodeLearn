@@ -1,0 +1,300 @@
+﻿@page "/posts"
+@inject IPostRepository PostRepository;
+@inject IPostRatingRepository PostRatingRepository;
+@inject IUserRepository UserRepository;
+@using Data.OrderingQuery;
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="my-10">
+    <MudPaper Class="py-4 px-6">
+        <div class="d-flex justify-space-between">
+            <MudText Class="flex-grow-1" Typo="Typo.h4">Bài viết chia sẻ</MudText>
+            <MudLink Disabled="_loadPostsState != State.Complete" Href="@(_user == null ? "Identity/Account/Login" : "posts/create")">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary">
+                    <MudIcon Class="mr-1" Icon="@Icons.Material.Filled.PostAdd" /> Tạo bài viết mới
+                </MudButton>
+            </MudLink>
+        </div>
+        <div class="d-flex justify-end align-end w-75">
+            <MudSelect Class="mr-2" T="OrderingOption" Label="Tìm kiếm dựa trên" ToStringFunc="OrderingOptionToString"
+                       Value="_inputOrderingOption" ValueChanged="HandleOrderingOptionChanged">
+                <MudSelectItem Value="OrderingOption.Relevance" />
+                <MudSelectItem Value="OrderingOption.OverallRating" />
+                <MudSelectItem Value="OrderingOption.DateCreated" />
+                <MudSelectItem Value="OrderingOption.Comments" />
+                <MudSelectItem Value="OrderingOption.Ratings" />
+            </MudSelect>
+            <MudSelect Class="mr-2" T="OrderByOption" Label="Sắp xếp" @bind-Value="_inputOrderByOption"
+                       ToStringFunc="OrderByOptionToString" Disabled="_inputOrderingOption == OrderingOption.Relevance">
+                <MudSelectItem Value="OrderByOption.Descending" />
+                <MudSelectItem Value="OrderByOption.Ascending" />
+            </MudSelect>
+            <MudButton Variant="@Variant.Outlined" OnClick="HandleSearchAllPostsButtonClicked"
+                       Disabled="_inputOrderingOption == OrderingOption.Relevance">
+                Tìm tất cả bài viết
+            </MudButton>
+        </div>
+        <div class="d-flex align-center mt-3">
+            <MudTextField Class="mr-2" Immediate="true" @bind-Value="@_inputSearch" OnKeyPress="HandleKeyPressed"
+                          Label="Tìm kiếm" Variant="@Variant.Outlined" Margin="Margin.Dense"
+                          Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" />
+
+            <MudButton Class="px-12" Variant="@Variant.Outlined" Color="Color.Primary"
+                       Disabled="_searchButtonDisabled" OnClick="HandleSearchByKeywordsButtonClicked">
+                Tìm
+            </MudButton>
+        </div>
+
+
+        @if (_loadPostsState == State.Loading)
+        {
+            <MudProgressCircular Class="d-block mx-auto" Size="Size.Large" Color="Color.Primary" Indeterminate="true" />
+        }
+        else if (_postInfoPage.Items.Count == 0)
+        {
+            <MudText Class="pt-10 pb-4" Align="Align.Center">Không có kết quả, hãy thử dùng từ khóa khác.</MudText>
+        }
+        else
+        {
+            @for (int i = 0; i < _postInfoPage.Items.Count; i++)
+            {
+                int index = i;
+
+                <MudDivider Class="my-4" />
+                <AuthorizeView>
+                    <NotAuthorized>
+                        <PostHeader @key="_postInfoPage.Items[index].Id" @bind-PostInfo="_postInfoPage.Items[index]" />
+                    </NotAuthorized>
+
+                    <Authorized>
+                        <PostHeader @key="_postInfoPage.Items[index].Id" @bind-PostInfo="_postInfoPage.Items[index]"
+                                    @bind-PostRating="_userPostRatings[index]" />
+                    </Authorized>
+                </AuthorizeView>
+            }
+
+            @if (_postInfoPage.PageCount > 1)
+            {
+                <div Class="d-flex justify-center">
+                    <MudPagination Selected="_selectedPage" Count="_postInfoPage.PageCount" SelectedChanged="HandlePageChanged" />
+                </div>
+            }
+        }
+    </MudPaper>
+</MudContainer>
+
+@code {
+    [CascadingParameter]
+    private Task<User> _userTask { get; set; }
+
+    private static int _postInfoPerPage = 10;
+
+    private State _loadPostsState;
+
+    private Page<PostInfo> _postInfoPage;
+
+    private IList<PostRating> _userPostRatings;
+
+    private int _selectedPage;
+
+    private User _user = null;
+
+    private bool _searchButtonDisabled => string.IsNullOrWhiteSpace(_inputSearch);
+
+    private string _inputSearch;
+
+    private string _search;
+
+    private OrderingOption _inputOrderingOption;
+
+    private OrderingOption _orderingOption;
+
+    private OrderByOption _inputOrderByOption;
+
+    private OrderByOption _orderByOption;
+
+
+    private bool _prevSearchUsedKeywords;
+
+    private enum OrderingOption
+    {
+        Ratings, Comments, Relevance, OverallRating, DateCreated
+    }
+
+    private enum OrderByOption
+    {
+        Ascending, Descending
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _selectedPage = 1;
+        _inputOrderingOption = OrderingOption.Relevance;
+        _inputOrderByOption = OrderByOption.Descending;
+        _prevSearchUsedKeywords = false;
+        _inputSearch = "";
+        _search = "";
+
+        _loadPostsState = State.Loading;
+        _postInfoPage = await PostRepository.GetPagePostInfo(_postInfoPerPage, 1,
+            orderingQuery => orderingQuery.OrderByDescending(pi => pi.DateCreated));
+
+        _user = await _userTask;
+
+        if (_user != null)
+            _userPostRatings = await PostRatingRepository.GetRangeAsync(_user.Id, _postInfoPage.Items.Select(p => p.Id));
+
+        _loadPostsState = State.Complete;
+    }
+
+    private string OrderingOptionToString(OrderingOption option)
+    {
+        return option switch
+        {
+            OrderingOption.Relevance => "Độ phù hợp",
+            OrderingOption.OverallRating => "Đánh giá sao",
+            OrderingOption.DateCreated => "Ngày đăng",
+            OrderingOption.Ratings => "Số lượng đánh giá sao",
+            OrderingOption.Comments => "Số lượng bình luận",
+            _ => throw new ArgumentOutOfRangeException(),
+        };
+    }
+
+    private string OrderByOptionToString(OrderByOption option)
+    {
+        return (_inputOrderingOption, option) switch
+        {
+            (OrderingOption.Relevance, OrderByOption.Descending) => "Phù hợp nhất",
+
+            (OrderingOption.OverallRating, OrderByOption.Descending) => "Đánh giá cao nhất",
+            (OrderingOption.OverallRating, OrderByOption.Ascending) => "Đánh giá thấp nhất",
+
+            (OrderingOption.DateCreated, OrderByOption.Descending) => "Mới nhất",
+            (OrderingOption.DateCreated, OrderByOption.Ascending) => "Cũ nhất",
+
+            (_, OrderByOption.Descending) => "Nhiều nhất",
+            (_, OrderByOption.Ascending) => "Ít Nhất",
+
+            _ => throw new ArgumentOutOfRangeException(),
+        };
+    }
+
+    private void HandleOrderingOptionChanged(OrderingOption option)
+    {
+        _inputOrderingOption = option;
+
+        if (option == OrderingOption.Relevance)
+            _inputOrderByOption = OrderByOption.Descending;
+    }
+
+    private async Task HandlePageChanged(int selected)
+    {
+        _inputSearch = _search;
+        _inputOrderByOption = _orderByOption;
+        _inputOrderingOption = _orderingOption;
+
+        _selectedPage = selected;
+
+        if (_prevSearchUsedKeywords)
+            await SearchByKeywords(_selectedPage);
+
+        else
+            await SearchAllPosts(_selectedPage);
+
+        _userPostRatings = await PostRatingRepository.GetRangeAsync(_user.Id, _postInfoPage.Items.Select(p => p.Id));
+    }
+
+    private async Task HandleSearchByKeywordsButtonClicked()
+    {
+        _search = _inputSearch;
+        _orderingOption = _inputOrderingOption;
+        _orderByOption = _inputOrderByOption;
+        _prevSearchUsedKeywords = true;
+        await SearchByKeywords(1);
+    }
+
+    private async Task HandleSearchAllPostsButtonClicked()
+    {
+        _inputSearch = "";
+        _orderingOption = _inputOrderingOption;
+        _orderByOption = _inputOrderByOption;
+        _prevSearchUsedKeywords = false;
+        await SearchAllPosts(1);
+    }
+
+    private async Task SearchByKeywords(int pageNumber)
+    {
+        var keywords = StringUtils.RemoveDiacritics(_search.Trim()).Split();
+        _selectedPage = pageNumber;
+
+        _loadPostsState = State.Loading;
+
+        if (_inputOrderingOption == OrderingOption.Relevance)
+            _postInfoPage = await PostRepository.GetPagePostInfoByKeywords(_postInfoPerPage, pageNumber, keywords);
+
+        else
+            _postInfoPage = await PostRepository.GetPagePostInfoByKeywords(_postInfoPerPage, pageNumber, keywords, HandleDataOrdering);
+
+
+        if (_user != null)
+            _userPostRatings = await PostRatingRepository.GetRangeAsync(_user.Id, _postInfoPage.Items.Select(p => p.Id));
+
+        _loadPostsState = State.Complete;
+    }
+
+    private async Task SearchAllPosts(int pageNumber)
+    {
+        _loadPostsState = State.Loading;
+        _selectedPage = pageNumber;
+
+        if (_inputOrderingOption == OrderingOption.Relevance)
+            _postInfoPage = await PostRepository.GetPagePostInfo(_postInfoPerPage, pageNumber);
+
+        else
+            _postInfoPage = await PostRepository.GetPagePostInfo(_postInfoPerPage, pageNumber, HandleDataOrdering);
+
+        if (_user != null)
+            _userPostRatings = await PostRatingRepository.GetRangeAsync(_user.Id, _postInfoPage.Items.Select(p => p.Id));
+
+        _loadPostsState = State.Complete;
+    }
+
+    private async Task HandleKeyPressed(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter" && !_searchButtonDisabled)
+            await HandleSearchByKeywordsButtonClicked();
+    }
+
+    private OrderedOrderingQuery<PostInfo> HandleDataOrdering(OrderingQuery<PostInfo> orderingQuery)
+    {
+        var ordered = (_orderingOption, _orderByOption) switch
+        {
+            (OrderingOption.OverallRating, OrderByOption.Descending)
+                => orderingQuery.OrderByDescending(p => p.OverallRating),
+
+            (OrderingOption.OverallRating, OrderByOption.Ascending)
+                => orderingQuery.OrderBy(p => p.OverallRating),
+
+            (OrderingOption.DateCreated, OrderByOption.Descending)
+                => orderingQuery.OrderByDescending(p => p.DateCreated),
+
+            (OrderingOption.DateCreated, OrderByOption.Ascending)
+                => orderingQuery.OrderBy(p => p.DateCreated),
+
+            (OrderingOption.Ratings, OrderByOption.Descending)
+                => orderingQuery.OrderByDescending(p => p.RatingCount),
+
+            (OrderingOption.Ratings, OrderByOption.Ascending)
+                => orderingQuery.OrderBy(p => p.RatingCount),
+
+            (OrderingOption.Comments, OrderByOption.Descending)
+                => orderingQuery.OrderByDescending(p => p.CommentCount),
+
+            (OrderingOption.Comments, OrderByOption.Ascending)
+                => orderingQuery.OrderBy(p => p.CommentCount),
+
+            _ => throw new ArgumentOutOfRangeException(),
+        };
+
+        return ordered.ThenByDescending(p => p.DateCreated);
+    }
+}
