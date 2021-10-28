@@ -1,0 +1,43 @@
+﻿
+<div class="@Class">
+    @for (int i = 0; i < 5; i++)
+    {
+        <MudIcon Icon="@icons[i]" Style="@_starColorStyle" />
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string Class { get; set; } = "";
+
+    [Parameter]
+    public float Value { get; set; }
+
+    private static string _starColorStyle = $"color: {Colors.Yellow.Accent3}";
+
+    private float _rating;
+
+    private string[] icons = new string[5];
+
+    protected override void OnParametersSet()
+    {
+        _rating = MathF.Round(Value, 1);
+        UpdateStarAttributes();
+    }
+
+    private void UpdateStarAttributes()
+    {
+        for (int i = 0; i < 5; i++)
+        {
+            if (i + 1 <= _rating)
+                icons[i] = Icons.Material.Rounded.Star;
+
+            else if (i + 1 == (int)MathF.Round(_rating))
+                icons[i] = Icons.Material.Rounded.StarHalf;
+
+            else
+                icons[i] = Icons.Material.Rounded.StarBorder;
+
+        }
+    }
+}
