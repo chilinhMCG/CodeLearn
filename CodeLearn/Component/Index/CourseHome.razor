@@ -94,29 +94,29 @@
 
 
 @code {
-    [Parameter]
-    public string Id { get; set; }
+        [Parameter]
+        public string Id { get; set; }
 
-    [CascadingParameter]
-    Guid userId { get; set; }
+        [CascadingParameter]
+        Guid userId { get; set; }
 
-    List<Course> courses { get; set; } = new List<Course>();
+        List<Course> courses { get; set; } = new List<Course>();
 
-    Course currentCourse { get; set; } = new Course();
+        Course currentCourse { get; set; } = new Course();
 
-    List<Lesson> lessons { get; set; } = new List<Lesson>();
+        List<Lesson> lessons { get; set; } = new List<Lesson>();
 
-    List<CourseRating> courseRatings { get; set; } = new List<CourseRating>();
+        List<CourseRating> courseRatings { get; set; } = new List<CourseRating>();
 
-    CourseRating currentCourseRating { get; set; } = new CourseRating();
+        CourseRating currentCourseRating { get; set; } = new CourseRating();
 
-    int allCourseRating { get; set; } = 0;
+        int allCourseRating { get; set; } = 0;
 
-    int allCourseRateCount { get; set; } = 0;
+        int allCourseRateCount { get; set; } = 0;
 
-    int averageRate { get; set; } = 0;
+        int averageRate { get; set; } = 0;
 
-    double ratingToShow { get; set; } = 0;
+        double ratingToShow { get; set; } = 0;
 
     protected override void OnInitialized()
     {
@@ -130,9 +130,12 @@
 
         allCourseRateCount = CourseRatingRepository.GetTotalRateCountByCourseId(currentCourse.Id.ToString());
 
-        averageRate = allCourseRating / allCourseRateCount;
+        if (allCourseRateCount != 0)
+        {
+            averageRate = allCourseRating / allCourseRateCount;
 
-        ratingToShow = (double)allCourseRating / allCourseRateCount;
+            ratingToShow = (double)allCourseRating / allCourseRateCount;
+        }
 
 
         currentCourseRating = CourseRatingRepository.GetCourseRatingByUserAndCourseId(currentCourse.Id.ToString(), this.userId.ToString());
@@ -173,7 +176,7 @@
         if (!result.Cancelled)
         {
             LessonRepository.DeleteLesson(lesson);
-            Snackbar.Add("Xóa thành công", Severity.Success);
+            Snackbar.Add("Xó thành công", Severity.Success);
 
             await Task.Delay(1500);
             Navigation.NavigateTo($"course/{lesson.CourseId}", true);
@@ -212,6 +215,7 @@
         averageRate = allCourseRating / allCourseRateCount;
 
         ratingToShow = (double)allCourseRating / allCourseRateCount;
+
         StateHasChanged();
     }
 
@@ -223,16 +227,24 @@
 
             currentCourseRating = null;
 
-            Snackbar.Add("Xóa thành công!", Severity.Success);
+            Snackbar.Add("Hủy thành công!", Severity.Success);
 
             allCourseRating = CourseRatingRepository.GetTotalRatingByCourseId(currentCourse.Id.ToString());
 
             allCourseRateCount = CourseRatingRepository.GetTotalRateCountByCourseId(currentCourse.Id.ToString());
 
-            averageRate = allCourseRating / allCourseRateCount;
+            if (allCourseRateCount != 0)
+            {
 
-            ratingToShow = (double)allCourseRating / allCourseRateCount;
+                averageRate = allCourseRating / allCourseRateCount;
 
+                ratingToShow = (double)allCourseRating / allCourseRateCount;
+            }
+            else
+            {
+                averageRate = 0;
+                ratingToShow = 0;
+            }
             StateHasChanged();
 
 

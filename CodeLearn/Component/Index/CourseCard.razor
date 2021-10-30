@@ -60,23 +60,23 @@
 
 @code {
 
-    [Parameter]
-    public Course course { get; set; } = new Course();
+        [Parameter]
+        public Course course { get; set; } = new Course();
 
-    [CascadingParameter]
-    Guid userId { get; set; }
+        [CascadingParameter]
+        Guid userId { get; set; }
 
-    List<CourseRating> courseRatings { get; set; } = new List<CourseRating>();
+        List<CourseRating> courseRatings { get; set; } = new List<CourseRating>();
 
-    CourseRating currentCourseRating { get; set; } = new CourseRating();
+        CourseRating currentCourseRating { get; set; } = new CourseRating();
 
-    int allCourseRating { get; set; } = 0;
+        int allCourseRating { get; set; } = 0;
 
-    int allCourseRateCount { get; set; } = 0;
+        int allCourseRateCount { get; set; } = 0;
 
-    int averageRate { get; set; } = 0;
+        int averageRate { get; set; } = 0;
 
-    double ratingToShow { get; set; } = 0;
+        double ratingToShow { get; set; } = 0;
 
     protected override void OnInitialized()
     {
@@ -88,9 +88,13 @@
 
         allCourseRateCount = CourseRatingRepository.GetTotalRateCountByCourseId(course.Id.ToString());
 
-        averageRate = allCourseRating / allCourseRateCount;
+        if (allCourseRateCount != 0)
+        {
 
-        ratingToShow = (double)allCourseRating / allCourseRateCount;
+            averageRate = allCourseRating / allCourseRateCount;
+
+            ratingToShow = (double)allCourseRating / allCourseRateCount;
+        }
     }
 
     void HandleCourseRating(int value)
@@ -139,15 +143,24 @@
 
             currentCourseRating = null;
 
-            Snackbar.Add("Xóa thành công!", Severity.Success);
+            Snackbar.Add("Hủy thành công!", Severity.Success);
 
             allCourseRating = CourseRatingRepository.GetTotalRatingByCourseId(course.Id.ToString());
 
             allCourseRateCount = CourseRatingRepository.GetTotalRateCountByCourseId(course.Id.ToString());
 
-            averageRate = allCourseRating / allCourseRateCount;
+            if (allCourseRateCount != 0)
+            {
 
-            ratingToShow = (double)allCourseRating / allCourseRateCount;
+                averageRate = allCourseRating / allCourseRateCount;
+
+                ratingToShow = (double)allCourseRating / allCourseRateCount;
+            }
+            else
+            {
+                averageRate = 0;
+                ratingToShow = 0;
+            }
 
             StateHasChanged();
 
