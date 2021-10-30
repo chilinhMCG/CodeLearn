@@ -54,5 +54,44 @@ namespace CodeLearn.Repositories
             }
             return courseRatings;
         }
+
+        public CourseRating GetCourseRatingByUserAndCourseId(string courseId, string userId)
+        {
+            using var context = _applicationDbContext.CreateDbContext();
+            CourseRating current = context.CourseRatings
+                .Where(x => x.CourseId.ToString() == courseId && x.UserId.ToString() == userId)
+                .FirstOrDefault();
+            return current;
+        }
+
+        public int GetTotalRatingByCourseId(string courseId)
+        {
+            using var context = _applicationDbContext.CreateDbContext();
+            List<CourseRating> currentCourseRatings = context.CourseRatings.Where(x => x.CourseId.ToString() == courseId).ToList();
+            int total = 0;
+            if (currentCourseRatings.Count() > 0)
+            {
+                foreach (var item in currentCourseRatings)
+                {
+                    total += item.TotalRating;
+                }
+            }
+            return total;
+        }
+
+        public int GetTotalRateCountByCourseId(string courseId)
+        {
+            using var context = _applicationDbContext.CreateDbContext();
+            List<CourseRating> currentCourseRatings = context.CourseRatings.Where(x => x.CourseId.ToString() == courseId).ToList();
+            int total = 0;
+            if (currentCourseRatings.Count() > 0)
+            {
+                foreach (var item in currentCourseRatings)
+                {
+                    total += item.RateCount;
+                }
+            }
+            return total;
+        }
     }
 }

@@ -27,7 +27,7 @@
     @if (searchCourses.Any(x => x.CourseTypeId == item.Id && x.Status == CourseStatusEnum.Free))
     {
         <MudPaper @key="item" Class="p-4">
-            <MudText Typo="Typo.h5">@item.Name</MudText>
+            <MudText Typo="Typo.h5">@item.Name</MudText>    
             <br />
             <MudGrid>
                 @foreach (var course in searchCourses.Where(x => x.CourseTypeId == item.Id && x.Status == CourseStatusEnum.Free))

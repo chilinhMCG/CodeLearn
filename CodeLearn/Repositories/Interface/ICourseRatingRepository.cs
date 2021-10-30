@@ -15,5 +15,11 @@ namespace CodeLearn.Repositories.Interface
         void DeleteRating(CourseRating courseRating);
 
         List<CourseRating> GetAllCourseRatingByCourseId(string courseId);
+
+        CourseRating GetCourseRatingByUserAndCourseId(string courseId, string userId);
+
+        int GetTotalRatingByCourseId(string courseId);
+
+        int GetTotalRateCountByCourseId(string courseId);
     }
 }

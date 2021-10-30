@@ -28,6 +28,10 @@
                 <span>
                     @ratingToShow.ToString("#.##") (@allCourseRateCount)
                 </span>
+                @if (currentCourseRating != null)
+                 {                
+                    <MudLink Underline="Underline.None" @onclick="DeleteCourseRating">Hủy</MudLink>
+                 }
             }
         </MudText>
 
@@ -104,6 +108,8 @@
 
     List<CourseRating> courseRatings { get; set; } = new List<CourseRating>();
 
+    CourseRating currentCourseRating { get; set; } = new CourseRating();
+
     int allCourseRating { get; set; } = 0;
 
     int allCourseRateCount { get; set; } = 0;
@@ -115,19 +121,23 @@
     protected override void OnInitialized()
     {
         currentCourse = CourseRepository.GetSingleCourse(this.Id);
+
         lessons = LessonRepository.GetAllLessonByCourseID(this.Id);
+
         courseRatings = CourseRatingRepository.GetAllCourseRatingByCourseId(currentCourse.Id.ToString());
 
-        if (courseRatings.Count > 0)
-        {
-            foreach (var item in courseRatings)
-            {
-                allCourseRating += item.TotalRating;
-                allCourseRateCount += item.RateCount;
-                averageRate = (int)allCourseRating / allCourseRateCount;
-                ratingToShow = allCourseRating / allCourseRateCount;
-            }
-        }
+        allCourseRating = CourseRatingRepository.GetTotalRatingByCourseId(currentCourse.Id.ToString());
+
+        allCourseRateCount = CourseRatingRepository.GetTotalRateCountByCourseId(currentCourse.Id.ToString());
+
+        averageRate = allCourseRating / allCourseRateCount;
+
+        ratingToShow = (double)allCourseRating / allCourseRateCount;
+
+
+        currentCourseRating = CourseRatingRepository.GetCourseRatingByUserAndCourseId(currentCourse.Id.ToString(), this.userId.ToString());
+
+        Console.WriteLine("CourseHome - OnInitialized");
 
     }
 
@@ -174,30 +184,60 @@
 
     void HandleCourseRating(int value)
     {
-
         if (value > 0)
         {
-            if (!courseRatings.Any(x => x.UserId == this.userId))
+            if (currentCourseRating == null)
             {
-                CourseRating newCourseRating = new CourseRating
+                currentCourseRating = new CourseRating
                 {
                     CourseId = currentCourse.Id,
                     UserId = this.userId,
                     TotalRating = value,
                     RateCount = 1
                 };
-                CourseRatingRepository.CreateNewRating(newCourseRating);
+                CourseRatingRepository.CreateNewRating(currentCourseRating);
+
             }
             else
             {
-                CourseRating currentUserCourseRating = courseRatings.Where(x => x.UserId == this.userId).FirstOrDefault();
-                CourseRatingRepository.UpdateRating(currentUserCourseRating, value);
+                CourseRatingRepository.UpdateRating(currentCourseRating, value);
+                currentCourseRating.TotalRating = value;
             }
             Snackbar.Add("Vote thành công!", Severity.Success);
+        }
+        allCourseRating = CourseRatingRepository.GetTotalRatingByCourseId(currentCourse.Id.ToString());
+
+        allCourseRateCount = CourseRatingRepository.GetTotalRateCountByCourseId(currentCourse.Id.ToString());
+
+        averageRate = allCourseRating / allCourseRateCount;
+
+        ratingToShow = (double)allCourseRating / allCourseRateCount;
+        StateHasChanged();
+    }
+
+    void DeleteCourseRating()
+    {
+        if (currentCourseRating != null)
+        {
+            CourseRatingRepository.DeleteRating(currentCourseRating);
+
+            currentCourseRating = null;
+
+            Snackbar.Add("Xóa thành công!", Severity.Success);
+
+            allCourseRating = CourseRatingRepository.GetTotalRatingByCourseId(currentCourse.Id.ToString());
+
+            allCourseRateCount = CourseRatingRepository.GetTotalRateCountByCourseId(currentCourse.Id.ToString());
+
+            averageRate = allCourseRating / allCourseRateCount;
+
+            ratingToShow = (double)allCourseRating / allCourseRateCount;
+
+            StateHasChanged();
 
 
         }
-        Navigation.NavigateTo($"/course/{currentCourse.Id}", true);
+
     }
 
 }
