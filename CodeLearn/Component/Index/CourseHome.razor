@@ -10,12 +10,13 @@
 <MudPaper Class="d-flex justify-space-around p-4">
     <MudItem Style="float:left; width:20%">
         <MudText Typo="Typo.h4">@currentCourse.Name</MudText>
-        <MudText Typo="Typo.subtitle1">
-            @currentCourse.Author
+        <MudText Typo="Typo.body1">
+            @currentCourse.Author &ensp;
+
             @if (!httpContextAccessor.HttpContext.User.Identity.IsAuthenticated)
             {
                 <MudRating @bind-SelectedValue="averageRate" ReadOnly="true"
-                           Size="Size.Small"></MudRating>
+                            Size="Size.Small" Style="position:relative;bottom:2.5px;"></MudRating>
                 <span>
                     @ratingToShow.ToString("#.##") (@allCourseRateCount)
                 </span>
@@ -23,15 +24,15 @@
             }
             else
             {
-                <MudRating @bind-SelectedValue="averageRate"
-                           Size="Size.Small" @onclick="(() => HandleCourseRating(averageRate))"></MudRating>
+                <MudRating @bind-SelectedValue="averageRate" Style="position:relative;bottom:2.5px;"
+                            Size="Size.Small" @onclick="(() => HandleCourseRating(averageRate))"></MudRating>
                 <span>
                     @ratingToShow.ToString("#.##") (@allCourseRateCount)
                 </span>
                 @if (currentCourseRating != null)
-                 {                
+                {
                     <MudLink Underline="Underline.None" @onclick="DeleteCourseRating">Hủy</MudLink>
-                 }
+                }
             }
         </MudText>
 

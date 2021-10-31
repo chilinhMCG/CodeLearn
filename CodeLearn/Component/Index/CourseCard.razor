@@ -36,7 +36,7 @@
     </MudLink>
     @if (!httpContextAccessor.HttpContext.User.Identity.IsAuthenticated)
     {
-        <MudRating @bind-SelectedValue="averageRate" ReadOnly="true"
+        <MudRating @bind-SelectedValue="averageRate" ReadOnly="true" Style="position:relative;bottom:2.5px;"
                    Size="Size.Small"></MudRating>
         <span>
             @ratingToShow.ToString("#.##") (@allCourseRateCount)
@@ -45,7 +45,7 @@
     }
     else
     {
-        <MudRating @bind-SelectedValue="averageRate"
+        <MudRating @bind-SelectedValue="averageRate" Style="position:relative;bottom:2.5px;"
                    Size="Size.Small" @onclick="(() => HandleCourseRating(averageRate))"></MudRating>
         <span>
             @ratingToShow.ToString("#.##") (@allCourseRateCount)
@@ -60,23 +60,23 @@
 
 @code {
 
-        [Parameter]
-        public Course course { get; set; } = new Course();
+    [Parameter]
+    public Course course { get; set; } = new Course();
 
-        [CascadingParameter]
-        Guid userId { get; set; }
+    [CascadingParameter]
+    Guid userId { get; set; }
 
-        List<CourseRating> courseRatings { get; set; } = new List<CourseRating>();
+    List<CourseRating> courseRatings { get; set; } = new List<CourseRating>();
 
-        CourseRating currentCourseRating { get; set; } = new CourseRating();
+    CourseRating currentCourseRating { get; set; } = new CourseRating();
 
-        int allCourseRating { get; set; } = 0;
+    int allCourseRating { get; set; } = 0;
 
-        int allCourseRateCount { get; set; } = 0;
+    int allCourseRateCount { get; set; } = 0;
 
-        int averageRate { get; set; } = 0;
+    int averageRate { get; set; } = 0;
 
-        double ratingToShow { get; set; } = 0;
+    double ratingToShow { get; set; } = 0;
 
     protected override void OnInitialized()
     {
@@ -120,18 +120,19 @@
             }
 
             Snackbar.Add("Vote thành công!", Severity.Success);
-
-            allCourseRating = CourseRatingRepository.GetTotalRatingByCourseId(course.Id.ToString());
-
-            allCourseRateCount = CourseRatingRepository.GetTotalRateCountByCourseId(course.Id.ToString());
-
-            averageRate = allCourseRating / allCourseRateCount;
-
-            ratingToShow = (double)allCourseRating / allCourseRateCount;
-
-            StateHasChanged();
-
         }
+
+
+
+        allCourseRating = CourseRatingRepository.GetTotalRatingByCourseId(course.Id.ToString());
+
+        allCourseRateCount = CourseRatingRepository.GetTotalRateCountByCourseId(course.Id.ToString());
+
+        averageRate = allCourseRating / allCourseRateCount;
+
+        ratingToShow = (double)allCourseRating / allCourseRateCount;
+
+        StateHasChanged();
     }
 
 
