@@ -58,6 +58,14 @@ namespace CodeLearn.Repositories
             return context.Courses.OrderBy(x => x.Name).ToList();
         }
 
+        public List<Course> GetAllCourseWithSearchString(string searchString)
+        {
+            using var context = _applicationDbContext.CreateDbContext();
+            return context.Courses.Where(x => 
+                string.IsNullOrEmpty(searchString) || x.Name.ToLower().Contains(searchString.ToLower())).ToList();
+
+        }
+
         public Course GetSingleCourse(string id)
         {
             using var context = _applicationDbContext.CreateDbContext();
@@ -91,6 +99,8 @@ namespace CodeLearn.Repositories
             }
             return courseTypeId;
         }
+
+
 
         
     }
