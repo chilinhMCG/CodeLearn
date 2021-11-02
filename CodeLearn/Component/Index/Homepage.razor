@@ -24,13 +24,13 @@
 <br />
 @foreach (var item in courseTypes)
 {
-    @if (searchCourses.Any(x => x.CourseTypeId == item.Id && x.Status == CourseStatusEnum.Free))
+    @if (searchCourses.Any(x => x.CourseTypeId == item.Id))
     {
         <MudPaper @key="item" Class="p-4">
             <MudText Typo="Typo.h5">@item.Name</MudText>    
             <br />
             <MudGrid>
-                @foreach (var course in searchCourses.Where(x => x.CourseTypeId == item.Id && x.Status == CourseStatusEnum.Free))
+                @foreach (var course in searchCourses.Where(x => x.CourseTypeId == item.Id))
                  {
 
                     
@@ -57,7 +57,7 @@
     protected override void OnInitialized()
     {
         courseTypes = CourseTypeRepository.GetAllCourseType();
-        searchCourses = CourseRepository.GetAllCourse().Where(x =>
+        searchCourses = CourseRepository.GetAllFreeCourse().Where(x =>
             string.IsNullOrEmpty(searchString) || x.Name.ToLower().Contains(searchString.ToLower()));
     }
 

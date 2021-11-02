@@ -18,7 +18,7 @@ namespace CodeLearn.Repositories.Interface
 
         List<Course> GetAllCourse();
 
-        List<Course> GetAllCourseWithSearchString(string searchString);
+        List<Course> GetAllFreeCourse();
 
         void AddCourse(Course course);
 
