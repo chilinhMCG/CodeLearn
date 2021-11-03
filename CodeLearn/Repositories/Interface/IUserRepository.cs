@@ -12,5 +12,9 @@ namespace CodeLearn.Repositories.Interface
         User GetUserById(Guid id);
         void AddUser(User user);
         void UpdateUser(User user);
+
+        Task<User> GetUserByEmailAsync(string email);
+
+        Task<User> GetUserByIdAsync(Guid id);
     }
 }
