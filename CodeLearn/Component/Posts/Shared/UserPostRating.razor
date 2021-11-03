@@ -1,0 +1,57 @@
+﻿@inject IPostRatingRepository PostRatingRepository;
+
+<div class="d-inline">
+    <MudRating SelectedValue="@_value" Class="@Class" SelectedValueChanged="@HandleValueChanged"
+               FullIcon="@Icons.Material.Rounded.Star" EmptyIcon="@Icons.Material.Rounded.StarBorder" />
+</div>
+
+@code {
+    [Parameter]
+    public string Class { get; set; } = "";
+
+    [Parameter]
+    public PostRating PostRating { get; set; }
+
+    [Parameter]
+    public EventCallback<PostRating> PostRatingChanged { get; set; }
+
+    private int _value;
+
+    private bool _loading = false;
+
+    protected override void OnInitialized()
+    {
+        _value = PostRating.Value;
+    }
+
+    private async Task HandleValueChanged(int newValue)
+    {
+        if (_loading == true)
+            return;
+
+        _value = newValue;
+
+        _loading = true;
+
+        var newPostRating = new PostRating
+        {
+            PostId = PostRating.PostId,
+            UserId = PostRating.UserId,
+            Value = newValue,
+        };
+
+        if (PostRating.Value == 0)
+            await PostRatingRepository.AddAsync(newPostRating);
+
+        else if (newValue == 0)
+            await PostRatingRepository.RemoveAsync(PostRating);
+
+        else
+            await PostRatingRepository.UpdateAsync(newPostRating);
+
+
+        await PostRatingChanged.InvokeAsync(newPostRating);
+
+        _loading = false;
+    }
+}
