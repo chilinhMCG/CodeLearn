@@ -1,0 +1,284 @@
+﻿/**
+ * Taken from https://github.com/tinymce/tinymce-dist/blob/master/skins/content/default/content.css with modifications
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
+ */
+
+.tinymce-wrapper {
+    margin: 0rem;
+}
+
+.mce-content-body:hover:not(:focus) {
+  outline: var(--mud-palette-primary) solid 2px;
+}
+
+.mce-content-body:focus {
+  outline: var(--mud-palette-primary-lighten) solid 2px;
+}
+
+.content-wrapper,
+.mce-content-body {
+  font-size: var(--mud-typography-body1-size);
+  font-family: var(--mud-typography-body1-family);
+  line-height: var(--mud-typography-body1-lineheight);
+  letter-spacing: var(--mud-typography-body1-letterspacing);
+
+  table {
+    border-collapse: collapse;
+  }
+  /* Apply a default padding if legacy cellpadding attribute is missing */
+  table:not([cellpadding]) th,
+  table:not([cellpadding]) td {
+    padding: 0.4rem;
+  }
+  /* Set default table styles if a table has a positive border attribute
+   and no inline css */
+  table[border]:not([border="0"]):not([style*="border-width"]) th,
+  table[border]:not([border="0"]):not([style*="border-width"]) td {
+    border-width: 1px;
+  }
+  /* Set default table styles if a table has a positive border attribute
+   and no inline css */
+  table[border]:not([border="0"]):not([style*="border-style"]) th,
+  table[border]:not([border="0"]):not([style*="border-style"]) td {
+    border-style: solid;
+  }
+  /* Set default table styles if a table has a positive border attribute
+   and no inline css */
+  table[border]:not([border="0"]):not([style*="border-color"]) th,
+  table[border]:not([border="0"]):not([style*="border-color"]) td {
+    border-color: #ccc;
+  }
+
+  figure {
+    display: table;
+    margin: 1rem auto;
+  }
+
+  figure figcaption {
+    color: #999;
+    display: block;
+    margin-top: 0.25rem;
+    text-align: center;
+  }
+
+  hr {
+    border-color: #ccc;
+    border-style: solid;
+    border-width: 1px 0 0 0;
+  }
+
+  code {
+    background-color: #e8e8e8;
+    border-radius: 3px;
+    padding: 0.1rem 0.2rem;
+  }
+
+  .mce-content-body:not([dir="rtl"]) blockquote {
+    border-left: 2px solid #ccc;
+    margin-left: 1.5rem;
+    padding-left: 1rem;
+  }
+
+  .mce-content-body[dir="rtl"] blockquote {
+    border-right: 2px solid #ccc;
+    margin-right: 1.5rem;
+    padding-right: 1rem;
+  }
+
+  figure.image {
+    display: inline-block;
+    border: 1px solid gray;
+    margin: 0 2px 0 1px;
+    background: #f5f2f0;
+  }
+
+  figure.align-left {
+    float: left;
+  }
+
+  figure.align-right {
+    float: right;
+  }
+
+  figure.image img {
+    margin: 8px 8px 0 8px;
+  }
+
+  figure.image figcaption {
+    margin: 6px 8px 6px 8px;
+    text-align: center;
+  }
+  /*
+     * Taken from https://www.tiny.cloud/docs/general-configuration-guide/boilerplate-content-css/
+     * Alignment using classes rather than inline styles
+     * check out the "formats" option
+     */
+
+  img.align-left {
+    float: left;
+  }
+
+  img.align-right {
+    float: right;
+  }
+  /* Basic styles for Table of Contents plugin (toc) */
+  .mce-toc {
+    border: 1px solid gray;
+  }
+
+  .mce-toc h2 {
+    margin: 4px;
+  }
+
+  .mce-toc li {
+    list-style-type: none;
+  }
+  /*
+     *  Custom:
+     *  Override styles from other css files
+     */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-weight: bold;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+  }
+
+  h1 {
+    font-family: var(--mud-typography-h1-family);
+    line-height: var(--mud-typography-h1-lineheight);
+    letter-spacing: var(--mud-typography-h1-letterspacing);
+    font-size: 2em;
+    margin-block-start: 0.67em;
+    margin-block-end: 0.67em;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+  }
+
+  h2 {
+    font-family: var(--mud-typography-h2-family);
+    line-height: var(--mud-typography-h2-lineheight);
+    letter-spacing: var(--mud-typography-h2-letterspacing);
+    font-size: 1.5em;
+    margin-block-start: 0.83em;
+    margin-block-end: 0.83em;
+  }
+
+  h3 {
+    font-family: var(--mud-typography-h3-family);
+    line-height: var(--mud-typography-h3-lineheight);
+    letter-spacing: var(--mud-typography-h3-letterspacing);
+    font-size: 1.17em;
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+  }
+
+  h4 {
+    font-family: var(--mud-typography-h4-family);
+    line-height: var(--mud-typography-h4-lineheight);
+    letter-spacing: var(--mud-typography-h4-letterspacing);
+    font-size: 1em;
+    margin-block-start: 1.33em;
+    margin-block-end: 1.33em;
+  }
+
+  h5 {
+    font-family: var(--mud-typography-h5-family);
+    line-height: var(--mud-typography-h5-lineheight);
+    letter-spacing: var(--mud-typography-h5-letterspacing);
+    font-size: 0.83em;
+    margin-block-start: 1.67em;
+    margin-block-end: 1.67em;
+  }
+
+  h6 {
+    font-family: var(--mud-typography-h6-family);
+    line-height: var(--mud-typography-h6-lineheight);
+    letter-spacing: var(--mud-typography-h6-letterspacing);
+    font-size: 0.67em;
+    margin-block-start: 2.33em;
+    margin-block-end: 2.33em;
+  }
+
+  ul {
+    list-style: disc;
+    margin-left: 2rem;
+  }
+
+  ol {
+    list-style: decimal;
+    margin-left: 2rem;
+  }
+
+  a {
+    color: var(--mud-palette-primary);
+  }
+
+  code {
+    color: var(--mud-palette-text-primary);
+  }
+
+  blockquote {
+    border-left: 10px solid #ccc;
+    margin: 1.5em 10px;
+    padding: 0.5em 10px;
+    quotes: "\201C""\201D""\2018""\2019";
+  }
+
+  blockquote:before {
+    color: #ccc;
+    content: open-quote;
+    font-size: 4em;
+    line-height: 0.1em;
+    margin-right: 0.25em;
+    vertical-align: -0.4em;
+  }
+
+  blockquote p {
+    display: inline;
+  }
+
+  code[class="language-markup"],
+  pre[class="language-markup"] {
+    color: black;
+    background: none;
+    text-shadow: 0 1px white;
+    font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
+    font-size: 1em;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    word-wrap: normal;
+    line-height: 1.5;
+    -moz-tab-size: 4;
+    tab-size: 4;
+    -webkit-hyphens: none;
+    -ms-hyphens: none;
+    hyphens: none;
+  }
+
+  pre[class="language-markup"] {
+    padding: 1em;
+    margin: 0.5em 0;
+    overflow: auto;
+    background: #f5f2f0;
+  }
+
+  pre[class="language-markup"] code {
+    background-color: transparent;
+  }
+}
+
+/* Avoid inconsistent line spacing at the end of content*/
+.content-wrapper > *:last-child,
+.mce-content-body > *:last-child {
+  margin-bottom: 0;
+}

@@ -10,6 +10,9 @@
 *.userosscache
 *.sln.docstates
 
+#Generated css file
+CodeLearn/wwwroot/css/tinymce/tinymce_css_override.css
+
 # Migration
 /CodeLearn/Migrations
 # User-specific files (MonoDevelop/Xamarin Studio)
