@@ -39,7 +39,7 @@
             <MudCard>
                 <MudCardHeader Style="padding-bottom: 0px;">
                     <CardHeaderContent>
-                        <MudAvatar Color="Color.Info" Variant="Variant.Outlined">@GetUserNamebyID(_searchedDiscussion[i].UserId.Value)[0]</MudAvatar>
+                        <MudAvatar Color="Color.Info" Variant="Variant.Outlined">@_searchedDiscussion[i].User.Name[0]</MudAvatar>
                         <MudLink Typo="Typo.h5" Href="@("/DetailDiscussion/" + _searchedDiscussion[i].Id)" Color="Color.Dark">@_searchedDiscussion[i].Question</MudLink>
                     </CardHeaderContent>
                 </MudCardHeader>
@@ -50,7 +50,7 @@
                     &emsp;
                     Người đăng: <MudElement HtmlTag="a"
                                             Style="@($"color:{Colors.BlueGrey.Lighten2};  font-weight:bold;")">
-                        @GetUserNamebyID(_searchedDiscussion[i].UserId.Value)
+                        @_searchedDiscussion[i].User.Name
                     </MudElement>
                     &emsp;Ngày đăng: <MudElement HtmlTag="a"
                                                  Style="@($"color:{Colors.BlueGrey.Lighten2};  font-weight:bold;")">
@@ -83,7 +83,7 @@
     IList<Discussion> _discussions, _searchedDiscussion;
     protected override void OnInitialized()
     {
-        _discussions = DiscussionRepository.GetDiscussionPage(_pageSelected, _sizePage, _searchString).OrderByDescending(t => t.CreateAt).ToList();
+        _discussions = DiscussionRepository.GetDiscussionPage(_pageSelected, _sizePage, _searchString).ToList();
         _count = DiscussionRepository.GetPageNumbers(_sizePage, "");
         _searchedDiscussion = _discussions;
     }

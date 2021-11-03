@@ -3,6 +3,7 @@
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.AspNetCore.Mvc.RazorPages
 @using Blazored.TextEditor
+@using System 
 @inject IDiscussionRepository DiscussionRepository
 @inject IUserRepository UserRepository
 @inject ICommentRepository CommentRepository
@@ -98,31 +99,53 @@
                 </MudItem>
             </MudCardContent>
             @* Here for comment*@
-            <MudCardContent>
-                <MudText Style="border-bottom: 1px solid darkgray;" Color="Color.Info">@_comments.Count() comments</MudText>
-                @for (int count = 0; count < _comments.Count(); count++)
-                {
-                    int i = count;
-                    <MudGrid Style="margin: 13px 4px 0 0;">
-                        <MudAvatar Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Medium">@_userNameComments[i][0]</MudAvatar>
+        <MudCardContent>
+            <MudText Style="border-bottom: 1px solid darkgray;" Color="Color.Info">@_commentsCount comments</MudText>
+            @if(_virtualComments != null)
+            @foreach (var comment in _virtualComments)
+            {
+                string name = GetUserNamebyID(comment.UserId.Value);
+                <MudGrid Style="margin: 13px 4px 0 0;">
+                    <MudAvatar Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Medium">@name[0]</MudAvatar>
+                    &emsp;
+                    <MudItem Style="padding-top: 0;">
+                        <MudLink Href="#" Typo="Typo.subtitle1" Color="Color.Info">@name</MudLink>
                         &emsp;
-                        <MudItem Style="padding-top: 0;">
-                            <MudLink Href="#" Typo="Typo.subtitle1" Color="Color.Info">@_userNameComments[i]</MudLink>
-                            &emsp;
-                            <MudText Style="display:inline" Typo="Typo.subtitle1">
-                                @_comments[i].CreateAt
-                                @if (_comments[i].UserId.Value == _userId)
-                                {
-                                    <MudIconButton OnClick="() => OpenWarning(_comments[i])" Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Style="margin: 0 0 0 8px;"></MudIconButton>
-                                }
-                            </MudText>
-                        </MudItem>
-                        <MudText Style="margin-left: 65px; max-width: 85%;width: 100%; border-bottom: 1px solid darkgray">
-                            @((MarkupString)_comments[i].Content)
+                        <MudText Style="display:inline" Typo="Typo.subtitle1">
+                            @comment.CreateAt
+                            @if (comment.UserId.Value == _userId)
+                            {
+                                <MudIconButton OnClick="() => OpenWarning(comment)" Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Style="margin: 0 0 0 8px;"></MudIconButton>
+                            }
                         </MudText>
-                    </MudGrid>
-                }
-            </MudCardContent>
+                    </MudItem>
+                    <MudText Style="margin-left: 65px; max-width: 85%;width: 100%; border-bottom: 1px solid darkgray">
+                        @((MarkupString)comment.Content)
+                    </MudText>
+                </MudGrid>
+            }
+            @foreach (var comment in _comments)
+            {
+                <MudGrid Style="margin: 13px 4px 0 0;">
+                    <MudAvatar Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Medium">@comment.User.Name[0]</MudAvatar>
+                    &emsp;
+                    <MudItem Style="padding-top: 0;">
+                        <MudLink Href="#" Typo="Typo.subtitle1" Color="Color.Info">@comment.User.Name</MudLink>
+                        &emsp;
+                        <MudText Style="display:inline" Typo="Typo.subtitle1">
+                            @comment.CreateAt
+                            @if (comment.UserId.Value == _userId)
+                            {
+                                <MudIconButton OnClick="() => OpenWarning(comment)" Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Style="margin: 0 0 0 8px;"></MudIconButton>
+                            }
+                        </MudText>
+                    </MudItem>
+                    <MudText Style="margin-left: 65px; max-width: 85%;width: 100%; border-bottom: 1px solid darkgray">
+                        @((MarkupString)comment.Content)
+                    </MudText>
+                </MudGrid>
+            }
+        </MudCardContent>
             <MudDialog @bind-IsVisible="_commentVisible">
                 <TitleContent>
                     <MudText Typo="Typo.h6">
@@ -163,14 +186,15 @@
     private Task<AuthenticationState> authenticationStateTask { get; set; }
     [CascadingParameter(Name = "_userId")]
     private Guid _userId { get; set; }
+    private int _commentsCount = 0;
     private bool _discussionVisible, _commentVisible;
     private string _home;
     private Guid _discussionId = Guid.Empty;
     private Discussion _discussion;
     private User _user;
     private List<Comment> _comments;
-    private Comment _comment = new(), _commentDelete;
-    private List<string> _userNameComments = new List<string>();
+    private Comment _commentDelete;
+    private List<Comment> _virtualComments;
     BlazoredTextEditor QuillHtml;
     string QuillHTMLContent;
     protected override void OnInitialized()
@@ -178,27 +202,13 @@
         _discussionId = new Guid(PostId);
         _discussion = DiscussionRepository.GetDiscussionById(_discussionId);
         _user = UserRepository.GetUserById(_discussion.UserId.Value);
-        var alter = CommentRepository.GetAllCommentInPost(_discussion.Id);
-        _comments = alter.OrderByDescending(t => t.CreateAt).ToList();
-        foreach(var comment in _comments)
-        {
-            _userNameComments.Add(GetUserNamebyID(comment.UserId.Value));
-        }
+        _comments = CommentRepository.GetAllCommentInPost(_discussion.Id).OrderByDescending(t => t.CreateAt).ToList();
+        _commentsCount = _comments.Count();
     }
     private string GetUserNamebyID(Guid id)
     {
         var user = UserRepository.GetUserById(id);
         return user.Name;
-    }
-    private int GetNumberofCommentinList(Comment comment)
-    {
-        int count = 0;
-        foreach(var cm in _comments)
-        {
-            if (comment == cm) return count;
-            else count++;
-        }
-        return 100;
     }
     public async void GetHTML()
     {
@@ -213,7 +223,6 @@
     {
         QuillHTMLContent = string.Empty;
         await QuillHtml.LoadHTMLContent(QuillHTMLContent);
-        StateHasChanged();
     }
     private void Delete()
     {
@@ -225,24 +234,35 @@
     {
         DeleteComment(_commentDelete);
         _commentDelete = null;
+        _commentsCount--;
         CloseWarning();
     }
     public void AddComment()
     {
+        Comment _comment = new();
+        if (_virtualComments == null) _virtualComments = new();
         _comment.UserId = _userId;
         _comment.Content = QuillHTMLContent;
         _comment.DiscussionId = _discussion.Id;
         CommentRepository.AddComment(_comment);
-        _comments.Insert(0, _comment);
-        _userNameComments.Insert(0, GetUserNamebyID(_comment.UserId.Value));
+        _virtualComments.Insert(0, _comment);
         _comment = new();
+        _commentsCount++;
+        StateHasChanged();
         SetHTML();
     }
     private void DeleteComment(Comment comment)
     {
         CommentRepository.DeleteCommentbyObject(comment);
-        _userNameComments.Remove(_userNameComments[GetNumberofCommentinList(comment)]);
-        _comments.Remove(comment);
+        bool _containComment = _virtualComments.Any(s => s == comment);
+        if (_containComment == true)
+        {
+            _virtualComments.Remove(comment);
+        }
+        else
+        {
+            _comments.Remove(comment);
+        }
     }
     private void OpenWarning()
     {

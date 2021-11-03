@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace CodeLearn.Models
 {
-    public class Comment
+    public class Comment : ICloneable
     {
         public Comment()
         {
@@ -27,5 +27,14 @@ namespace CodeLearn.Models
         public Guid? DiscussionId { get; set; }
         public User User { get; set; }
         public Discussion Discussion { get; set; }
+        public object Clone()
+        {
+            return this.MemberwiseClone();
+        }
+        public object DeepCopy()
+        {
+            object other = (object)this.MemberwiseClone();
+            return other;
+        }
     }
 }

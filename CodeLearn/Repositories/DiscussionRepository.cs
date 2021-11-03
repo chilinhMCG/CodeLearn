@@ -32,31 +32,17 @@ namespace CodeLearn.Repositories
         }
         public List<Discussion> GetDiscussionPage(int pageNumbers, int pageSize, string search)
         {
+            string h = "h";
             using var context = _applicationDBContext.CreateDbContext();
-            List<Discussion> discussions = context.Discussions.ToList().Where(t => CheckContain(t, search)).OrderByDescending(t => t.CreateAt).Skip(pageSize * (pageNumbers - 1)).Take(pageSize).ToList();
+            List<Discussion> discussions = context.Discussions.Include(s => s.User).Where(t=>t.Question.Contains(search) || t.HashTag.Contains(search)).OrderByDescending(t => t.CreateAt).Skip(pageSize * (pageNumbers - 1)).Take(pageSize).ToList();
             return discussions;
         }
         public int GetPageNumbers(int sizePage, string search)
         {
             using var context = _applicationDBContext.CreateDbContext();
-            int count = context.Discussions.ToList().Where(t => CheckContain(t, search)).Count();
+            int count = context.Discussions.Where(t => t.Question.Contains(search) || t.HashTag.Contains(search)).Count();
             if (count % sizePage == 0) return (count / sizePage);
             else return (count / sizePage) + 1;
-        }
-        private bool CheckContain(Discussion discussion, string search)
-        {
-            if (discussion.Question.Contains(search) == true)
-            {
-                return true;
-            }
-            foreach (var n in discussion.HashTag.ToList())
-            {
-                if (n.Contains(search) == true)
-                {
-                    return true;
-                }
-            }
-            return false;
         }
         public async Task<List<User>> GetAllUser()
         {

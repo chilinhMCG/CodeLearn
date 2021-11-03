@@ -26,12 +26,7 @@ namespace CodeLearn.Repositories
         public List<Comment> GetAllCommentInPost(Guid postID)
         {
             using var context = _applicationDBContext.CreateDbContext();
-            IList<Comment> _comments = new List<Comment>();
-            IList<Comment> k = context.Comments.ToList();
-            foreach (var comment in k)
-            {
-                if (comment.DiscussionId == postID) _comments.Add(comment);
-            }
+            IList<Comment> _comments = context.Comments.Include(s => s.User).Where(t => t.DiscussionId == postID).ToList();
             return (List<Comment>)_comments;
         }
         public void DeleteAllCommentsInPost(Guid postID)
