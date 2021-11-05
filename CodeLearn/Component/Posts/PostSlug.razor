@@ -1,0 +1,238 @@
+﻿@page "/posts/{AuthorId}/{Slug}";
+@using Data.OrderingQuery;
+@inject IPostRepository PostRepository;
+@inject IPostRatingRepository PostRatingRepository;
+@inject ICommentRepository CommentRepository;
+@inject IUserRepository UserRepository;
+@inject ICommentStarRepository CommentStarRepository;
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-10">
+    <MudPaper Class="pa-6">
+        @if (_postState == State.Loading)
+        {
+            <MudProgressCircular Class="d-block mx-auto" Size="Size.Large" Color="Color.Primary" Indeterminate="true" />
+
+        }
+        else if (_postState == State.NotFound)
+        {
+            <MudText>Bài viết không tồn tại.</MudText>
+        }
+        else
+        {
+            <PostSection Post="_post" @bind-PostInfo="_postInfo" User="_user" />
+        }
+    </MudPaper>
+
+    @if (_postState == State.Complete)
+    {
+        <MudPaper Class="mt-4 pa-6">
+            <AuthorizeView>
+                <CommentBox Class="mb-3" SubmitButtonText="Bình luận" @bind-Content="_commentContent" OnSubmit="SubmitComment" />
+            </AuthorizeView>
+
+            @for (int i = 0; i < _newUserTopLevelCommentInfoList.Count; i++)
+            {
+                int index = i;
+
+                <CommentItem @key="_newUserTopLevelCommentInfoList[index].Comment.Id" User="_user" Post="_post"
+                             @bind-Starred="_newUserTopLevelCommentStarredList[index]" @bind-CommentInfo="_newUserTopLevelCommentInfoList[index]"
+                             OnCommentRemove="() => HandleNewUserTopLevelCommentRemoved(index)" />
+
+                <MudDivider Class="mt-4 mb-6" />
+            }
+
+            @if (_topLevelCommentInfoList.Count != 0)
+            {
+                @for (int i = 0; i < _topLevelCommentInfoList.Count; i++)
+                {
+                    int index = i;
+                    var commentInfo = _topLevelCommentInfoList[index];
+                    if (_newUserTopLevelCommentInfoList.FirstOrDefault(ci => ci.Comment.Id == commentInfo.Comment.Id) != null)
+                        continue;
+
+                    if (index != 0)
+                    {
+                        <MudDivider Class="mt-4 mb-6" />
+                    }
+                    <AuthorizeView>
+                        <Authorized>
+                            <CommentItem @key="commentInfo.Comment.Id" User="_user" Post="_post"
+                                         @bind-Starred="_userTopLevelCommentStarredList[index]" @bind-CommentInfo="_topLevelCommentInfoList[index]"
+                                         OnCommentRemove="() => HandleTopLevelCommentRemoved(index)" />
+                        </Authorized>
+
+                        <NotAuthorized>
+                            <CommentItem @key="commentInfo.Comment.Id" Post="_post"
+                                         @bind-CommentInfo="_topLevelCommentInfoList[index]" />
+                        </NotAuthorized>
+                    </AuthorizeView>
+                }
+
+                @if (_loadCommentsState == State.Complete && _topLevelCommentInfoPage.CurrentPage < _topLevelCommentInfoPage.PageCount)
+                {
+                    <MudButton Class="px-16 d-block mx-auto" Variant="Variant.Outlined" OnClick="LoadMoreTopLevelComments">
+                        Xem thêm bình luận
+                    </MudButton>
+                }
+
+                @if (_loadCommentsState == State.Loading)
+                {
+                    <MudProgressCircular Class="d-block mx-auto" Size="Size.Large" Color="Color.Primary" Indeterminate="true" />
+                }
+            }
+        </MudPaper>
+    }
+</MudContainer>
+
+@code {
+    [CascadingParameter]
+    private Task<User> _userTask { get; set; }
+
+    [Parameter]
+    public string AuthorId { get; set; }
+
+    [Parameter]
+    public string Slug { get; set; }
+
+    private static readonly int _commentPageSize = 15;
+
+    private State _postState = State.Loading;
+
+    private State _loadCommentsState = State.Loading;
+
+    private User _user;
+
+    private Post _post;
+
+    private PostInfo _postInfo;
+
+    private Page<CommentInfo> _topLevelCommentInfoPage;
+
+    private List<CommentInfo> _topLevelCommentInfoList;
+
+    private List<bool> _userTopLevelCommentStarredList;
+
+    /// <summary>
+    /// comment info list of user's submitted top level comments since page loaded
+    /// </summary>
+    private List<CommentInfo> _newUserTopLevelCommentInfoList;
+
+    /// <summary>
+    /// user starred states of user's submitted top level comment since page loaded
+    /// </summary>
+    private List<bool> _newUserTopLevelCommentStarredList;
+
+    private string _commentContent;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _postState = State.Loading;
+        _loadCommentsState = State.Loading;
+
+        _topLevelCommentInfoList = new List<CommentInfo>();
+        _userTopLevelCommentStarredList = new List<bool>();
+
+        _newUserTopLevelCommentInfoList = new List<CommentInfo>();
+        _newUserTopLevelCommentStarredList = new List<bool>();
+
+        _commentContent = "";
+
+        _post = await PostRepository.GetAsync(new Guid(AuthorId), Slug);
+
+        if (_post == null)
+        {
+            _postState = State.NotFound;
+            _loadCommentsState = State.NotFound;
+            return;
+        }
+
+        _postInfo = await PostRepository.GetPostInfoAsync(_post.Id);
+
+        _topLevelCommentInfoPage = await CommentRepository.GetPageTopLevelCommentInfoAsync(
+        _commentPageSize, 1, _post.Id, StarCountDescDateDesc);
+
+        _topLevelCommentInfoList.AddRange(_topLevelCommentInfoPage.Items);
+
+        _user = await _userTask;
+
+        if (_user != null)
+        {
+            var commentIds = _topLevelCommentInfoList.Select(ci => ci.Comment.Id);
+            var commentStars = await CommentStarRepository.GetRangeAsync(_user.Id, commentIds);
+            _userTopLevelCommentStarredList.AddRange(commentStars.Select(cs => cs == null ? false : true));
+        }
+
+        _postState = State.Complete;
+
+        _loadCommentsState = State.Complete;
+    }
+
+    private OrderedOrderingQuery<CommentInfo> StarCountDescDateDesc(OrderingQuery<CommentInfo> oq)
+    {
+        return oq.OrderByDescending(ci => ci.StarCount)
+                 .ThenByDescending(ci => ci.Comment.DateCreated);
+    }
+
+
+    private async Task LoadMoreTopLevelComments()
+    {
+        _loadCommentsState = State.Loading;
+
+        _topLevelCommentInfoPage = await CommentRepository.GetPageTopLevelCommentInfoAsync(
+            _commentPageSize, _topLevelCommentInfoPage.CurrentPage + 1, _post.Id, StarCountDescDateDesc);
+
+        _topLevelCommentInfoList.AddRange(_topLevelCommentInfoPage.Items);
+
+        if (_user != null)
+        {
+            var commentIds = _topLevelCommentInfoPage.Items.Select(ci => ci.Comment.Id);
+            var commentStars = await CommentStarRepository.GetRangeAsync(_user.Id, commentIds);
+            _userTopLevelCommentStarredList.AddRange(commentStars.Select(cs => cs == null ? false : true));
+        }
+
+        _loadCommentsState = State.Complete;
+    }
+
+    private async Task SubmitComment()
+    {
+        DateTime dateCreated = DateTime.Now;
+        var comment = new Comment
+        {
+            UserId = _user.Id,
+            ParentCommentId = null,
+            DateCreated = dateCreated,
+            DateLastEdited = dateCreated,
+            PostId = _post.Id,
+            Content = _commentContent,
+        };
+
+        await CommentRepository.AddAsync(comment);
+
+        _newUserTopLevelCommentInfoList.Insert(0, new CommentInfo
+        {
+            Comment = comment,
+            UserName = _user.Name,
+            ReplyCount = 0,
+            StarCount = 0,
+        });
+
+        _newUserTopLevelCommentStarredList.Insert(0, false);
+        _commentContent = "";
+        _postInfo.CommentCount++;
+    }
+
+    private async Task HandleTopLevelCommentRemoved(int index)
+    {
+        _topLevelCommentInfoList.RemoveAt(index);
+        _userTopLevelCommentStarredList.RemoveAt(index);
+        _postInfo = await PostRepository.GetPostInfoAsync(_post.Id);
+    }
+
+    private async Task HandleNewUserTopLevelCommentRemoved(int index)
+    {
+        _newUserTopLevelCommentInfoList.RemoveAt(index);
+        _newUserTopLevelCommentStarredList.RemoveAt(index);
+        _postInfo = await PostRepository.GetPostInfoAsync(_post.Id);
+    }
+}
+
