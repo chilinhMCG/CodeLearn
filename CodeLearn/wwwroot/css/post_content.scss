@@ -20,261 +20,261 @@
 
 .content-wrapper,
 .mce-content-body {
-  font-size: var(--mud-typography-body1-size);
-  font-family: var(--mud-typography-body1-family);
-  line-height: var(--mud-typography-body1-lineheight);
-  letter-spacing: var(--mud-typography-body1-letterspacing);
+    font-size: var(--mud-typography-body1-size);
+    font-family: var(--mud-typography-body1-family);
+    line-height: var(--mud-typography-body1-lineheight);
+    letter-spacing: var(--mud-typography-body1-letterspacing);
+    /* avoid float element outside of container */
+    overflow: hidden;
 
-  table {
-    border-collapse: collapse;
-  }
-  /* Apply a default padding if legacy cellpadding attribute is missing */
-  table:not([cellpadding]) th,
-  table:not([cellpadding]) td {
-    padding: 0.4rem;
-  }
-  /* Set default table styles if a table has a positive border attribute
+    table {
+        border-collapse: collapse;
+    }
+
+    table table {
+        margin: 0rem;
+    }
+    /* Apply a default padding if legacy cellpadding attribute is missing */
+    table:not([cellpadding]) th,
+    table:not([cellpadding]) td {
+        padding: 0.4rem;
+    }
+    /* Set default table styles if a table has a positive border attribute
    and no inline css */
-  table[border]:not([border="0"]):not([style*="border-width"]) th,
-  table[border]:not([border="0"]):not([style*="border-width"]) td {
-    border-width: 1px;
-  }
-  /* Set default table styles if a table has a positive border attribute
+    table[border]:not([border="0"]):not([style*="border-width"]) th,
+    table[border]:not([border="0"]):not([style*="border-width"]) td {
+        border-width: 1px;
+    }
+    /* Set default table styles if a table has a positive border attribute
    and no inline css */
-  table[border]:not([border="0"]):not([style*="border-style"]) th,
-  table[border]:not([border="0"]):not([style*="border-style"]) td {
-    border-style: solid;
-  }
-  /* Set default table styles if a table has a positive border attribute
+    table[border]:not([border="0"]):not([style*="border-style"]) th,
+    table[border]:not([border="0"]):not([style*="border-style"]) td {
+        border-style: solid;
+    }
+    /* Set default table styles if a table has a positive border attribute
    and no inline css */
-  table[border]:not([border="0"]):not([style*="border-color"]) th,
-  table[border]:not([border="0"]):not([style*="border-color"]) td {
-    border-color: #ccc;
-  }
+    table[border]:not([border="0"]):not([style*="border-color"]) th,
+    table[border]:not([border="0"]):not([style*="border-color"]) td {
+        border-color: #ccc;
+    }
 
-  figure {
-    display: table;
-    margin: 1rem auto;
-  }
+    figure {
+        display: table;
+        margin: 1rem auto;
+    }
 
-  figure figcaption {
-    color: #999;
-    display: block;
-    margin-top: 0.25rem;
-    text-align: center;
-  }
+    figure figcaption {
+        color: #999;
+        display: block;
+        margin-top: 0.25rem;
+        text-align: center;
+    }
 
-  hr {
-    border-color: #ccc;
-    border-style: solid;
-    border-width: 1px 0 0 0;
-  }
+    hr {
+        border-color: #ccc;
+        border-style: solid;
+        border-width: 1px 0 0 0;
+    }
 
-  code {
-    background-color: #e8e8e8;
-    border-radius: 3px;
-    padding: 0.1rem 0.2rem;
-  }
+    code {
+        background-color: #e8e8e8;
+        border-radius: 3px;
+        padding: 0.1rem 0.2rem;
+    }
 
-  .mce-content-body:not([dir="rtl"]) blockquote {
-    border-left: 2px solid #ccc;
-    margin-left: 1.5rem;
-    padding-left: 1rem;
-  }
+    .mce-content-body:not([dir="rtl"]) blockquote {
+        border-left: 2px solid #ccc;
+        margin-left: 1.5rem;
+        padding-left: 1rem;
+    }
 
-  .mce-content-body[dir="rtl"] blockquote {
-    border-right: 2px solid #ccc;
-    margin-right: 1.5rem;
-    padding-right: 1rem;
-  }
+    .mce-content-body[dir="rtl"] blockquote {
+        border-right: 2px solid #ccc;
+        margin-right: 1.5rem;
+        padding-right: 1rem;
+    }
 
-  figure.image {
-    display: inline-block;
-    border: 1px solid gray;
-    margin: 0 2px 0 1px;
-    background: #f5f2f0;
-  }
+    figure.image {
+        border: 1px solid gray;
+        text-align: center;
+        background: #f5f2f0;
+    }
 
-  figure.align-left {
-    float: left;
-  }
+    figure.align-left {
+        float: left;
+        margin-right: 1rem;
+    }
 
-  figure.align-right {
-    float: right;
-  }
+    figure.align-right {
+        float: right;
+        margin-left: 1rem;
+    }
 
-  figure.image img {
-    margin: 8px 8px 0 8px;
-  }
+    figure.image img {
+        margin: 8px 8px 0 8px !important;
+    }
 
-  figure.image figcaption {
-    margin: 6px 8px 6px 8px;
-    text-align: center;
-  }
-  /*
+    figure.image figcaption {
+        margin: 6px 8px 6px 8px;
+        text-align: center;
+    }
+
+    figure.image.align-center {
+        display: table;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    /*
      * Taken from https://www.tiny.cloud/docs/general-configuration-guide/boilerplate-content-css/
      * Alignment using classes rather than inline styles
      * check out the "formats" option
      */
 
-  img.align-left {
-    float: left;
-  }
+    img.align-left {
+        float: left;
+    }
 
-  img.align-right {
-    float: right;
-  }
-  /* Basic styles for Table of Contents plugin (toc) */
-  .mce-toc {
-    border: 1px solid gray;
-  }
+    img.align-right {
+        float: right;
+    }
+    /* Basic styles for Table of Contents plugin (toc) */
+    .mce-toc {
+        border: 1px solid gray;
+    }
 
-  .mce-toc h2 {
-    margin: 4px;
-  }
+    .mce-toc h2 {
+        margin: 4px;
+    }
 
-  .mce-toc li {
-    list-style-type: none;
-  }
-  /*
+    .mce-toc li {
+        list-style-type: none;
+    }
+    /*
      *  Custom:
      *  Override styles from other css files
      */
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    font-weight: bold;
-    margin-inline-start: 0px;
-    margin-inline-end: 0px;
-  }
+    img {
+        max-width: 100%;
+        margin-bottom: 1rem;
+    }
 
-  h1 {
-    font-family: var(--mud-typography-h1-family);
-    line-height: var(--mud-typography-h1-lineheight);
-    letter-spacing: var(--mud-typography-h1-letterspacing);
-    font-size: 2em;
-    margin-block-start: 0.67em;
-    margin-block-end: 0.67em;
-    margin-inline-start: 0px;
-    margin-inline-end: 0px;
-  }
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-weight: bold;
+        margin-inline-start: 0px;
+        margin-inline-end: 0px;
+    }
 
-  h2 {
-    font-family: var(--mud-typography-h2-family);
-    line-height: var(--mud-typography-h2-lineheight);
-    letter-spacing: var(--mud-typography-h2-letterspacing);
-    font-size: 1.5em;
-    margin-block-start: 0.83em;
-    margin-block-end: 0.83em;
-  }
+    h1 {
+        line-height: var(--mud-typography-h1-lineheight);
+        letter-spacing: var(--mud-typography-h1-letterspacing);
+        margin-block-start: 0.67em;
+    }
 
-  h3 {
-    font-family: var(--mud-typography-h3-family);
-    line-height: var(--mud-typography-h3-lineheight);
-    letter-spacing: var(--mud-typography-h3-letterspacing);
-    font-size: 1.17em;
-    margin-block-start: 1em;
-    margin-block-end: 1em;
-  }
+    h2 {
+        line-height: var(--mud-typography-h2-lineheight);
+        letter-spacing: var(--mud-typography-h2-letterspacing);
+        margin-block-start: 0.83em;
+    }
 
-  h4 {
-    font-family: var(--mud-typography-h4-family);
-    line-height: var(--mud-typography-h4-lineheight);
-    letter-spacing: var(--mud-typography-h4-letterspacing);
-    font-size: 1em;
-    margin-block-start: 1.33em;
-    margin-block-end: 1.33em;
-  }
+    h3 {
+        line-height: var(--mud-typography-h3-lineheight);
+        letter-spacing: var(--mud-typography-h3-letterspacing);
+        margin-block-start: 1em;
+    }
 
-  h5 {
-    font-family: var(--mud-typography-h5-family);
-    line-height: var(--mud-typography-h5-lineheight);
-    letter-spacing: var(--mud-typography-h5-letterspacing);
-    font-size: 0.83em;
-    margin-block-start: 1.67em;
-    margin-block-end: 1.67em;
-  }
+    h4 {
+        font-family: var(--mud-typography-h4-family);
+        line-height: var(--mud-typography-h4-lineheight);
+        letter-spacing: var(--mud-typography-h4-letterspacing);
+        margin-block-start: 1.33em;
+    }
 
-  h6 {
-    font-family: var(--mud-typography-h6-family);
-    line-height: var(--mud-typography-h6-lineheight);
-    letter-spacing: var(--mud-typography-h6-letterspacing);
-    font-size: 0.67em;
-    margin-block-start: 2.33em;
-    margin-block-end: 2.33em;
-  }
+    h5 {
+        font-family: var(--mud-typography-h5-family);
+        line-height: var(--mud-typography-h5-lineheight);
+        letter-spacing: var(--mud-typography-h5-letterspacing);
+        margin-block-start: 1.67em;
+    }
 
-  ul {
-    list-style: disc;
-    margin-left: 2rem;
-  }
+    h6 {
+        font-family: var(--mud-typography-h6-family);
+        line-height: var(--mud-typography-h6-lineheight);
+        letter-spacing: var(--mud-typography-h6-letterspacing);
+        margin-block-start: 2.33em;
+    }
 
-  ol {
-    list-style: decimal;
-    margin-left: 2rem;
-  }
+    ul {
+        list-style: disc;
+        margin-left: 2rem;
+    }
 
-  a {
-    color: var(--mud-palette-primary);
-  }
+    ol {
+        list-style: decimal;
+        margin-left: 2rem;
+    }
 
-  code {
-    color: var(--mud-palette-text-primary);
-  }
+    a {
+        color: var(--mud-palette-primary);
+    }
 
-  blockquote {
-    border-left: 10px solid #ccc;
-    margin: 1.5em 10px;
-    padding: 0.5em 10px;
-    quotes: "\201C""\201D""\2018""\2019";
-  }
+    code {
+        color: var(--mud-palette-text-primary);
+    }
 
-  blockquote:before {
-    color: #ccc;
-    content: open-quote;
-    font-size: 4em;
-    line-height: 0.1em;
-    margin-right: 0.25em;
-    vertical-align: -0.4em;
-  }
+    blockquote {
+        border-left: 10px solid #ccc;
+        margin: 1.5em 10px;
+        padding: 0.5em 10px;
+        quotes: "\201C""\201D""\2018""\2019";
+    }
 
-  blockquote p {
-    display: inline;
-  }
+    blockquote:before {
+        color: #ccc;
+        content: open-quote;
+        font-size: 4em;
+        line-height: 0.1em;
+        margin-right: 0.25em;
+        vertical-align: -0.4em;
+    }
 
-  code[class="language-markup"],
-  pre[class="language-markup"] {
-    color: black;
-    background: none;
-    text-shadow: 0 1px white;
-    font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
-    font-size: 1em;
-    text-align: left;
-    white-space: pre;
-    word-spacing: normal;
-    word-break: normal;
-    word-wrap: normal;
-    line-height: 1.5;
-    -moz-tab-size: 4;
-    tab-size: 4;
-    -webkit-hyphens: none;
-    -ms-hyphens: none;
-    hyphens: none;
-  }
+    blockquote p {
+        display: inline;
+    }
 
-  pre[class="language-markup"] {
-    padding: 1em;
-    margin: 0.5em 0;
-    overflow: auto;
-    background: #f5f2f0;
-  }
+    code[class="language-markup"],
+    pre[class="language-markup"] {
+        color: black;
+        background: none;
+        text-shadow: 0 1px white;
+        font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
+        font-size: 1em;
+        text-align: left;
+        white-space: pre;
+        word-spacing: normal;
+        word-break: normal;
+        word-wrap: normal;
+        line-height: 1.5;
+        tab-size: 4;
+        -webkit-hyphens: none;
+        -ms-hyphens: none;
+        hyphens: none;
+    }
 
-  pre[class="language-markup"] code {
-    background-color: transparent;
-  }
+    pre[class="language-markup"] {
+        padding: 1em;
+        margin: 0.5em 0;
+        overflow: auto;
+        background: #f5f2f0;
+    }
+
+    pre[class="language-markup"] code {
+        background-color: transparent;
+    }
 }
 
 /* Avoid inconsistent line spacing at the end of content*/
