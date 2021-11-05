@@ -6,8 +6,18 @@
  * For commercial licenses see https://www.tiny.cloud/
  */
 
+//Avoid editor to appear on top of page header
+.tox .tox-editor-header {
+    z-index: 0 !important;
+}
+
 .tinymce-wrapper {
-    margin: 0rem;
+    outline: var(--mud-palette-divider) solid 2px;
+}
+
+.mce-content-body {
+    padding: 1rem;
+    min-height: 500px;
 }
 
 .mce-content-body:hover:not(:focus) {
