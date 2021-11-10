@@ -57,6 +57,8 @@ namespace CodeLearn
             services.AddScoped<ICourseTypeRepository, CourseTypeRepository>();
 
             services.AddSingleton<IPostRepository, PostRepository>();
+            services.AddSingleton<IPostRatingRepository, PostRatingRepository>();
+            services.AddSingleton<ICommentRepository, CommentRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
