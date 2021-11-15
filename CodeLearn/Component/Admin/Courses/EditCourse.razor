@@ -1,0 +1,139 @@
+﻿@page "/admin/course/edit/{id}"
+@attribute [Authorize(Roles = "Admin")]
+@inject ICourseTypeRepository CourseTypeRepository
+@inject ICourseRepository CourseRepository
+@inject ISnackbar Snackbar
+@inject IWebHostEnvironment Environment
+@inject NavigationManager Navigation
+
+
+<MudPaper Class="p-4">
+    <MudItem>
+        <MudText Class="text-center" Color="Color.Success" Typo="Typo.h3">Chỉnh sửa khóa học</MudText>
+    </MudItem>
+</MudPaper>
+<br />
+<MudPaper Class="m-auto p-4">
+    <MudForm Model="currentCourse" @bind-IsValid="@formSuccess">
+        <MudItem>
+            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="currentCourse.Name"
+                          Label="Tên khóa học" Required="true"></MudTextField>
+        </MudItem>
+        <br />
+
+
+        <MudItem>
+            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="currentCourse.Author"
+                          Label="Tác giả" Required="true"></MudTextField>
+        </MudItem>
+        <br />
+
+
+        <MudItem>
+            <MudTextField Disabled="true" Margin="Margin.Dense" Variant="Variant.Outlined" Value="courseTypeName" 
+                          Label="Thuộc loại khóa học"></MudTextField>
+        </MudItem>
+        <br />
+
+
+
+
+
+        <MudItem>
+            <MudSelect T="string" Label="Thumbnail" Required="true" Strict="true" @bind-Value="currentCourse.Thumbnail">
+                @{
+                    DirectoryInfo directoryInfo = new DirectoryInfo("wwwroot/images/CoursesImg");
+                    FileInfo[] fileInfos = directoryInfo.GetFiles();
+                    foreach (var file in fileInfos)
+                    {
+                        <MudSelectItem @key="file" Value="@file.Name"></MudSelectItem>
+                    }
+                }
+            </MudSelect>
+            <br />
+            <MudLink Underline="Underline.None" Href="/admin/course-images-manager">Thêm hình ảnh mới vào kho</MudLink>
+            <br />
+            @if (currentCourse.Thumbnail != null)
+            {
+                <img src="@($"images/CoursesImg/{currentCourse.Thumbnail}")" width="250" height="210" alt="img" />
+            }
+        </MudItem>
+        <br />
+
+
+     
+
+
+        <MudItem>
+            <MudSelect T="CourseStatusEnum" Label="Status" Required="true" @bind-Value="currentCourse.Status">
+                <MudSelectItem Value="CourseStatusEnum.Free" />
+                <MudSelectItem Value="CourseStatusEnum.Block" />
+                <MudSelectItem Value="CourseStatusEnum.Updating" />
+                <MudSelectItem Value="CourseStatusEnum.Cancel" />
+            </MudSelect>
+        </MudItem>
+        <br />
+
+        <MudItem>
+            <MudText Typo="Typo.body1">Mô tả</MudText>
+            <BlazoredTextEditor @ref="QuillHtml" Placeholder="type something...">
+                <ToolbarContent>
+                    <BasicTextEditor></BasicTextEditor>
+                </ToolbarContent>
+                <EditorContent>
+                    @((MarkupString)currentCourse.Description)
+                </EditorContent>
+            </BlazoredTextEditor>
+        </MudItem>
+
+
+
+        <MudItem Class="text-center">
+            <MudButton Color="Color.Success" @onclick="GetDescription" Disabled="@(!formSuccess)">Update</MudButton>
+            <MudButton Color="Color.Dark">
+                <MudLink Color="Color.Dark" Underline="Underline.None" Href="admin/course-manager">Quay lại</MudLink>
+            </MudButton>
+        </MudItem>
+    </MudForm>
+</MudPaper>
+
+@code {
+
+    [Parameter]
+    public string ID { get; set; }
+
+    bool formSuccess { get; set; }
+
+    BlazoredTextEditor QuillHtml { get; set; }
+
+    Course currentCourse { get; set; } = new Course();
+
+    string courseTypeName { get; set; }
+
+    protected override void OnInitialized()
+    {
+        currentCourse = CourseRepository.GetSingleCourse(this.ID);
+
+        courseTypeName = CourseTypeRepository.GetSingleCourseTypeNameByID(currentCourse.CourseTypeId.ToString());
+
+    }
+
+    void UpdateCourse()
+    {
+        CourseRepository.UpdateCourse(currentCourse);
+        Snackbar.Add("Chỉnh sửa thành công!", Severity.Success);
+        Navigation.NavigateTo("/admin/course-manager");
+    }
+
+
+    async Task GetDescription()
+    {
+        if (!string.IsNullOrWhiteSpace(await QuillHtml.GetText()))
+        {
+            currentCourse.Description = await QuillHtml.GetHTML();
+            UpdateCourse();
+        }
+    }
+
+
+}

@@ -1,0 +1,112 @@
+﻿
+@page "/admin/lesson/add-new/{courseId:guid}" 
+@attribute [Authorize(Roles = "Admin")]
+@inject ICourseRepository CourseRepository
+@inject ILessonRepository LessonRepository  
+@inject ISnackbar Snackbar
+@inject IUserRepository UserRepository
+@inject NavigationManager Navigation
+@inject IdentityUser IdentityUser
+
+<MudPaper Class="p-4 mt-4">
+    <MudItem>
+        <MudText Class="text-center" Color="Color.Success" Typo="Typo.h3">Thêm bài học mới</MudText>
+    </MudItem>
+</MudPaper>
+<br />
+<MudPaper Class="m-auto p-4">
+    <MudForm Model="newLesson" @bind-IsValid="formSuccess">
+        <MudItem>
+            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="newLesson.Name"
+                          Label="Tên bài học" Required="true"></MudTextField>
+        </MudItem>
+        <br />
+        <MudItem>
+            <MudTextField Disabled="true" Margin="Margin.Dense" Variant="Variant.Outlined"
+                                Label="Thuộc khóa học" Value="currentCourseName"></MudTextField>
+
+        </MudItem>
+        <br />
+
+        <MudItem>
+            <MudTextField Disabled="true" Margin="Margin.Dense" Variant="Variant.Outlined"
+                          Label="Người tạo" Value="nameOfUser"></MudTextField>
+        </MudItem>
+        <br />
+
+        <MudItem>
+            <MudText Typo="Typo.body1">Nội dung khóa học</MudText>
+            <BlazoredTextEditor @ref="QuillHtml" Placeholder="type something...">
+                <ToolbarContent>
+                    <BasicTextEditor></BasicTextEditor>
+                </ToolbarContent>
+                <EditorContent></EditorContent>
+            </BlazoredTextEditor>
+        </MudItem>
+        <br />
+
+
+        <MudItem Class="text-center">
+            <MudButton Color="Color.Success" @onclick="AddContent" Disabled="@(!formSuccess)">Thêm</MudButton>
+            <MudButton Color="Color.Dark">
+                <MudLink Color="Color.Dark" Underline="Underline.None" Href="@($"course/{this.courseId}")">Quay lại</MudLink>
+            </MudButton>
+        </MudItem>
+    </MudForm>
+</MudPaper>
+
+
+@code {
+        [Parameter]
+        public Guid courseId { get; set; }
+
+        [CascadingParameter]
+        Guid userId { get; set; }
+
+        BlazoredTextEditor QuillHtml { get; set; }
+
+        bool formSuccess { get; set; }
+
+        string currentCourseName { get; set; }
+
+        Lesson newLesson { get; set; } = new Lesson();
+
+        List<User> users { get; set; } = new List<User>();
+
+        string nameOfUser;
+
+
+        protected override void OnInitialized()
+    {
+        users = UserRepository.GetUser();
+        currentCourseName = CourseRepository.GetSingleCourseNameById(this.courseId.ToString());
+        newLesson.CourseId = courseId;
+        newLesson.CreatorId = userId;
+        nameOfUser = UserRepository.GetNameOfUserById(userId.ToString());
+
+    }
+
+
+    void AddNew()
+    {
+        if (newLesson is not null)
+        {
+            LessonRepository.AddLesson(newLesson);
+            Snackbar.Add("Thêm thành công!", Severity.Success);
+        }
+        Navigation.NavigateTo($"/course/{newLesson.CourseId}", false);
+    }
+
+    async Task AddContent()
+    {
+        if (!string.IsNullOrWhiteSpace(await QuillHtml.GetText()))
+        {
+            newLesson.Content = await QuillHtml.GetHTML();
+            AddNew();
+        }
+        else
+        {
+            Snackbar.Add("Nội dung còn thiếu!", Severity.Warning);
+        }
+    }
+}

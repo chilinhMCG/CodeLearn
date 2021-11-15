@@ -1,0 +1,101 @@
+﻿@page "/lesson/{id}"
+@inject ICourseRepository CourseRepository
+@inject ILessonRepository LessonRepository
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+
+<MudPaper Class="p-4">
+    <MudItem>
+        <MudButton Link="@($"course/{currentLesson.CourseId}")" Color="Color.Success"
+                   Variant="Variant.Outlined" Class="text-decoration-none">Trở về khóa học</MudButton>
+    </MudItem>
+
+    <MudItem>
+        <MudText Typo="Typo.h4" Align="Align.Center">
+            <!-- ten bai hoc-->
+            @currentLesson.Name
+            <br />
+            <AuthorizeView Roles="Admin">
+                <MudButton Color="Color.Error" Variant="Variant.Outlined" @onclick="DeleteAsync">Xóa</MudButton>
+                <MudButton Color="Color.Dark" Class="text-decoration-none"
+                           Variant="Variant.Outlined" Link="@($"/admin/lesson/edit/{currentLesson.Id}")">Sửa</MudButton>
+            </AuthorizeView>
+        </MudText>
+    </MudItem>
+    <br />
+    <MudItem>
+        <MudText Align="Align.Justify">
+            @((MarkupString) currentLesson.Content)
+        </MudText>
+    </MudItem>
+
+    <MudItem Class="text-center m-3">
+        @{
+            var index = lessonWithCourseID.FindIndex(x => x.Id.ToString() == this.ID);
+        }
+        @if (lessonWithCourseID.Count > 1)
+        {
+            @if (index == 0)
+            {
+                <MudButton Color="Color.Success" Variant="Variant.Outlined" @onclick="(() => MoveToNextLesson(index))">Bài tiếp theo</MudButton>
+            }
+            else if (index == (lessonWithCourseID.Count - 1))
+            {
+                <MudButton Color="Color.Success" Variant="Variant.Outlined" @onclick="(() => MoveToPreviousLesson(index))">Bài trước</MudButton>
+            }
+            else
+            {
+                <MudButton Color="Color.Success" Variant="Variant.Outlined" @onclick="(() => MoveToPreviousLesson(index))">Bài trước</MudButton>
+                <MudButton Color="Color.Success" Variant="Variant.Outlined" @onclick="(() => MoveToNextLesson(index))">Bài tiếp theo</MudButton>
+            }
+        }
+    </MudItem>
+</MudPaper>
+
+@code {
+    [Parameter]
+    public string ID { get; set; }
+
+    Lesson currentLesson { get; set; } = new Lesson();
+
+    List<Lesson> lessonWithCourseID { get; set; } = new List<Lesson>();
+
+
+
+
+    protected override void OnInitialized()
+    {
+
+        currentLesson = LessonRepository.GetSingleLesson(this.ID);
+        lessonWithCourseID = LessonRepository.GetAllLessonByCourseID(currentLesson.CourseId.ToString());
+    }
+
+    async Task DeleteAsync()
+    {
+
+        var dialog = DialogService.Show<DeleteDialog>("Xóa bài học");
+        var result = await dialog.Result;
+
+        if (!result.Cancelled)
+        {
+            LessonRepository.DeleteLesson(currentLesson);
+            Snackbar.Add("Xóa thành công!", Severity.Success);
+            Navigation.NavigateTo($"/course/{currentLesson.CourseId}");
+
+        }
+
+    }
+
+    void MoveToNextLesson(int index)
+    {
+        Navigation.NavigateTo($"lesson/{lessonWithCourseID[index + 1].Id}", true);
+    }
+
+    void MoveToPreviousLesson(int index)
+    {
+        Navigation.NavigateTo($"lesson/{lessonWithCourseID[index - 1].Id}", true);
+    }
+
+
+}

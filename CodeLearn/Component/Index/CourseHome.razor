@@ -1,0 +1,258 @@
+﻿@page "/course/{id}"
+@inject ILessonRepository LessonRepository
+@inject ICourseRepository CourseRepository
+@inject ICourseRatingRepository CourseRatingRepository
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+@inject IHttpContextAccessor httpContextAccessor
+
+<MudPaper Class="d-flex justify-space-around p-4">
+    <MudItem Style="float:left; width:20%">
+        <MudText Typo="Typo.h4">@currentCourse.Name</MudText>
+        <MudText Typo="Typo.body1">
+            @currentCourse.Author &ensp;
+
+            @if (!httpContextAccessor.HttpContext.User.Identity.IsAuthenticated)
+            {
+                <MudRating @bind-SelectedValue="averageRate" ReadOnly="true"
+                            Size="Size.Small" Style="position:relative;bottom:2.5px;"></MudRating>
+                <span>
+                    @ratingToShow.ToString("#.##") (@allCourseRateCount)
+                </span>
+                <MudText Typo="Typo.body2" Class="font-italic">Vui lòng đăng nhập để vote!</MudText>
+            }
+            else
+            {
+                <MudRating @bind-SelectedValue="averageRate" Style="position:relative;bottom:2.5px;"
+                            Size="Size.Small" @onclick="(() => HandleCourseRating(averageRate))"></MudRating>
+                <span>
+                    @ratingToShow.ToString("#.##") (@allCourseRateCount)
+                </span>
+                @if (currentCourseRating != null)
+                {
+                    <MudLink Underline="Underline.None" @onclick="DeleteCourseRating">Hủy</MudLink>
+                }
+            }
+        </MudText>
+
+    </MudItem>
+
+    <MudDivider Vertical="true" FlexItem="true" Class="mr-3" />
+    <MudItem Style="float:right; width:80%">
+        <MudText Align="Align.Justify">
+            @((MarkupString) currentCourse.Description)
+        </MudText>
+    </MudItem>
+
+</MudPaper>
+<br>
+
+
+<!-- bai hoc -->
+<MudPaper Class="d-flex p-4 text-center">
+    
+    <MudItem> 
+        @foreach (var item in lessons)
+        {
+            <MudCard @key="item" Style="width:155px;margin:20px;" Class="float-left">
+                <MudCardContent>
+                    <MudLink Underline="Underline.None" Href="@($"/lesson/{item.Id}")">@item.Name</MudLink>
+                </MudCardContent>
+                <AuthorizeView Roles="Admin">
+                    <MudCardActions>
+                        <p>
+                            <MudButton OnClick="(() => DeleteLessonAsync(item))" Variant="Variant.Outlined" Color="Color.Error" 
+                                       Size="Size.Small">Xóa</MudButton>
+                            <MudButton Variant="Variant.Outlined" Color="Color.Default" Size="Size.Small"
+                                       Link="@($"/admin/lesson/edit/{item.Id}")" Class="text-decoration-none">Sửa</MudButton>
+                        </p>
+                    </MudCardActions>
+                </AuthorizeView>
+            </MudCard>
+        }
+    </MudItem>
+</MudPaper>
+<br />
+
+<AuthorizeView Roles="Admin">
+    <MudPaper Class="d-flex p-4 justify-space-around">
+        <MudItem>
+            <MudButton Color="Color.Error" Variant="Variant.Outlined" @onclick="DeleteCourseAsync">Xóa khóa học</MudButton>
+
+            <MudButton Color="Color.Default" Class="text-decoration-none"
+                       Variant="Variant.Outlined" Link="@($"/admin/course/edit/{currentCourse.Id}")">Chỉnh sửa khóa học</MudButton>
+
+            <MudButton Color="Color.Primary" Class="text-decoration-none"  
+                       Variant="Variant.Outlined" Link="@($"admin/lesson/add-new/{currentCourse.Id}")">Tạo bài học mới</MudButton>
+        </MudItem>
+    </MudPaper>
+</AuthorizeView>
+
+
+
+
+
+
+@code {
+        [Parameter]
+        public string Id { get; set; }
+
+        [CascadingParameter]
+        Guid userId { get; set; }
+
+        List<Course> courses { get; set; } = new List<Course>();
+
+        Course currentCourse { get; set; } = new Course();
+
+        List<Lesson> lessons { get; set; } = new List<Lesson>();
+
+        List<CourseRating> courseRatings { get; set; } = new List<CourseRating>();
+
+        CourseRating currentCourseRating { get; set; } = new CourseRating();
+
+        int allCourseRating { get; set; } = 0;
+
+        int allCourseRateCount { get; set; } = 0;
+
+        int averageRate { get; set; } = 0;
+
+        double ratingToShow { get; set; } = 0;
+
+    protected override void OnInitialized()
+    {
+        currentCourse = CourseRepository.GetSingleCourse(this.Id);
+
+        lessons = LessonRepository.GetAllLessonByCourseID(this.Id);
+
+        courseRatings = CourseRatingRepository.GetAllCourseRatingByCourseId(currentCourse.Id.ToString());
+
+        allCourseRating = CourseRatingRepository.GetTotalRatingByCourseId(currentCourse.Id.ToString());
+
+        allCourseRateCount = CourseRatingRepository.GetTotalRateCountByCourseId(currentCourse.Id.ToString());
+
+        if (allCourseRateCount != 0)
+        {
+            averageRate = allCourseRating / allCourseRateCount;
+
+            ratingToShow = (double)allCourseRating / allCourseRateCount;
+        }
+
+
+        currentCourseRating = CourseRatingRepository.GetCourseRatingByUserAndCourseId(currentCourse.Id.ToString(), this.userId.ToString());
+
+        Console.WriteLine("CourseHome - OnInitialized");
+
+    }
+
+
+    async Task DeleteCourseAsync()
+    {
+        var dialog = DialogService.Show<DeleteDialog>("Xóa khóa học");
+        var result = await dialog.Result;
+
+        if (!result.Cancelled)
+        {
+            if (lessons.Any(x => x.CourseId == currentCourse.Id))
+            {
+                Snackbar.Add("Bạn cần phải xóa tất cả bài học trong khóa này trước!", Severity.Warning);
+            }
+            else
+            {
+                CourseRepository.DeleteCourse(currentCourse);
+                Snackbar.Add("Xóa thành công", Severity.Success);
+                Navigation.NavigateTo("/");
+            }
+
+        }
+
+
+    }
+
+    async Task DeleteLessonAsync(Lesson lesson)
+    {
+        var dialog = DialogService.Show<DeleteDialog>("Xóa bài học");
+        var result = await dialog.Result;
+
+        if (!result.Cancelled)
+        {
+            LessonRepository.DeleteLesson(lesson);
+            Snackbar.Add("Xó thành công", Severity.Success);
+
+            await Task.Delay(1500);
+            Navigation.NavigateTo($"course/{lesson.CourseId}", true);
+        }
+
+
+    }
+
+    void HandleCourseRating(int value)
+    {
+        if (value > 0)
+        {
+            if (currentCourseRating == null)
+            {
+                currentCourseRating = new CourseRating
+                {
+                    CourseId = currentCourse.Id,
+                    UserId = this.userId,
+                    TotalRating = value,
+                    RateCount = 1
+                };
+                CourseRatingRepository.CreateNewRating(currentCourseRating);
+
+            }
+            else
+            {
+                CourseRatingRepository.UpdateRating(currentCourseRating, value);
+                currentCourseRating.TotalRating = value;
+            }
+            Snackbar.Add("Vote thành công!", Severity.Success);
+        }
+        allCourseRating = CourseRatingRepository.GetTotalRatingByCourseId(currentCourse.Id.ToString());
+
+        allCourseRateCount = CourseRatingRepository.GetTotalRateCountByCourseId(currentCourse.Id.ToString());
+
+        averageRate = allCourseRating / allCourseRateCount;
+
+        ratingToShow = (double)allCourseRating / allCourseRateCount;
+
+        StateHasChanged();
+    }
+
+    void DeleteCourseRating()
+    {
+        if (currentCourseRating != null)
+        {
+            CourseRatingRepository.DeleteRating(currentCourseRating);
+
+            currentCourseRating = null;
+
+            Snackbar.Add("Hủy thành công!", Severity.Success);
+
+            allCourseRating = CourseRatingRepository.GetTotalRatingByCourseId(currentCourse.Id.ToString());
+
+            allCourseRateCount = CourseRatingRepository.GetTotalRateCountByCourseId(currentCourse.Id.ToString());
+
+            if (allCourseRateCount != 0)
+            {
+
+                averageRate = allCourseRating / allCourseRateCount;
+
+                ratingToShow = (double)allCourseRating / allCourseRateCount;
+            }
+            else
+            {
+                averageRate = 0;
+                ratingToShow = 0;
+            }
+            StateHasChanged();
+
+
+        }
+
+    }
+
+}
+
+

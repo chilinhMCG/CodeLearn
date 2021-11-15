@@ -2,23 +2,35 @@
 @using Microsoft.AspNetCore.Http
 @inject IHttpContextAccessor httpContextAccessor
 @inherits LayoutComponentBase
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor httpContextAccsessor
 @inject IUserRepository UserRepository
 
-<MudThemeProvider Theme="MCGTheme" />
-<MudDialogProvider />
-<MudSnackbarProvider />
+    <MudThemeProvider Theme="MCGTheme" />
+    <MudDialogProvider />
+    <MudSnackbarProvider />
 
-<MudLayout>
-    <NavBar />
-    <MudMainContent>
-        <CascadingValue Value="@_userId" Name="_userId">
+    <MudLayout>
+        <NavBar />
+
+        <MudMainContent>
             <MudContainer MaxWidth="MaxWidth.Large">
-                @Body
+
+                <CascadingValue Value="_userId">
+                    @Body
+                </CascadingValue>
+
+                    <MudScrollToTop>
+                        <MudFab Color="Color.Success" Icon="@Icons.Filled.ArrowCircleUp" />
+                    </MudScrollToTop>
             </MudContainer>
-        </CascadingValue>
-    </MudMainContent>
-    <Footer />
-</MudLayout>
+
+        </MudMainContent>
+
+        <Footer />
+    </MudLayout>
+
 
 @code{
     Guid _userId;
@@ -30,9 +42,15 @@
             AppbarBackground = "#19B33D",
         }
     };
-    protected override async Task OnInitializedAsync()
+
+    Guid _userId;
+
+    protected override void OnInitialized()
     {
-        if(httpContextAccessor.HttpContext.User.Identity.IsAuthenticated == true)
-        _userId = UserRepository.GetUserByName(httpContextAccessor.HttpContext.User.Identity.Name).Id;
+        if (httpContextAccsessor.HttpContext.User.Identity.IsAuthenticated == true)
+        {
+            User user =  UserRepository.GetUserByName(httpContextAccsessor.HttpContext.User.Identity.Name);
+            _userId = user.Id;
+        }
     }
 }
