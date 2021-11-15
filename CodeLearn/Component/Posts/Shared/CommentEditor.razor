@@ -1,0 +1,79 @@
+﻿@using Microsoft.JSInterop;
+@using Microsoft.Extensions.Configuration;
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+@inject IConfiguration Configuration;
+
+@if (_state == State.Loading)
+{
+    <div class="d-flex justify-content-center @Class">
+        <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+    </div>
+}
+
+@if (_confObjName != null)
+{
+    <div hidden="@(_state != State.Complete)" class="@Class">
+        <textarea id="comment-editor-@_editorId"></textarea>
+        <Editor JsConfSrc="@_confObjName" ApiKey="@Configuration["TinyMceApiKey"]" @bind-Value="_boundContent" />
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string Class { get; set; } = "";
+
+    [Parameter]
+    public EventCallback<string> ContentChanged { get; set; }
+
+    [Parameter]
+    public string Content { get; set; }
+
+    private string _boundContent
+    {
+        get => Content;
+        set => ContentChanged.InvokeAsync(value);
+    }
+
+    private string _confObjName;
+
+    private string _editorId = Guid.NewGuid().ToString();
+
+    private State _state = State.Loading;
+
+    private DotNetObjectReference<CommentEditor> _objRef;
+
+    public async Task ClearTextBoxAsync()
+    {
+        await JS.InvokeVoidAsync($"setCommentEditorContentEmpty-{_editorId}");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _objRef = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("initCommentEditor", _objRef, _editorId);
+        }
+    }
+
+    [JSInvokable]
+    public void OnConfigObjReady(string name)
+    {
+        _confObjName = name;
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public void OnEditorLoaded()
+    {
+        _state = State.Complete;
+        StateHasChanged();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await JS.InvokeVoidAsync("disposeCommentEditor", _editorId);
+        _objRef?.Dispose();
+    }
+}
