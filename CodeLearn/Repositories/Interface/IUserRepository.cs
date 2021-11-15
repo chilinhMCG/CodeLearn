@@ -9,8 +9,17 @@ namespace CodeLearn.Repositories.Interface
     public interface IUserRepository
     {
         Task<List<User>> GetAllUser();
-        User GetUserById(Guid id);
+
+        List<User> GetUser();
+        User GetUserById(string id);
+
+        User GetUserByName(string name);
+
+        string GetNameOfUserById(string id);
+        
         void AddUser(User user);
         void UpdateUser(User user);
+
+        
     }
 }

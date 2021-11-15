@@ -14,8 +14,12 @@ namespace CodeLearn.Models
         public string Name { get; set; }
         [Column("email")]
         public string Email { get; set; }
+
+        [Column("role")]
+        public string Role { get; set; }
+
         [Column("is_blocked")]
         public bool IsBlocked { get; set; }
-        public ICollection<CourseDetail> CourseDetails { get; set; }
+        public ICollection<Lesson> Lessons { get; set; }
     }
 }

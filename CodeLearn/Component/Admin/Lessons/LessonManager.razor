@@ -1,0 +1,54 @@
+﻿@page "/admin/lesson-manager"
+@attribute [Authorize(Roles = "Admin")]
+@inject ILessonRepository LessonRepository
+@inject ICourseRepository CourseRepository
+
+
+
+<MudPaper Class="p-4">
+
+    <br />
+    <MudItem lg="12">
+        @foreach (var item in courses)
+        {
+            <MudTable @key="item" Hover="true" Items="lessons.Where(x => x.CourseId == item.Id)" Bordered="true" Dense="true">
+                <HeaderContent>
+                    <!-- khoa hoc -->
+                    <MudTh>
+                        <MudLink Underline="Underline.None" Href="@($"/course/{item.Id}")">@item.Name</MudLink>
+                    </MudTh>
+                    <MudTh></MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <!-- bai hoc -->
+                    <MudTd DataLabel="name" Class="text-center">
+                        <MudLink Color="Color.Success" Underline="Underline.None"
+                                 Href="@($"lesson/{context.Id}")">@context.Name</MudLink>
+                            </MudTd>
+                            <MudTd DataLabel="crud" Class="text-center">
+                                <MudButton Variant="Variant.Text">
+                                    <MudLink Underline="Underline.None" Href="@($"/admin/lesson/edit/{context.Id}")">Edit</MudLink>
+                                </MudButton>
+                            </MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                    <br />
+        }
+
+    </MudItem>
+</MudPaper>
+<br />
+
+
+@code {
+    List<Course> courses { get; set; } = new List<Course>();
+
+    List<Lesson> lessons { get; set; } = new List<Lesson>();
+
+    protected override void OnInitialized()
+    {
+        courses = CourseRepository.GetAllCourse();
+        lessons = LessonRepository.GetAllLesson();
+
+    }
+}

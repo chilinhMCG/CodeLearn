@@ -1,0 +1,72 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.Identity
+@inject ICourseTypeRepository CourseTypeRepository
+@inject ICourseRepository CourseRepository
+@inject ISnackbar Snackbar
+
+
+<MudPaper Class="p-4 pb-1 mt-4 ">
+    <MudText Typo="Typo.h4" Color="Color.Dark">
+        Tự học lập trình trực tuyến. Hãy bắt đầu với khoá học đầu tiên của bạn!
+    </MudText>
+    <MudGrid>
+        <MudItem lg="4">
+            <MudTextField @bind-Value="searchString"
+                          Label="Tìm kiếm khóa học"
+                          Variant="Variant.Outlined"
+                          Adornment="Adornment.End"
+                          AdornmentIcon="@Icons.Filled.Search"
+                          Margin="Margin.Dense"
+                          Class="my-4" />
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+<br />
+@foreach (var item in courseTypes)
+{
+    @if (searchCourses.Any(x => x.CourseTypeId == item.Id))
+    {
+        <MudPaper @key="item" Class="p-4">
+            <MudText Typo="Typo.h5">@item.Name</MudText>    
+            <br />
+            <MudGrid>
+                @foreach (var course in searchCourses.Where(x => x.CourseTypeId == item.Id))
+                 {
+
+                    
+                 <MudItem @key="course" lg="3">
+                     <CourseCard course="course"></CourseCard>
+                 </MudItem>
+                } 
+            </MudGrid>
+        </MudPaper>
+        <br>
+    }
+}
+@code {
+
+    string searchString = String.Empty;
+
+    List<CourseType> courseTypes { get; set; }
+
+    IEnumerable<Course> searchCourses { get; set; }
+
+    List<Course> searches { get; set; }
+
+
+    protected override void OnInitialized()
+    {
+        courseTypes = CourseTypeRepository.GetAllCourseType();
+        searchCourses = CourseRepository.GetAllFreeCourse().Where(x =>
+            string.IsNullOrEmpty(searchString) || x.Name.ToLower().Contains(searchString.ToLower()));
+    }
+
+    void UpdateRating(Course course, int value)
+    {
+        CourseRepository.UpdateRating(course, value);
+        Snackbar.Add("Vote thành công!", Severity.Success);
+
+        StateHasChanged();
+    }
+
+}
