@@ -51,7 +51,6 @@ namespace CodeLearn
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddHttpContextAccessor();
-            services.AddSingleton<WeatherForecastService>();
             services.AddServerSideBlazor();   
 
             //Repositories

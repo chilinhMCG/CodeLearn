@@ -48,9 +48,7 @@ namespace CodeLearn.Data
                .HasOne(h => h.User)
               .WithMany(t => t.Comments)
               .HasForeignKey(t => t.UserId);
-            modelBuilder.Entity<CourseDetail>(entity =>
-                entity.Property(p => p.CreatedAt)
-                      .HasDefaultValueSql("CURRENT_TIMESTAMP"));
+           
             modelBuilder.Entity<Lesson>(entity =>
                 entity.Property(p => p.CreatedAt)
                       .HasDefaultValueSql("CURRENT_TIMESTAMP"));

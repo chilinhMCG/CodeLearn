@@ -32,7 +32,6 @@ namespace CodeLearn.Repositories
         }
         public List<Discussion> GetDiscussionPage(int pageNumbers, int pageSize, string search)
         {
-            string h = "h";
             using var context = _applicationDBContext.CreateDbContext();
             List<Discussion> discussions = context.Discussions.Include(s => s.User).Where(t=>t.Question.Contains(search) || t.HashTag.Contains(search)).OrderByDescending(t => t.CreateAt).Skip(pageSize * (pageNumbers - 1)).Take(pageSize).ToList();
             return discussions;

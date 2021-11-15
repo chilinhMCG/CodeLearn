@@ -59,5 +59,11 @@ namespace CodeLearn.Repositories
             context.Update(user);
             context.SaveChanges();
         }
+
+        public User GetUserById(Guid id)
+        {
+            using var context = _applicationDBContext.CreateDbContext();
+            return context.Users.Where(h => h.Id == id).FirstOrDefault();
+        }
     }
 }

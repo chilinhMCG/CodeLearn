@@ -89,8 +89,7 @@
     </MudContainer>
 </MudPaper>
 @code {
-    [CascadingParameter(Name = "_userId")]
-    private Guid _userId { get; set; }
+    [CascadingParameter] public Guid _userId { get; set; }
     private MudForm _form;
     private BlazoredTextEditor QuillHtml;
     private bool _sucess;
@@ -119,13 +118,16 @@
         await QuillHtml.LoadHTMLContent(_discussion.Content);
         StateHasChanged();
     }
+
     private void Add()
     {
         if (_hashTags == null) _hashTags = new List<string>();
         _hashTags.Add(_searchString);
         _searchString = String.Empty;
     }
+
     private void Close(MudChip chip) => _hashTags.Remove(chip.Text);
+
     private void AddDiscussion()
     {
         _discussion.UserId = _userId;
