@@ -24,10 +24,36 @@ namespace CodeLearn.Repositories
             context.SaveChanges();
         }
 
+        public void UpdateCourseType(CourseType courseType)
+        {
+            using var context = _applicationDbContext.CreateDbContext();
+            context.CourseTypes.Update(courseType);
+            context.SaveChanges();
+        }
+
+        public void DeleteCourseType(CourseType courseType)
+        {
+            using var context = _applicationDbContext.CreateDbContext();
+            context.CourseTypes.Remove(courseType);
+            context.SaveChanges();
+        }
+
         public List<CourseType> GetAllCourseType()
         {
             using var context = _applicationDbContext.CreateDbContext();
-            return context.CourseTypes.ToList();
+            return context.CourseTypes.OrderBy(x => x.Name).ToList();
+        }
+
+        public CourseType GetSingleCourseType(string id)
+        {
+            using var context = _applicationDbContext.CreateDbContext();
+            return context.CourseTypes.FirstOrDefault(x => x.Id.ToString() == id);
+        }
+
+        public string GetSingleCourseTypeNameByID(string id)
+        {
+            using var context = _applicationDbContext.CreateDbContext();
+            return context.CourseTypes.Where(x => x.Id.ToString() == id).FirstOrDefault().Name;
         }
     }
 }

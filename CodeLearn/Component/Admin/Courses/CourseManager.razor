@@ -1,0 +1,56 @@
+﻿@page "/admin/course-manager"
+@attribute [Authorize(Roles = "Admin")]
+@inject ICourseTypeRepository CourseTypeRepository
+@inject ICourseRepository CourseRepository
+
+
+
+
+<MudPaper Class="p-4">
+
+    <MudItem>
+        <MudLink Href="/admin/course/add-new" Color="Color.Success" Typo="Typo.h5">Thêm khóa học mới</MudLink>
+    </MudItem>
+    <br />
+    <MudItem lg="12">
+        @foreach (var item in courseTypes)
+        {
+            <MudTable @key="item" Hover="true" Items="courses.Where(x => x.CourseTypeId == item.Id)" Bordered="true" Dense="true">
+                <HeaderContent>
+                    <!-- ten nhom khoa hoc -->
+                    <MudTh>@item.Name</MudTh>
+                    <MudTh></MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <!-- khoa hoc -->
+                    <MudTd DataLabel="name" Class="text-center">
+                        <MudLink Underline="Underline.None" Color="Color.Success"
+                                 Href="@($"/course/{context.Id}")">@context.Name (@context.Status)</MudLink>
+                            </MudTd>
+                            <MudTd DataLabel="crud" Class="text-center">
+                                <MudButton Variant="Variant.Text">
+                                    <MudLink Underline="Underline.None" Href="@($"/admin/course/edit/{context.Id}")">Edit</MudLink>
+                                </MudButton>
+                            </MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                    <br />
+                }
+
+    </MudItem>
+</MudPaper>
+<br />
+
+
+@code {
+
+    private List<Course> courses { get; set; }
+    private List<CourseType> courseTypes { get; set; }
+
+    protected override void OnInitialized()
+    {
+        courses = CourseRepository.GetAllCourse();
+        courseTypes = CourseTypeRepository.GetAllCourseType();
+
+    }
+}

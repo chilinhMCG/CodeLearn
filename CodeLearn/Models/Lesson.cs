@@ -6,10 +6,16 @@ using System.Threading.Tasks;
 
 namespace CodeLearn.Models
 {
-    public class CourseDetail
+    public class Lesson
     {
         [Column("id")]
         public Guid Id { get; set; }
+
+        [Column("name")]
+        public string Name { get; set; }
+
+        [Column("content")]
+        public string Content { get; set; }
         [Column("created_at")]
         public DateTime CreatedAt { get; set; }
         [Column("course_id")]

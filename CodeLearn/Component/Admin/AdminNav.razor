@@ -1,0 +1,19 @@
+﻿@page "/admin"
+@attribute [Authorize(Roles = "Admin")]
+
+        <MudPaper Width="300px" Class="m-auto"> 
+            <MudList Clickable="true">
+                <MudListItem Text="Nhóm khóa học" Href="/admin/course-type-manager" />
+                <MudListItem Text="Khóa học" Href="/admin/course-manager" />
+                <MudListItem Text="Bài học" Href="/admin/lesson-manager"></MudListItem>
+
+
+                <MudDivider></MudDivider>
+
+                <MudListItem Text="Kho hình ảnh" Href="/admin/course-images-manager"></MudListItem>
+
+                
+
+
+            </MudList>
+        </MudPaper>

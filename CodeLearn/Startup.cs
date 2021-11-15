@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -34,6 +36,8 @@ namespace CodeLearn
                 options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"), o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))
             );
 
+            
+            
             services.AddDistributedMemoryCache();
 
             services.AddSession(options =>
@@ -46,12 +50,15 @@ namespace CodeLearn
 
             services.AddMudServices();
             services.AddRazorPages();
-            services.AddServerSideBlazor();
-            services.AddSingleton<WeatherForecastService>();
+            services.AddServerSideBlazor();   
 
-            //Repository
+            //Repositories
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<ICourseTypeRepository, CourseTypeRepository>();
+            services.AddScoped<ICourseRepository, CourseRepository>();
+            services.AddScoped<ILessonRepository, LessonRepository>();
+            services.AddScoped<ICourseRatingRepository, CourseRatingRepository>();
+            services.AddScoped<IdentityUser>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -20,6 +20,7 @@ namespace CodeLearn.Areas.Identity
                         context.Configuration.GetConnectionString("DefaultConnection")));
 
                 services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+                    .AddRoles<IdentityRole>()
                     .AddEntityFrameworkStores<IdentityDbContext>();
                 services.Configure<IdentityOptions>(options =>
                 {

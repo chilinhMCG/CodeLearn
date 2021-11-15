@@ -1,18 +1,33 @@
 ﻿@inherits LayoutComponentBase
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor httpContextAccsessor
+@inject IUserRepository UserRepository
 
-<MudThemeProvider Theme="MCGTheme" />
-<MudDialogProvider />
-<MudSnackbarProvider />
+    <MudThemeProvider Theme="MCGTheme" />
+    <MudDialogProvider />
+    <MudSnackbarProvider />
 
-<MudLayout>
-    <NavBar />
-    <MudMainContent>
-        <MudContainer MaxWidth="MaxWidth.Large">
-            @Body
-        </MudContainer>
-    </MudMainContent>
-    <Footer />
-</MudLayout>
+    <MudLayout>
+        <NavBar />
+
+        <MudMainContent>
+            <MudContainer MaxWidth="MaxWidth.Large">
+
+                <CascadingValue Value="_userId">
+                    @Body
+                </CascadingValue>
+
+                    <MudScrollToTop>
+                        <MudFab Color="Color.Success" Icon="@Icons.Filled.ArrowCircleUp" />
+                    </MudScrollToTop>
+            </MudContainer>
+
+        </MudMainContent>
+
+        <Footer />
+    </MudLayout>
+
 
 @code{
     MudTheme MCGTheme = new()
@@ -23,4 +38,15 @@
             AppbarBackground = "#19B33D",
         }
     };
+
+    Guid _userId;
+
+    protected override void OnInitialized()
+    {
+        if (httpContextAccsessor.HttpContext.User.Identity.IsAuthenticated == true)
+        {
+            User user =  UserRepository.GetUserByName(httpContextAccsessor.HttpContext.User.Identity.Name);
+            _userId = user.Id;
+        }
+    }
 }
