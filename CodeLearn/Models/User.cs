@@ -18,12 +18,6 @@ namespace CodeLearn.Models
         public bool IsBlocked { get; set; }
         public ICollection<CourseDetail> CourseDetails { get; set; }
 
-        [Column("bio")]
-        public string Bio { get; set; }
-
-        [Column("date_joined")]
-        public DateTime DateJoined { get; set; }
-
         [Column("profile_picture_path", TypeName = "varchar(260)")]
         public string ProfilePicturePath { get; set; }
 

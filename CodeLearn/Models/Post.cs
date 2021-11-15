@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NpgsqlTypes;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -15,11 +16,12 @@ namespace CodeLearn.Models
         [Column("user_id")]
         public Guid UserId { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Bắt buộc phải có tiêu đề bài viết.")]
         [Column("title")]
+        [MaxLength(300, ErrorMessage = "Tiêu đề độ dài tối đa là 300 ký tự.")]
         public string Title { get; set; }
 
-        [Column("slug", TypeName = "varchar(100)")]
+        [Column("slug")]
         [Required]
         public string Slug { get; set; }
 
@@ -33,6 +35,16 @@ namespace CodeLearn.Models
         [Column("date_last_edited")]
         public DateTime DateLastEdited { get; set; }
 
+        [Column("unaccented_title")]
+        [MaxLength(300)]
+        public string UnaccentedTitle { get; set; }
+        
+        [Column("unaccented_content")]
+        public string UnaccentedContent { get; set; }
+
+        public NpgsqlTsVector TitleSearchVector { get; set; }
+
+        public NpgsqlTsVector ContentSearchVector { get; set; }
 
         public User User { get; set; }
 

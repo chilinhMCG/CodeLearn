@@ -76,9 +76,7 @@ namespace CodeLearn.Seeders
                 Id = Guid.Parse(identityUser1.Id),
                 Name = identityUser1.UserName,
                 Email = identityUser1.Email,
-                DateJoined = DateTime.ParseExact("2012-07-22", "yyyy-MM-dd", CultureInfo.InvariantCulture),
                 IsBlocked = false,
-                Bio = "seed user 1 bio, hello!",
             };
             context.Users.Add(user1);
 
@@ -87,9 +85,7 @@ namespace CodeLearn.Seeders
                 Id = Guid.Parse(identityUser2.Id),
                 Name = identityUser2.UserName,
                 Email = identityUser2.Email,
-                DateJoined = DateTime.ParseExact("2020-11-22", "yyyy-MM-dd", CultureInfo.InvariantCulture),
                 IsBlocked = false,
-                Bio = "seed user 2 bio, hi there!",
             };
             context.Users.Add(user2);
 
@@ -97,9 +93,7 @@ namespace CodeLearn.Seeders
             {
                 Name = identityAdmin.UserName,
                 Email = identityAdmin.Email,
-                DateJoined = DateTime.ParseExact("2009-09-09", "yyyy-MM-dd", CultureInfo.InvariantCulture),
                 IsBlocked = false,
-                Bio = "seed admin bio, get banned!",
             };
             context.Users.Add(admin);
 
@@ -108,7 +102,7 @@ namespace CodeLearn.Seeders
                 Id = Guid.Parse("72633b00-cdb2-47b7-810f-715562fcab52"),
                 UserId = Guid.Parse(identityUser1.Id),
                 Title = "Seed Post 1: Tiny MCE Basic Example",
-                Slug = "seed-post-tiny-mce-basic-example",
+                Slug = "seed-post-1-tiny-mce-basic-example",
                 Content = "<p><img style=\"display: block; margin-left: auto; margin-right: auto;\" title=\"Tiny Logo\" src=\"https://www.tiny.cloud/docs/images/logos/android-chrome-256x256.png\" alt=\"TinyMCE Logo\" width=\"128\" height=\"128\" /></p>\n<h2 style=\"text-align: center;\">Welcome to the TinyMCE editor demo!</h2>\n<h2>Got questions or need help?</h2>\n<ul>\n<li>Our <a href=\"https://www.tiny.cloud/docs/\">documentation</a> is a great resource for learning how to configure TinyMCE.</li>\n<li>Have a specific question? Try the <a href=\"https://stackoverflow.com/questions/tagged/tinymce\" target=\"_blank\" rel=\"noopener\"><code>tinymce</code> tag at Stack Overflow</a>.</li>\n<li>We also offer enterprise grade support as part of <a href=\"https://www.tiny.cloud/pricing\">TinyMCE premium plans</a>.</li>\n</ul>\n<h2>A simple table to play with</h2>\n<table style=\"border-collapse: collapse; width: 100%;\" border=\"1\">\n<thead>\n<tr>\n<th>Product</th>\n<th>Cost</th>\n<th>Really?</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>TinyMCE</td>\n<td>Free</td>\n<td>YES!</td>\n</tr>\n<tr>\n<td>Plupload</td>\n<td>Free</td>\n<td>YES!</td>\n</tr>\n</tbody>\n</table>\n<h2>Found a bug?</h2>\n<p>If you think you have found a bug please create an issue on the <a href=\"https://github.com/tinymce/tinymce/issues\">GitHub repo</a> to report it to the developers.</p>\n<h2>Finally ...</h2>\n<p>Don't forget to check out our other product <a href=\"http://www.plupload.com\" target=\"_blank\" rel=\"noopener\">Plupload</a>, your ultimate upload solution featuring HTML5 upload support.</p>\n<p>Thanks for supporting TinyMCE! We hope it helps you and your users create great content.<br />All the best from the TinyMCE team.</p>",
                 DateCreated = DateTime.ParseExact("2013-01-01", "yyyy-MM-dd", CultureInfo.InvariantCulture),
                 DateLastEdited = DateTime.ParseExact("2013-01-01", "yyyy-MM-dd", CultureInfo.InvariantCulture),
@@ -120,7 +114,7 @@ namespace CodeLearn.Seeders
                 Id = Guid.Parse("e5954cec-dbc3-4d0b-b85a-5f4a253ff48b"),
                 UserId = Guid.Parse(identityUser2.Id),
                 Title = "Seed Post 2: Tiny MCE Basic Example",
-                Slug = "seed-post-tiny-mce-basic-example",
+                Slug = "seed-post-2-tiny-mce-basic-example",
                 Content = "<p><img style=\"display: block; margin-left: auto; margin-right: auto;\" title=\"Tiny Logo\" src=\"https://www.tiny.cloud/images/illustrations/spot/tiny/illustration-spot-tiny-editor.svg\" alt =\"TinyMCE Logo\" width=\"128\" height=\"128\" /></p>\n<h2 style=\"text-align: center;\">Welcome to the TinyMCE editor demo!</h2>\n<h2>Got questions or need help?</h2>\n<ul>\n<li>Our <a href=\"https://www.tiny.cloud/docs/\">documentation</a> is a great resource for learning how to configure TinyMCE.</li>\n<li>Have a specific question? Try the <a href=\"https://stackoverflow.com/questions/tagged/tinymce\" target=\"_blank\" rel=\"noopener\"><code>tinymce</code> tag at Stack Overflow</a>.</li>\n<li>We also offer enterprise grade support as part of <a href=\"https://www.tiny.cloud/pricing\">TinyMCE premium plans</a>.</li>\n</ul>\n<h2>A simple table to play with</h2>\n<table style=\"border-collapse: collapse; width: 100%;\" border=\"1\">\n<thead>\n<tr>\n<th>Product</th>\n<th>Cost</th>\n<th>Really?</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>TinyMCE</td>\n<td>Free</td>\n<td>YES!</td>\n</tr>\n<tr>\n<td>Plupload</td>\n<td>Free</td>\n<td>YES!</td>\n</tr>\n</tbody>\n</table>\n<h2>Found a bug?</h2>\n<p>If you think you have found a bug please create an issue on the <a href=\"https://github.com/tinymce/tinymce/issues\">GitHub repo</a> to report it to the developers.</p>\n<h2>Finally ...</h2>\n<p>Don't forget to check out our other product <a href=\"http://www.plupload.com\" target=\"_blank\" rel=\"noopener\">Plupload</a>, your ultimate upload solution featuring HTML5 upload support.</p>\n<p>Thanks for supporting TinyMCE! We hope it helps you and your users create great content.<br />All the best from the TinyMCE team.</p>",
                 DateCreated = DateTime.ParseExact("2021-12-01", "yyyy-MM-dd", CultureInfo.InvariantCulture),
                 DateLastEdited = DateTime.ParseExact("2021-12-02", "yyyy-MM-dd", CultureInfo.InvariantCulture),

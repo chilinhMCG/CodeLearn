@@ -29,10 +29,11 @@ namespace CodeLearn.Models
         [Column("date_last_edited")]
         public DateTime DateLastEdited { get; set; }
 
-
         public Post Post { get; set; }
 
         public Comment ParentComment { get; set; }
+
+        public List<Comment> Replies { get; set; }
 
         public User User { get; set; }
     }

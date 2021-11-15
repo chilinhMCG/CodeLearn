@@ -15,9 +15,9 @@ namespace CodeLearn.Models
         [Column("post_id")]
         public Guid PostId { get; set; }
 
-        [Column("value")]
+        [Column("value", TypeName = "smallint")]
         [Range(minimum: 1, maximum: 5)]
-        public short Value { get; set; }
+        public int Value { get; set; }
 
         public User User { get; set; }
 

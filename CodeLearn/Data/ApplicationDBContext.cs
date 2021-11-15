@@ -58,11 +58,32 @@ namespace CodeLearn.Data
                 .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("fk_coursedetial_user");
 
-            modelBuilder.Entity<CommentStar>()
-               .HasKey(cs => new { cs.UserId, cs.CommentId });
-
             modelBuilder.Entity<PostRating>()
                         .HasKey(pr => new { pr.UserId, pr.PostId });
+
+            modelBuilder.Entity<Post>()
+                        .HasGeneratedTsVectorColumn(
+                            p => p.TitleSearchVector,
+                            "english",
+                            p => new { p.UnaccentedTitle })
+                        .HasIndex(p => p.TitleSearchVector)
+                        .HasMethod("GIN");
+
+            modelBuilder.Entity<Post>()
+                        .HasGeneratedTsVectorColumn(
+                            p => p.ContentSearchVector,
+                            "english",
+                            p => new { p.UnaccentedContent })
+                        .HasIndex(p => p.ContentSearchVector)
+                        .HasMethod("GIN");
+
+            modelBuilder.Entity<CommentStar>()
+                        .HasKey(cs => new { cs.UserId, cs.CommentId });
+
+            modelBuilder.Entity<Comment>()
+                        .HasOne(u => u.ParentComment)
+                        .WithMany(c => c.Replies)
+                        .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
