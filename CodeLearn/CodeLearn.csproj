@@ -6,23 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Migrations\**" />
-    <Content Remove="Migrations\**" />
-    <EmbeddedResource Remove="Migrations\**" />
-    <None Remove="Migrations\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="Migrations\20211115141954_init.cs" />
-    <Compile Include="Migrations\20211115141954_init.Designer.cs" />
-    <Compile Include="Migrations\ApplicationDBContextModelSnapshot.cs" />
-    <Compile Include="Migrations\IdentityDb\20211115142230_initIdentity.cs" />
-    <Compile Include="Migrations\IdentityDb\20211115142230_initIdentity.Designer.cs" />
-    <Compile Include="Migrations\IdentityDb\IdentityDbContextModelSnapshot.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Blazored.TextEditor" Version="1.0.4" />
+	<PackageReference Include="Blazored.TextEditor" Version="1.0.7" />
     <PackageReference Include="Markdig" Version="0.26.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="5.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="5.0.8" />

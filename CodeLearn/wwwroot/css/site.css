@@ -83,7 +83,14 @@ li {
 .validation-message {
     color: red;
 }
-
+.footer-list a{
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+}
+.footer-list a:hover{
+    color: darkolivegreen !important;
+    margin-left: 4px;
+}
 #blazor-error-ui {
     background: lightyellow;
     bottom: 0;
