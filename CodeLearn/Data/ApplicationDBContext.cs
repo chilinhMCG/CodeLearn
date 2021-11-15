@@ -12,6 +12,8 @@ namespace CodeLearn.Data
     {
         public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options) : base(options)
         { }
+        public DbSet<Comment> Comments { get; set; }
+        public DbSet<Discussion> Discussions { get; set; }
         public DbSet<Course> Courses { get; set; }
         public DbSet<Lesson> Lessons { get; set; }
         public DbSet<CourseType> CourseTypes { get; set; }
@@ -20,21 +22,33 @@ namespace CodeLearn.Data
         public DbSet<CourseRating> CourseRatings { get; set; }
 
         static ApplicationDBContext() => NpgsqlConnection.GlobalTypeMapper.MapEnum<CourseStatusEnum>();
-
+      
         protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
+        { 
             modelBuilder.HasPostgresEnum<CourseStatusEnum>();
 
             modelBuilder.Entity<Course>(entity =>
                 entity.Property(p => p.CreatedAt)
                       .HasDefaultValueSql("CURRENT_TIMESTAMP"));
+
             modelBuilder.Entity<Course>()
                 .HasOne(h => h.CourseTypeNavigation)
                 .WithMany(h => h.Courses)
                 .HasForeignKey(h => h.CourseTypeId)
                 .OnDelete(DeleteBehavior.SetNull)
                 .HasConstraintName("fk_courses_coursestype");
-
+            modelBuilder.Entity<Discussion>()
+               .HasOne(h => h.User)
+               .WithMany(t => t.Discussions)
+               .HasForeignKey(t => t.UserId);
+            modelBuilder.Entity<Comment>()
+               .HasOne(h => h.Discussion)
+               .WithMany(t => t.Comments);
+            modelBuilder.Entity<Comment>()
+               .HasOne(h => h.User)
+              .WithMany(t => t.Comments)
+              .HasForeignKey(t => t.UserId);
+           
             modelBuilder.Entity<Lesson>(entity =>
                 entity.Property(p => p.CreatedAt)
                       .HasDefaultValueSql("CURRENT_TIMESTAMP"));

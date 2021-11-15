@@ -1,0 +1,106 @@
+﻿@page "/Discussion"
+@using CodeLearn.Component
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Mvc.RazorPages;
+@inject IDiscussionRepository DiscussionRepository
+@inject IUserRepository UserRepository
+<MudPaper Class="p-4 pb-1 mt-4 ">
+    <MudGrid Style="justify-content: space-between;">
+        <MudItem lg="4">
+            <MudTextField @bind-Value="_searchString"
+                          Label="Tìm kiếm chủ đề của bạn.."
+                          Variant="Variant.Outlined"
+                          Adornment="Adornment.End"
+                          AdornmentIcon="@Icons.Filled.Search"
+                          Margin="Margin.Dense"
+                          TextChanged="UpdateList"
+                          Class="my-4" />
+        </MudItem>
+        <MudItem>
+            <AuthorizeView>
+                <Authorized>
+                    <MudButton Link="CreateDiscussion" Variant="Variant.Filled" Color="Color.Secondary">Tạo bài viết</MudButton>
+                </Authorized>
+                <NotAuthorized>                
+                    <MudLink Style="text-align: end;" Href="Identity/Account/Login" Underline="Underline.None" Color="Color.Secondary">Đăng nhập để tiếp tục</MudLink>
+                </NotAuthorized>
+            </AuthorizeView>
+        </MudItem>
+    </MudGrid>
+</MudPaper>
+<br />
+<MudPaper Width="100%">
+    <MudContainer Style="padding-top: 5%;">
+    @{
+        for (int count = 0; count < _sizePage; count++)
+            if (count < _searchedDiscussion.Count())
+            {
+                int i = count;
+            <MudCard>
+                <MudCardHeader Style="padding-bottom: 0px;">
+                    <CardHeaderContent>
+                        <MudAvatar Color="Color.Info" Variant="Variant.Outlined">@_searchedDiscussion[i].User.Name[0]</MudAvatar>
+                        <MudLink Typo="Typo.h5" Href="@("/DetailDiscussion/" + _searchedDiscussion[i].Id)" Color="Color.Dark">@_searchedDiscussion[i].Question</MudLink>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent Style="padding-top: 0px; margin-left: 45px; font-size:13px !important;">
+                    <MudText Class="content-home" Style="max-width: 67%;display: -webkit-box;-webkit-box-orient: vertical; -webkit-line-clamp: 3;overflow:hidden; text-overflow: ellipsis;" Typo="Typo.body2">@((MarkupString)_searchedDiscussion[i].Content)</MudText>
+                </MudCardContent>
+                <MudText Style="@($"color:{Colors.BlueGrey.Lighten4}; font-size: 13px;  margin-left: 45px;")">
+                    &emsp;
+                    Người đăng: <MudElement HtmlTag="a"
+                                            Style="@($"color:{Colors.BlueGrey.Lighten2};  font-weight:bold;")">
+                        @_searchedDiscussion[i].User.Name
+                    </MudElement>
+                    &emsp;Ngày đăng: <MudElement HtmlTag="a"
+                                                 Style="@($"color:{Colors.BlueGrey.Lighten2};  font-weight:bold;")">
+                        @_searchedDiscussion[i].CreateAt
+                    </MudElement>
+                </MudText>
+                <MudChipSet Style="margin-left: 53px;">
+                    @foreach (var value in _searchedDiscussion[i].HashTag)
+                    {
+                    <MudChip Style="@($"background-color :{Colors.BlueGrey.Lighten4};")" Text="@value"></MudChip>
+                    }
+                </MudChipSet>
+            </MudCard>
+            <MudDivider />
+            <MudDivider />
+            <br \>
+        }
+    }
+    </MudContainer>
+</MudPaper>
+<MudPagination Class="pagination-style" Style="margin-top: 14px;" Color="Color.Primary" Count="_count" SelectedChanged="LoadPage"/>
+@code 
+{
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    [CascadingParameter(Name = "_userId")]
+    private Guid _userId { get; set; }
+    private int _pageSelected = 1, _sizePage = 7, _count;
+    private string _searchString = String.Empty;
+    IList<Discussion> _discussions, _searchedDiscussion;
+    protected override void OnInitialized()
+    {
+        _discussions = DiscussionRepository.GetDiscussionPage(_pageSelected, _sizePage, _searchString).ToList();
+        _count = DiscussionRepository.GetPageNumbers(_sizePage, "");
+        _searchedDiscussion = _discussions;
+    }
+    private void LoadPage(int page)
+    {
+        _pageSelected = page;
+        _searchedDiscussion = DiscussionRepository.GetDiscussionPage(_pageSelected, _sizePage, _searchString).OrderByDescending(t => t.CreateAt).ToList();
+    }
+    private string GetUserNamebyID(Guid id)
+    {
+        var user = UserRepository.GetUserById(id);
+        return user.Name;
+    }
+    private void UpdateList()
+    {
+        _pageSelected = 1;
+        _count = DiscussionRepository.GetPageNumbers(_sizePage, _searchString);
+        _searchedDiscussion = DiscussionRepository.GetDiscussionPage(_pageSelected, _sizePage, _searchString).OrderByDescending(t => t.CreateAt).ToList();
+    }
+}

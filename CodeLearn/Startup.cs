@@ -16,7 +16,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
 namespace CodeLearn
 {
     public class Startup
@@ -50,6 +49,8 @@ namespace CodeLearn
 
             services.AddMudServices();
             services.AddRazorPages();
+            services.AddServerSideBlazor();
+            services.AddHttpContextAccessor();
             services.AddServerSideBlazor();   
 
             //Repositories
@@ -59,6 +60,8 @@ namespace CodeLearn
             services.AddScoped<ILessonRepository, LessonRepository>();
             services.AddScoped<ICourseRatingRepository, CourseRatingRepository>();
             services.AddScoped<IdentityUser>();
+            services.AddSingleton<IDiscussionRepository, DiscussionRepository>();
+            services.AddSingleton<ICommentRepository, CommentRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -7,15 +7,39 @@ html, body {
 }
 
 .mud-link {
-    font-size: 14px !important;
+    font-size: 14px ;
 }
-
+.mud-input-control.mud-input-required > .mud-input-control-input-container > .mud-input-label::after {
+    content: none !important;
+}
 .btn-primary {
     color: #fff;
     background-color: #1b6ec2;
     border-color: #1861ac;
 }
-
+.ql-editor h1{
+    font-size: 2.5rem !important;
+}
+.ql-editor h2 {
+    font-size: 2rem !important;
+}
+.ql-editor h3 {
+    font-size: 1.75rem !important;
+}
+.ql-editor h4 {
+    font-size: 1.5rem !important;
+}
+.content-home h1,
+.content-home h2,
+.content-home h3,
+.content-home h4,
+.content-home h5 {
+    font-size: 13px;
+    font-weight: 400;
+}
+.content-home strong{
+    font-weight: 400;
+}
 .content {
     padding-top: 1.1rem;
 }
@@ -23,7 +47,35 @@ html, body {
 .valid.modified:not([type=checkbox]) {
     outline: 1px solid #26b050;
 }
-
+.ql-editor {
+    white-space: pre-line !important;
+    word-wrap: break-word !important;
+}
+ul li {
+    margin: 0 0 0 50px !important;
+    padding-left: 0 !important;
+}
+p{
+    margin-bottom: 0 !important;
+}
+ul {
+    padding-left: 0 !important;
+    list-style: disc !important;
+}
+li {
+    margin: 0 0 0 50px !important;
+    padding-left: 0 !important;
+}
+.pagination-style {
+    list-style: none !important;
+    padding: 0 !important;
+    margin: 8px 0 0 0 !important;
+    align-items: center !important;
+    z-index: 3;
+}
+.pagination-style li {
+    margin: 0 !important;    
+}
 .invalid {
     outline: 1px solid red;
 }

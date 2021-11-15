@@ -48,7 +48,6 @@ namespace CodeLearn.Repositories
             using var context = _applicationDBContext.CreateDbContext();
             return context.Users.Where(h => h.Id.ToString() == id).FirstOrDefault().Name;
         }
-
         public User GetUserByName(string name)
         {
             using var context = _applicationDBContext.CreateDbContext();
@@ -59,6 +58,12 @@ namespace CodeLearn.Repositories
             using var context = _applicationDBContext.CreateDbContext();
             context.Update(user);
             context.SaveChanges();
+        }
+
+        public User GetUserById(Guid id)
+        {
+            using var context = _applicationDBContext.CreateDbContext();
+            return context.Users.Where(h => h.Id == id).FirstOrDefault();
         }
     }
 }

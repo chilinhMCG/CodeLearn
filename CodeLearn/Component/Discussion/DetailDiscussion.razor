@@ -1,0 +1,283 @@
+﻿@page "/DetailDiscussion/{PostId}"
+@using CodeLearn.Component
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Mvc.RazorPages
+@using Blazored.TextEditor
+@using System 
+@inject IDiscussionRepository DiscussionRepository
+@inject IUserRepository UserRepository
+@inject ICommentRepository CommentRepository
+
+    <MudContainer Style="padding-top: 5%;"> 
+        <MudCard Style="position: relative; padding: 14px 5px 5px 0;">
+            @if (_discussion.UserId.Value == _userId)
+            {
+                @*<MudButton OnClick="OpenWarning" Variant="Variant.Filled" Style="@($"background:{Colors.Green.Darken3}; position: absolute; right: 13px;")">Xóa</MudButton>*@
+                <MudIconButton OnClick="OpenWarning" Icon="@Icons.Material.Filled.Delete" Size="Size.Medium" Style="@($"position: absolute; right: 13px;")"></MudIconButton>
+            }
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudGrid Style="display: inline-flex;">
+                        <MudAvatar Color="Color.Info" Variant="Variant.Outlined" Size="Size.Large">@GetUserNamebyID(_discussion.UserId.Value)[0]</MudAvatar>
+                        &emsp;
+                        <MudText Typo="Typo.h5" Style=" max-width: 930px;">
+                            @_discussion.Question<br \>
+                            <MudText Style="@($"color:{Colors.BlueGrey.Lighten3}; font-size: 13px;")">
+                                Người đăng: <MudElement HtmlTag="a"
+                                                        Class="ma-0"
+                                                        Style="@($"color:{Colors.BlueGrey.Lighten2};  font-weight:bold;")"
+                                                        target="blank"
+                                                        rel="noopener noreferrer">
+                                    @_user.Name
+                                </MudElement>
+                                &emsp;
+                                Ngày đăng: <MudElement HtmlTag="a"
+                                                       Class="ma-0"
+                                                       Style="@($"color:{Colors.BlueGrey.Lighten2};  font-weight:bold;")"
+                                                       target="blank"
+                                                       rel="noopener noreferrer">
+                                    @_discussion.CreateAt
+                                </MudElement>
+                            </MudText>
+                        </MudText>
+                    </MudGrid>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent Style="padding-top: 0px; margin: 25px 0 13px 57px;">
+                <MudText Style="max-width: 67%; margin-bottom: 13px;">@((MarkupString)_discussion.Content)</MudText>
+                <MudChipSet>
+                    @foreach (var value in _discussion.HashTag)
+                    {
+                        <MudChip Style="@($"background-color :{Colors.BlueGrey.Lighten4};")" Text="@value"></MudChip>
+                    }
+                </MudChipSet>
+                <br \>
+                <MudItem xs="12" sm="12" md="12" Style="margin: 13px 0 13px 0;">
+                    <AuthorizeView>
+                        <NotAuthorized>
+                            <MudTextField Style="color: darkgray;" T="string" Label="Đăng nhập để bình luận" Disabled="true" Variant="Variant.Outlined" Lines="8" />
+                        </NotAuthorized>
+                        <Authorized>
+                            @*<MudTextField T="string" Label="Comment.." Variant="Variant.Outlined" @bind-Value="@_sampleText" Lines="8" />*@
+                            <div style="height: 186px;">
+                                <BlazoredTextEditor @ref="@QuillHtml" Placeholder="Để lại comment..">
+                                    <ToolbarContent>
+                                        <span class="ql-formats">
+                                            <button class="ql-bold"></button>
+                                            <button class="ql-italic"></button>
+                                            <button class="ql-underline"></button>
+                                            <button class="ql-strike"></button>
+                                        </span>
+                                        <span class="ql-formats">
+                                            <select class="ql-color"></select>
+                                            <select class="ql-background"></select>
+                                        </span>
+                                        <span class="ql-formats">
+                                            <button class="ql-list" value="ordered"></button>
+                                            <button class="ql-list" value="bullet"></button>
+                                        </span>
+                                    </ToolbarContent>
+                                    <EditorContent>
+                                        <div style="white-space: pre;"></div>
+                                    </EditorContent>
+                                </BlazoredTextEditor>
+                            </div>
+                            <br />
+                            <br />
+                        </Authorized>
+                    </AuthorizeView>
+                </MudItem>
+                <MudItem Style="text-align: end;">
+                    <AuthorizeView>
+                        <NotAuthorized>
+                            <MudButton Variant="Variant.Filled" Color="Color.Info " Disabled="true">Bình luận</MudButton>
+                        </NotAuthorized>
+                        <Authorized>
+                            <MudButton Variant="Variant.Filled" Color="Color.Info " OnClick="GetHTML">Bình luận</MudButton>
+                        </Authorized>
+                    </AuthorizeView>
+                </MudItem>
+            </MudCardContent>
+            @* Here for comment*@
+        <MudCardContent>
+            <MudText Style="border-bottom: 1px solid darkgray;" Color="Color.Info">@_commentsCount comments</MudText>
+            @if(_virtualComments != null)
+            @foreach (var comment in _virtualComments)
+            {
+                string name = GetUserNamebyID(comment.UserId.Value);
+                <MudGrid Style="margin: 13px 4px 0 0;">
+                    <MudAvatar Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Medium">@name[0]</MudAvatar>
+                    &emsp;
+                    <MudItem Style="padding-top: 0;">
+                        <MudLink Href="#" Typo="Typo.subtitle1" Color="Color.Info">@name</MudLink>
+                        &emsp;
+                        <MudText Style="display:inline" Typo="Typo.subtitle1">
+                            @comment.CreateAt
+                            @if (comment.UserId.Value == _userId)
+                            {
+                                <MudIconButton OnClick="() => OpenWarning(comment)" Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Style="margin: 0 0 0 8px;"></MudIconButton>
+                            }
+                        </MudText>
+                    </MudItem>
+                    <MudText Style="margin-left: 65px; max-width: 85%;width: 100%; border-bottom: 1px solid darkgray">
+                        @((MarkupString)comment.Content)
+                    </MudText>
+                </MudGrid>
+            }
+            @foreach (var comment in _comments)
+            {
+                <MudGrid Style="margin: 13px 4px 0 0;">
+                    <MudAvatar Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Medium">@comment.User.Name[0]</MudAvatar>
+                    &emsp;
+                    <MudItem Style="padding-top: 0;">
+                        <MudLink Href="#" Typo="Typo.subtitle1" Color="Color.Info">@comment.User.Name</MudLink>
+                        &emsp;
+                        <MudText Style="display:inline" Typo="Typo.subtitle1">
+                            @comment.CreateAt
+                            @if (comment.UserId.Value == _userId)
+                            {
+                                <MudIconButton OnClick="() => OpenWarning(comment)" Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Style="margin: 0 0 0 8px;"></MudIconButton>
+                            }
+                        </MudText>
+                    </MudItem>
+                    <MudText Style="margin-left: 65px; max-width: 85%;width: 100%; border-bottom: 1px solid darkgray">
+                        @((MarkupString)comment.Content)
+                    </MudText>
+                </MudGrid>
+            }
+        </MudCardContent>
+            <MudDialog @bind-IsVisible="_commentVisible">
+                <TitleContent>
+                    <MudText Typo="Typo.h6">
+                        Xóa bình luận
+                    </MudText>
+                </TitleContent>
+                <DialogContent>
+                    <p>Bình luân sẽ bị xóa khỏi bài viết, bạn có muốn tiếp tục?</p>
+                </DialogContent>
+                <DialogActions>
+                    <MudButton OnClick="DeleteComment" Variant="Variant.Filled" Style="@($"background:{Colors.Green.Darken3}; margin-left: 20px;")">Xóa</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Default" OnClick="CloseWarning" Class="px-10">Hủy</MudButton>
+                </DialogActions>
+            </MudDialog>
+            <MudDialog @bind-IsVisible="_discussionVisible">
+                <TitleContent>
+                    <MudText Typo="Typo.h6">
+                        Xóa bài viết
+                    </MudText>
+                </TitleContent>
+                <DialogContent>
+                    <p>Bài viết sẽ bị xóa khỏi diễn đàn, bạn có muốn tiếp tục?</p>
+                </DialogContent>
+                <DialogActions>
+                    <MudButton OnClick="Delete" Link="@_home" Variant="Variant.Filled" Style="@($"background:{Colors.Green.Darken3}; margin-left: 20px;")">Xóa</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Default" OnClick="CloseWarning" Class="px-10">Hủy</MudButton>
+                </DialogActions>
+            </MudDialog>
+        </MudCard>
+        <MudDivider />
+        <MudDivider />
+        <br \>
+    </MudContainer>
+@code {
+    [Parameter]
+    public string PostId { get; set; }
+    [CascadingParameter]
+    private Task<AuthenticationState> authenticationStateTask { get; set; }
+    [CascadingParameter(Name = "_userId")]
+    private Guid _userId { get; set; }
+    private int _commentsCount = 0;
+    private bool _discussionVisible, _commentVisible;
+    private string _home;
+    private Guid _discussionId = Guid.Empty;
+    private Discussion _discussion;
+    private User _user;
+    private List<Comment> _comments;
+    private Comment _commentDelete;
+    private List<Comment> _virtualComments;
+    BlazoredTextEditor QuillHtml;
+    string QuillHTMLContent;
+    protected override void OnInitialized()
+    {
+        _discussionId = new Guid(PostId);
+        _discussion = DiscussionRepository.GetDiscussionById(_discussionId);
+        _user = UserRepository.GetUserById(_discussion.UserId.Value);
+        _comments = CommentRepository.GetAllCommentInPost(_discussion.Id).OrderByDescending(t => t.CreateAt).ToList();
+        _commentsCount = _comments.Count();
+    }
+    private string GetUserNamebyID(Guid id)
+    {
+        var user = UserRepository.GetUserById(id);
+        return user.Name;
+    }
+    public async void GetHTML()
+    {
+        QuillHTMLContent = await QuillHtml.GetHTML();
+        StateHasChanged();
+        if (string.IsNullOrWhiteSpace(await QuillHtml.GetText()) == false)
+        {
+            AddComment();
+        }
+    }
+    public async void SetHTML()
+    {
+        QuillHTMLContent = string.Empty;
+        await QuillHtml.LoadHTMLContent(QuillHTMLContent);
+    }
+    private void Delete()
+    {
+        CommentRepository.DeleteAllCommentsInPost(_discussion.Id);
+        DiscussionRepository.DeleteDiscussionByID(_discussion.Id);
+        _home = "Discussion";
+    }
+    private void DeleteComment()
+    {
+        DeleteComment(_commentDelete);
+        _commentDelete = null;
+        _commentsCount--;
+        CloseWarning();
+    }
+    public void AddComment()
+    {
+        Comment _comment = new();
+        if (_virtualComments == null) _virtualComments = new();
+        _comment.UserId = _userId;
+        _comment.Content = QuillHTMLContent;
+        _comment.DiscussionId = _discussion.Id;
+        CommentRepository.AddComment(_comment);
+        _virtualComments.Insert(0, _comment);
+        _comment = new();
+        _commentsCount++;
+        StateHasChanged();
+        SetHTML();
+    }
+    private void DeleteComment(Comment comment)
+    {
+        CommentRepository.DeleteCommentbyObject(comment);
+        bool _containComment = _virtualComments.Any(s => s == comment);
+        if (_containComment == true)
+        {
+            _virtualComments.Remove(comment);
+        }
+        else
+        {
+            _comments.Remove(comment);
+        }
+    }
+    private void OpenWarning()
+    {
+        _discussionVisible = true;
+        _home = "Discussion";
+    }
+    private void OpenWarning(Comment comment)
+    {
+        _commentVisible = true;
+        _commentDelete = comment;
+    }
+    private void CloseWarning()
+    {
+        _discussionVisible = false;
+        _commentVisible = false;
+        _home = string.Empty;
+    }
+}

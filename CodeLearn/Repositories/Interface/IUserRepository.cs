@@ -17,6 +17,7 @@ namespace CodeLearn.Repositories.Interface
 
         string GetNameOfUserById(string id);
         
+        User GetUserById(Guid id);
         void AddUser(User user);
         void UpdateUser(User user);
 
