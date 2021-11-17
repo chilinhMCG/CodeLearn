@@ -14,5 +14,6 @@ namespace CodeLearn.Repositories.Interface
         void DeleteDiscussionByID(Guid id);
         List<Discussion> GetDiscussionPage(int pageNumbers, int pageSize, string search);
         int GetPageNumbers(int sizePage, string search);
+        Task<ICollection<Discussion>> GetDiscussionByAuthor(Guid id);
     }
 }

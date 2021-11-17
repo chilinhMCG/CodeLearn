@@ -7,7 +7,11 @@
 
   <ItemGroup>
 	<PackageReference Include="Blazored.TextEditor" Version="1.0.7" />
+	<PackageReference Include="Bogus" Version="33.1.1" />
+	<PackageReference Include="DocumentFormat.OpenXml" Version="2.14.0" />
+	<PackageReference Include="Faker.Net" Version="1.5.150" />
     <PackageReference Include="Markdig" Version="0.26.0" />
+    <PackageReference Include="Microsoft.AspNet.Mvc" Version="5.2.7" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="5.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="5.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.9" />

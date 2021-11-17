@@ -1,17 +1,22 @@
-﻿using CodeLearn.Models;
+﻿using Bogus;
+using CodeLearn.Models;
+using ManageForum.Api.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Npgsql;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity;
 
 namespace CodeLearn.Data
 {
-    public class ApplicationDBContext : DbContext
+    public class ApplicationDBContext : IdentityDbContext<IdentityUser>
     {
         public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options) : base(options)
-        { }
+        { 
+        }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Discussion> Discussions { get; set; }
         public DbSet<Course> Courses { get; set; }
@@ -19,12 +24,21 @@ namespace CodeLearn.Data
         public DbSet<CourseType> CourseTypes { get; set; }
         public DbSet<User> Users { get; set; }
 
+        public DbSet<Post> Posts { set; get; }
+        public DbSet<PostCreact> PostCreacts { set; get; }
+
+        public DbSet<DiscussionCreact> DiscussionCreacts { set; get; }
+
         public DbSet<CourseRating> CourseRatings { get; set; }
 
         static ApplicationDBContext() => NpgsqlConnection.GlobalTypeMapper.MapEnum<CourseStatusEnum>();
       
         protected override void OnModelCreating(ModelBuilder modelBuilder)
-        { 
+        {
+            base.OnModelCreating(modelBuilder);
+            // Customize the ASP.NET Identity model and override the defaults if needed.
+            // For example, you can rename the ASP.NET Identity table names and more.
+            // Add your customizations after calling base.OnModelCreating(builder);
             modelBuilder.HasPostgresEnum<CourseStatusEnum>();
 
             modelBuilder.Entity<Course>(entity =>
@@ -48,7 +62,7 @@ namespace CodeLearn.Data
                .HasOne(h => h.User)
               .WithMany(t => t.Comments)
               .HasForeignKey(t => t.UserId);
-           
+
             modelBuilder.Entity<Lesson>(entity =>
                 entity.Property(p => p.CreatedAt)
                       .HasDefaultValueSql("CURRENT_TIMESTAMP"));
@@ -68,6 +82,7 @@ namespace CodeLearn.Data
 
             modelBuilder.Entity<CourseRating>()
                 .HasKey(nameof(CourseRating.CourseId), nameof(CourseRating.UserId));
+            
         }
     }
 }

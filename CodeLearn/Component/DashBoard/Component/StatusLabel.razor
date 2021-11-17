@@ -1,0 +1,16 @@
+﻿
+@switch (IsBlocked)
+{
+    case false:
+        <MudChip Color="Color.Primary">Hoạt động</MudChip>
+        break;
+    case true:
+        <MudChip Color="Color.Dark">Khóa</MudChip>
+        break;
+}
+
+
+@code {
+    [Parameter]
+    public bool IsBlocked { set; get; }
+}

@@ -2,8 +2,6 @@
 @using Microsoft.AspNetCore.Http
 @inject IHttpContextAccessor httpContextAccessor
 @inherits LayoutComponentBase
-@using Microsoft.AspNetCore.Identity
-@using Microsoft.AspNetCore.Http
 @inject IHttpContextAccessor httpContextAccsessor
 @inject IUserRepository UserRepository
 
@@ -13,7 +11,6 @@
 
     <MudLayout>
         <NavBar />
-
         <MudMainContent>
             <MudContainer MaxWidth="MaxWidth.Large">
 
@@ -21,24 +18,27 @@
                     @Body
                 </CascadingValue>
 
-                    <MudScrollToTop>
-                        <MudFab Color="Color.Success" Icon="@Icons.Filled.ArrowCircleUp" />
-                    </MudScrollToTop>
+                <MudScrollToTop>
+                    <MudFab Color="Color.Success" Icon="@Icons.Filled.ArrowCircleUp" />
+                </MudScrollToTop>
             </MudContainer>
 
         </MudMainContent>
 
-        <Footer />
+        <Footer/>
     </MudLayout>
 
 
 @code{
+    bool _drawerOpen = false;
+
     MudTheme MCGTheme = new()
     {
         Palette = new Palette()
         {
             Primary = "#19B33D",
             AppbarBackground = "#19B33D",
+            
         }
     };
 

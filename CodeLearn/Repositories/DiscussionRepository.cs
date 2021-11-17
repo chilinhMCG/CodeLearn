@@ -54,6 +54,14 @@ namespace CodeLearn.Repositories
             using var context = _applicationDBContext.CreateDbContext();
             return context.Discussions.Where(h => h.Id == id).FirstOrDefault();
         }
+        public async Task<ICollection<Discussion>> GetDiscussionByAuthor(Guid id)
+        {
+            using var context = _applicationDBContext.CreateDbContext();
+            var result = await (from d in context.Discussions
+                                where d.UserId == id
+                                select d).ToListAsync(); ;
+            return result;
+        }
 
         public void UpdateDiscussion(Discussion discussion)
         {
