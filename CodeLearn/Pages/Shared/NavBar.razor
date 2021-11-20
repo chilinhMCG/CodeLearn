@@ -1,4 +1,4 @@
-﻿<MudAppBar Color="Color.Success" Fixed="false" Elevation="25" style="position:fixed;z-index:1;">
+﻿<MudAppBar Color="Color.Success" Fixed="false" Elevation="25" style="position:fixed;z-index:2;">
     <MudText Class="d-none d-md-inline" Typo="Typo.h5">
         <a href="/" class="textlink">CodeLearn</a>
     </MudText>
@@ -31,8 +31,8 @@
                      Color="Color.Default" Href="/">
                 <div style="color:white;">Chào, @context.User.Identity.Name!</div>
             </MudLink>
-            <MudIconButton Icon="@Icons.Material.Filled.ExitToApp" 
-                           Link="Identity/Account/Logout"  
+            <MudIconButton Icon="@Icons.Material.Filled.ExitToApp"
+                           Link="Identity/Account/Logout"
                            Color="Color.Inherit" />
         </Authorized>
         <NotAuthorized>
