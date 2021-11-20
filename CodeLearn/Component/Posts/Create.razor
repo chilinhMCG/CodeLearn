@@ -1,0 +1,78 @@
+﻿@page "/posts/create"
+@attribute [Authorize]
+@inject IUserRepository UserRepository
+@inject IPostRepository PostRepository
+@inject IDialogService DialogService
+@inject NavigationManager NavManager
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-10 mb-4">
+    <EditForm Model="_post" OnSubmit="OnValidSubmit">
+        <DataAnnotationsValidator />
+
+        <MudPaper Class="pa-6">
+            <MudText Class="mb-4" Align="Align.Center" Typo="Typo.h4">Tạo bài viết chia sẻ mới</MudText>
+            <MudTextField Class="mb-4" @bind-Value="_post.Title" Immediate="true"
+                          Label="Tiêu đề bài viết..."
+                          Variant="Variant.Outlined" For="() => _post.Title" />
+
+            <PostEditor @bind-Content="_post.Content" @bind-TextContent="_textContent" />
+
+            <div class="d-flex justify-end mt-4">
+                <MudButton Class="mr-2" OnClick="@(() => NavManager.NavigateTo("/posts"))">
+                    Hủy
+                </MudButton>
+
+                <MudButton Class="px-10" Disabled="_disabled" ButtonType="ButtonType.Submit"
+                           Variant="Variant.Filled" Color="Color.Primary">
+                    Đăng
+                </MudButton>
+            </div>
+        </MudPaper>
+    </EditForm>
+</MudContainer>
+
+@code {
+    [CascadingParameter]
+    private Task<User> _userTask { get; set; }
+
+    private string _textContent;
+
+    private Post _post;
+
+    private User _user;
+
+    private bool _disabled => string.IsNullOrWhiteSpace(_post.Title) || string.IsNullOrWhiteSpace(_textContent);
+
+    protected override async Task OnInitializedAsync()
+    {
+        _post = new Post()
+        {
+            Content = "",
+            Title = "",
+        };
+
+        _user = await _userTask;
+
+        _post.UserId = _user.Id;
+    }
+
+    private async Task OnValidSubmit()
+    {
+        _post.Title = _post.Title.Trim();
+        _post.DateCreated = DateTime.Now;
+        _post.DateLastEdited = _post.DateCreated;
+        _post.Slug = StringUtils.GenerateSlug(_post.Title, 100);
+        _post.UnaccentedTitle = _post.Title.RemoveDiacritics();
+        _post.UnaccentedContent = _textContent.RemoveDiacritics();
+
+        var postWithSameSlug = await PostRepository.GetAsync(_user.Id, _post.Slug);
+
+        if (postWithSameSlug != null)
+            _post.Slug = Guid.NewGuid().ToString();
+
+        await PostRepository.AddAsync(_post);
+        NavManager.NavigateTo($"/posts/{_user.Id}/{_post.Slug}");
+    }
+
+
+}
