@@ -59,7 +59,8 @@ namespace CodeLearn
             services.AddScoped<ICourseRepository, CourseRepository>();
             services.AddScoped<ILessonRepository, LessonRepository>();
             services.AddScoped<ICourseRatingRepository, CourseRatingRepository>();
-            services.AddScoped<IdentityUser>();
+            
+            services.AddScoped<IRoleRepository, RoleRepository>();
             services.AddSingleton<IDiscussionRepository, DiscussionRepository>();
             services.AddSingleton<ICommentRepository, CommentRepository>();
         }

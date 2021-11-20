@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="Component\Admin\Role\EditUserRole.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
 	<PackageReference Include="Blazored.TextEditor" Version="1.0.7" />
 	<PackageReference Include="Bogus" Version="33.1.1" />
 	<PackageReference Include="DocumentFormat.OpenXml" Version="2.14.0" />
@@ -26,7 +30,20 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Component\Admin\Posts\" />
     <Folder Include="wwwroot\images\CoursesImg\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Component\Admin\Role\EditUserRole.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Component\Admin\Role\EditUserRole.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Component\Admin\Role\EditUserRole.razor" />
   </ItemGroup>
 
 </Project>

@@ -9,8 +9,10 @@ namespace CodeLearn.Repositories.Interface
     public interface IRoleRepository
     {
         Task<IdentityRole> Add(IdentityRole role);
-        Task<IdentityRole> Delete(IdentityRole role);
+        Task Delete(IdentityRole role);
         Task<IdentityRole> Edit(IdentityRole role);
+        Task<IEnumerable<IdentityRole>> GetAllRole();
+        Task<IdentityRole> FindByName(string name);
 
     }
 }

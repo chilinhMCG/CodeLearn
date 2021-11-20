@@ -1,24 +1,37 @@
-﻿<div class="row">
-    <div class="col-md-6">
-        <form method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Input.Name" class="control-label"></label>
-                <input asp-for="Input.Name" class="form-control" />
-                <span asp-validation-for="Input.Name" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Tạo mới" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
-</div>
+﻿@using System.ComponentModel.DataAnnotations
+@inject ISnackbar Snackbar
+@inject RoleManager<IdentityRole> Roles;
+@inject IRoleRepository RoleRepository;
 
-<div>
-    <a asp-page="./Index">Danh sách các role</a>
-</div>
+<MudText>Thêm Role</MudText>
+<EditForm Model="@model" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
 
+    <MudTextField Label="Tên Role" HelperText="Max. 20 characters"
+                  @bind-Value="model.Name" For="@(() => model.Name)" />
+    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Create</MudButton>
 
+</EditForm>
 @code {
+    int Count = 1;
+    IdentityRole model = new IdentityRole();
+    bool success;
+
+    public class RoleForm
+    {
+        [Required]
+        [StringLength(20, ErrorMessage = "Role Name length can't' be more than 20.")]
+        public string Name { get; set; }
+
+    }
+
+    private async Task OnValidSubmit(EditContext context)
+    {
+        success = true;
+        StateHasChanged();
+        await RoleRepository.Add(model);
+        Snackbar.Add("Thêm role thành công!", Severity.Success);
+        await Task.Delay(1500);
+    }
 
 }

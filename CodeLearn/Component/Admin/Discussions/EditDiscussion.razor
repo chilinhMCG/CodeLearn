@@ -1,0 +1,146 @@
+﻿@page "/admin/discussion/edit/{discussion_id}"
+@using CodeLearn.Component
+@using Microsoft.AspNetCore.Identity
+@using Blazored.TextEditor
+@using System.ComponentModel.DataAnnotations
+@inject IDiscussionRepository DiscussionRepository
+@inject ISnackbar Snackbar
+
+<MudPaper Class="p-4 pb-1 mt-4 ">
+    <MudContainer>
+        <MudForm @ref="_form" @bind-IsValid="@_sucess">
+            <MudItem>
+                <MudText Typo="Typo.h5">Chỉnh sửa bài thảo luận</MudText>
+                <MudText Style="font-size: small; font-style: oblique;" Color="Color.Secondary">*Mọi dữ liệu đều bắt buộc nhập</MudText>
+            </MudItem>
+            <br />
+            <br />
+            <MudItem xs="12" sm="12" md="12">
+                <MudText Typo="Typo.h6">Tiêu đề</MudText>
+                <MudTextField @bind-Value="_discussion.Question" Label="Chủ đề của bạn.."
+                              Required="true" RequiredError="Bạn phải thêm chủ đề!"
+                              Variant="Variant.Filled"
+                              Adornment="Adornment.End"
+                              Margin="Margin.Dense"
+                              Lines="1" />
+            </MudItem>
+            <MudItem xs="12" sm="12" md="12">
+                <MudText Typo="Typo.h6">#Hashtag</MudText>
+                <br />
+                <MudGrid>
+                    &emsp;
+                    <MudTextField @bind-Value="@_searchString" Label="Thêm hashtag cho bài viết.."
+                                  Variant="Variant.Filled"
+                                  Adornment="Adornment.End"
+                                  Margin="Margin.Dense"
+                                  Lines="1" />
+                    &emsp;
+                    <MudIconButton Style="width: 50px; height: 50px; border-radius: 50%; margin-top: 15px;" Icon="@Icons.Material.Filled.Add" OnClick="Add"></MudIconButton>
+                </MudGrid>
+                <MudChipSet AllClosable="true" OnClose="Close">
+                    @if (_hashTags != null)
+                        @foreach (var value in _hashTags)
+                        {
+                            <MudChip Text="@value"></MudChip>
+                        }
+                </MudChipSet>
+            </MudItem>
+            <MudItem xs="12" sm="12" md="12">
+                <MudText Typo="Typo.h6">Nội dung</MudText>
+                <div style="height: 254px; margin: 9px 0 0 0;">
+                    <BlazoredTextEditor @ref="QuillHtml" Placeholder="Chỉnh sửa nội dung bài viết..">
+                        <ToolbarContent>
+                            <select class="ql-header">
+                                <option selected=""></option>
+                                <option value="1"></option>
+                                <option value="2"></option>
+                                <option value="3"></option>
+                                <option value="4"></option>
+                            </select>
+                            <span class="ql-formats">
+                                <button class="ql-bold"></button>
+                                <button class="ql-italic"></button>
+                                <button class="ql-underline"></button>
+                                <button class="ql-strike"></button>
+                            </span>
+                            <span class="ql-formats">
+                                <select class="ql-color"></select>
+                                <select class="ql-background"></select>
+                            </span>
+                            <span class="ql-formats">
+                                <button class="ql-list" value="ordered"></button>
+                                <button class="ql-list" value="bullet"></button>
+                            </span>
+                        </ToolbarContent>
+                        <EditorContent >
+                            @_discussion.Content
+                        </EditorContent>
+                    </BlazoredTextEditor>
+                </div>
+            </MudItem>
+            <br /> <br /> <br />
+            <MudItem Style="text-align: end;">
+                <MudButton Link="Discussion" Variant="Variant.Filled">Hủy</MudButton>
+                &emsp;
+                <AuthorizeView>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="GetHTML">Sửa</MudButton>
+                </AuthorizeView>
+            </MudItem>
+        </MudForm>
+    </MudContainer>
+</MudPaper>
+@code {
+    [Parameter]
+    public string discussion_id { set; get; }
+    [CascadingParameter] public Guid _userId { get; set; }
+    private MudForm _form;
+    private BlazoredTextEditor QuillHtml ;
+    private bool _sucess;
+    private string _searchString = String.Empty;
+    private CodeLearn.Models.Discussion _discussion = new();
+    private IList<string> _hashTags;
+    protected override void OnInitialized()
+    {
+        _discussion = DiscussionRepository.GetDiscussionById(discussion_id);
+        _hashTags = _discussion.HashTag;
+    }
+
+
+    public async void GetHTML()
+    {   
+        _discussion.Content = await QuillHtml.GetHTML();
+        StateHasChanged();
+        if (string.IsNullOrWhiteSpace(await QuillHtml.GetText()) == false && _sucess == true && _hashTags != null)
+        {
+            UpdateDiscussion();
+        }
+        else
+        {
+            Snackbar.Add("Thất bại khi sửa bài viết!", Severity.Error);
+        }
+    }
+
+    public async void SetHTML()
+    {
+        _discussion = DiscussionRepository.GetDiscussionById(discussion_id);
+        _hashTags = _discussion.HashTag;
+        //await QuillHtml.LoadHTMLContent(_discussion.Content);
+        StateHasChanged();
+    }
+
+    private void Add()
+    {
+        if (_hashTags == null) _hashTags = new List<string>();
+        _hashTags.Add(_searchString);
+        _searchString = String.Empty;
+    }
+
+    private void Close(MudChip chip) => _hashTags.Remove(chip.Text);
+
+    private void UpdateDiscussion()
+    {
+        _discussion.LastUpdated = DateTime.Now;
+        DiscussionRepository.UpdateDiscussion(_discussion);
+        Snackbar.Add("Sửa bài viết thành công!", Severity.Success);
+    }
+}

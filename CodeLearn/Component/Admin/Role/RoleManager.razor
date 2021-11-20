@@ -1,0 +1,167 @@
+﻿@page "/admin/role"
+@using System.Net.Http.Json
+@inject IUserRepository UserRepositoy
+@inject IDiscussionRepository DicussionRepository
+@inject IRoleRepository RoleRepository
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject UserManager<IdentityUser> UserManager
+
+
+<MudPaper class="p-4 pb-1 mt-4">
+    <MudTabs Elevation="1" Rounded="true" PanelClass="pa-6">
+        <MudTabPanel Text="Danh sách quyền" ToolTip="Danh sách các quyền ">
+            <MudTable Items="@listUsers" Hover="true" SortLabel="Sort By" Filter="new Func<User,bool>(FilterUser)">
+                <ToolBarContent>
+                    <MudText Typo="Typo.h6">Danh sách quyền hạn của thành viên</MudText>
+                    <MudSpacer />
+                    <MudTextField @bind-Value="searchUser" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                </ToolBarContent>
+                <HeaderContent>
+                    <MudTh><MudTableSortLabel SortBy="new Func<User, object>(x => x.Name)">Tài khoản</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel Enabled="@enabled" SortBy="new Func<User, object>(x => x)">Quyền hạn</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<User, object>(x => x.IsBlocked)">Trạng thái</MudTableSortLabel></MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Name">@context.Name</MudTd>
+                    <MudTd DataLabel="Is Blocked">
+                        @if (string.IsNullOrEmpty(context.Role) )
+                        {
+                            <MudLink Href="@($"/admin/role/user/{context.Id}")">+Thêm</MudLink>
+                        }
+                        else
+                        {
+
+                    <MudLink Href="@($"/admin/role/user/{context.Id}")">
+                       @context.Role
+                    </MudLink>
+                        }
+                    </MudTd>
+                    <MudTd DataLabel="Is Blocked"><CodeLearn.Component.DashBoard.Component.StatusLabel IsBlocked="@context.IsBlocked"></CodeLearn.Component.DashBoard.Component.StatusLabel></MudTd>
+
+                </RowTemplate>  
+                <PagerContent>
+                    <MudTablePager PageSizeOptions="new int[] { 25, 50 }" />
+                </PagerContent>
+            </MudTable>
+
+            <MudSwitch @bind-Checked="enabled" Color="Color.Info">Cho phép sắp xếp theo cột</MudSwitch>
+        </MudTabPanel>
+        <MudTabPanel Text="Role" ToolTip="Role">
+            @if (AddRole)
+               {
+               <CreateRole></CreateRole>
+               <MudButton Color="Color.Primary" @onclick="(() => AddRole = false)">Quay lại</MudButton>
+               }
+            else{
+            <MudButton Color="Color.Success" @onclick="(() => AddRole = true)">Thêm role</MudButton>
+            <MudTable  Items="@listRoles" Hover="true" SortLabel="Sort By">
+                <ToolBarContent>
+                    <MudText Typo="Typo.h6">Danh sách quyền hạn</MudText>
+                </ToolBarContent>
+              
+                <HeaderContent>
+                    <MudTh>Tên Role</MudTh>
+                    <MudTh>Tác vụ</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Name">
+                        <MudText @onclick="(() => EditRole(context.Name))">
+                            @context.Name
+                        </MudText>
+                    </MudTd>
+                    <MudTd>
+                        <MudButton @onclick="(() => DeleteRole(context))" Variant="Variant.Filled" Color="Color.Error">Xóa </MudButton>
+                        <MudButton Variant="Variant.Filled" Color="Color.Success">Sửa</MudButton>
+                    </MudTd>
+                </RowTemplate>
+                <PagerContent>
+                    <MudTablePager PageSizeOptions="new int[] { 25, 50 }" />
+                </PagerContent>
+            </MudTable>
+                        }
+        </MudTabPanel>
+    </MudTabs>
+
+</MudPaper>
+@code {
+    bool AddRole = false;
+    int count = 1;
+    private bool enabled = true;
+
+    public class UserAndRole : User
+    {
+        public string RoleNames { get; set; }
+    }
+    private IEnumerable<User> listUsers = new List<User>();
+    private IEnumerable<UserAndRole> listUserAndRoles = new List<UserAndRole>();
+
+    private IEnumerable<IdentityRole> listRoles = new List<IdentityRole>();
+    private bool coerceText;
+    private bool coerceValue;
+    private string roles = "";
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        listUsers = await UserRepositoy.GetAllUser();
+        listRoles = await RoleRepository.GetAllRole();
+
+        foreach (var user in listUsers)
+        {
+            var userIdentity = await UserManager.FindByIdAsync(user.Id.ToString());
+            var roles = await UserManager.GetRolesAsync(userIdentity);
+            user.Discussions = await DicussionRepository.GetDiscussionByAuthor(user.Id);
+            user.Role = string.Join(",", roles);
+
+        }
+    }
+    private async Task EditRole(string name)
+    {
+        var role = await RoleRepository.FindByName(name);
+
+
+    }
+    private string searchUser = "";
+    private bool FilterUser(User element) => FilterFunc(element, searchUser);
+
+    private bool FilterFunc(User element, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if ($"{element.Email} {element.Discussions.Count}".Contains(searchString))
+            return true;
+        return false;
+    }
+
+    private async Task<IEnumerable<string>> SearchUser(string value)
+    {
+        // In real life use an asynchronous function for fetching data from an api.
+
+        await Task.Delay(5);
+        if (string.IsNullOrEmpty(value))
+            return new string[0];
+        var users = listUsers.Where(x => x.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+        var result = from u in users
+                     select u.Name;
+        return result;
+    }
+    async Task DeleteRole(IdentityRole role)
+    {
+        var dialog = DialogService.Show<DeleteDialog>("Xóa quyền hạn");
+        var result = await dialog.Result;
+
+        if (!result.Cancelled)
+        {
+
+            await RoleRepository.Delete(role);
+
+            Snackbar.Add("Xóa thành công!", Severity.Success);
+            await Task.Delay(1500);
+        }
+    }
+}

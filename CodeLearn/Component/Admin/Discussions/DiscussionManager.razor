@@ -1,0 +1,97 @@
+﻿@page "/admin/discussions"
+@using System.Net.Http.Json
+@inject IUserRepository UserRepositoy
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject IDiscussionRepository DiscussionRepository
+
+<MudPaper Class="p-4 pb-1 mt-4 ">
+    <MudTable Items="@listDiscussions" Hover="true" SortLabel="Sort By" Filter="new Func<Discussion,bool>(FilterDiscussion)">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Danh sách bài thảo luận</MudText>
+            <MudSpacer />
+            <MudTextField @bind-Value="searchDiscussion" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent>
+        <HeaderContent>
+            <MudTh><MudTableSortLabel SortBy="new Func<Discussion, object>(x => x.Question)">Câu hỏi</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<Discussion, object>(x => x.User.Name)">Người tạo</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel Enabled="@enabled" SortBy="new Func<Discussion, object>(x => x.CreateAt)">Ngày tạo</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<Discussion, object>(x => x.LastUpdated)">Ngày sửa </MudTableSortLabel></MudTh>
+            <MudTh>Tác vụ </MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Câu hỏi "><MudLink Href="@($"/admin/discussion/edit/{context.Id}")">@context.Question</MudLink></MudTd>
+            <MudTd DataLabel="Người tạo">@context.User.Name</MudTd>
+            <MudTd DataLabel="Ngày tạo">@context.CreateAt</MudTd>
+            <MudTd DataLabel="Ngày sửa">@context.LastUpdated</MudTd>
+            <MudTd DataLabel="Tác vụ">
+                <MudButton @onclick="(() => DeleteDiscussion(context))" Variant="Variant.Filled" Color="Color.Error">Xóa </MudButton>
+                <MudLink Href="@($"/admin/discussion/edit/{context.Id}")"><MudButton Variant="Variant.Filled" Color="Color.Success">Sửa</MudButton></MudLink>
+            </MudTd>
+
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager PageSizeOptions="new int[] { 25, 50 }" />
+        </PagerContent>
+    </MudTable>
+
+    <MudSwitch @bind-Checked="enabled" Color="Color.Info">Cho phép sắp xếp theo cột</MudSwitch>
+</MudPaper>
+@code {
+    private bool enabled = true;
+    private IEnumerable<Discussion> listDiscussions = new List<Discussion>();
+    private bool resetValueOnEmptyText;
+    private bool coerceText;
+    private bool coerceValue;
+    private string value1, value2;
+
+    protected override async Task OnInitializedAsync()
+    {
+        listDiscussions = await DiscussionRepository.GetAllDiscussion();
+        foreach (var item in listDiscussions)
+        {
+            item.User = UserRepositoy.GetUserById(item.UserId.ToString());
+
+        }
+    }
+    private string searchDiscussion = "";
+    private bool FilterDiscussion(Discussion element) => FilterFunc(element, searchDiscussion);
+
+    private bool FilterFunc(Discussion element, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.Question.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if ($"{element.Question} ".Contains(searchString))
+            return true;
+        return false;
+    }
+
+    private async Task<IEnumerable<string>> SearchDiscussion(string value)
+    {
+        // In real life use an asynchronous function for fetching data from an api.
+
+        await Task.Delay(5);
+        if (string.IsNullOrEmpty(value))
+            return new string[0];
+        var users = listDiscussions.Where(x => x.Question.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+        var result = from u in listDiscussions
+                     select u.Question;
+        return result;
+    }
+    async Task DeleteDiscussion(Discussion discussion)
+    {
+        var dialog = DialogService.Show<DeleteDialog>("Xóa thảo luận");
+        var result = await dialog.Result;
+
+        if (!result.Cancelled)
+        {
+
+            DiscussionRepository.DeleteDiscussionByID(discussion.Id);
+
+            Snackbar.Add("Xóa thành công!", Severity.Success);
+            await Task.Delay(1500);
+        }
+    }
+}

@@ -24,14 +24,26 @@ namespace CodeLearn.Repositories
             return role; 
         }
 
-        public Task<IdentityRole> Delete(IdentityRole role)
+        public async Task Delete(IdentityRole role)
         {
-            throw new NotImplementedException();
+            await _roleManager.DeleteAsync(role);
         }
 
         public Task<IdentityRole> Edit(IdentityRole role)
         {
             throw new NotImplementedException();
+        }
+
+        public Task<IdentityRole> FindByName(string name)
+        {
+            var role = _roleManager.FindByNameAsync(name);
+            return role; 
+        }
+
+        public async Task<IEnumerable<IdentityRole>> GetAllRole()
+        {
+            var listRole = await _roleManager.Roles.ToListAsync();
+            return listRole;
         }
     }
 }

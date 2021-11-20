@@ -127,3 +127,7 @@ li {
 .link-navbar:hover {
     text-decoration: none;
 }
+
+.sidebar {
+    background-color: #000;
+}

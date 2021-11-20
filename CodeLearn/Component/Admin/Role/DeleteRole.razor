@@ -1,0 +1,15 @@
+﻿@page "/admin/role/delete/{name}"
+@inject IRoleRepository RoleRepository;
+<MudPaper class="p-4 pb-1 mt-4">
+    <MudCardHeader>Bạn có chắc muốn xóa role </MudCardHeader>
+
+</MudPaper>
+@code {
+    [Parameter]
+    public string name { set; get; }
+    IdentityRole role = new IdentityRole();
+    protected override async Task OnInitializedAsync()
+        {
+        role = await RoleRepository.FindByName(name);
+        }
+}

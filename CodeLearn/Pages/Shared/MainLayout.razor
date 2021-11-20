@@ -15,7 +15,15 @@
             <MudContainer MaxWidth="MaxWidth.Large">
 
                 <CascadingValue Value="_userId">
-                    @Body
+                    <MudGrid>
+
+                    <MudItem Style="height : fit-content" xs="12" sm="3">
+                        <CodeLearn.Component.DashBoard.Menu.DashBoardMenu></CodeLearn.Component.DashBoard.Menu.DashBoardMenu>
+                    </MudItem>
+                    <MudItem xs="12" sm="9">
+                        @Body
+                    </MudItem>
+                    </MudGrid>
                 </CascadingValue>
 
                 <MudScrollToTop>
@@ -24,8 +32,10 @@
             </MudContainer>
 
         </MudMainContent>
+        
 
-        <Footer/>
+        
+        <Footer />
     </MudLayout>
 
 

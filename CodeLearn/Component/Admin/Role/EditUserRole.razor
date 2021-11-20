@@ -1,0 +1,41 @@
+﻿@page "/admin/role/user/{userid}"
+@using System.Net.Http.Json
+@inject IUserRepository UserRepositoy
+@inject IDiscussionRepository DicussionRepository
+@inject IRoleRepository RoleRepository
+@inject RoleManager<IdentityRole> RoleManager
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject UserManager<IdentityUser> UserManager
+<MudGrid>
+    <MudItem xs="12" md="12">
+        <MudSelect T="string" Label="Thiết lập role cho thành viênn" HelperText="Vui lòng chọn role " MultiSelection="true" @bind-Value="value" @bind-SelectedValues="options">
+            @foreach (var role in roles)
+            {
+                <MudSelectItem T="string" Value="@role">@role</MudSelectItem>
+            }
+        </MudSelect>
+    </MudItem>
+    <MudItem xs="12" md="6">
+        <MudText Typo="Typo.body2">MudSelect.Value: "@value"</MudText>
+    </MudItem>
+    <MudItem xs="12" md="6">
+        <MudText Typo="Typo.body2">MudSelect.SelectedValues: HashSet&lt;string&gt; { @(string.Join(", ", options.Select(x=>$"\"{x}\""))) }</MudText>
+    </MudItem>
+</MudGrid>
+@code {
+    [Parameter]
+    public string userid { set; get; }
+    private string value { get; set; } = "Nothing selected";
+    private IEnumerable<string> options { get; set; } = new List<string>();
+
+    private IList<string> roles;
+    protected override async Task OnInitializedAsync()
+    {
+        var userIdentity = await UserManager.FindByIdAsync(userid.ToString());
+        options = await UserManager.GetRolesAsync(userIdentity);
+        roles = RoleManager.Roles.Select(r => r.Name).ToList();
+
+    }
+
+}

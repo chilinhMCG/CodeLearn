@@ -54,6 +54,11 @@ namespace CodeLearn.Repositories
             using var context = _applicationDBContext.CreateDbContext();
             return context.Discussions.Where(h => h.Id == id).FirstOrDefault();
         }
+        public Discussion GetDiscussionById(string id)
+        {
+            using var context = _applicationDBContext.CreateDbContext();
+            return context.Discussions.Where(h => h.Id.ToString() == id).FirstOrDefault();
+        }
         public async Task<ICollection<Discussion>> GetDiscussionByAuthor(Guid id)
         {
             using var context = _applicationDBContext.CreateDbContext();
@@ -67,6 +72,14 @@ namespace CodeLearn.Repositories
         {
             using var context = _applicationDBContext.CreateDbContext();
             context.Update(discussion);
+            //context.SaveChanges();
+        }
+
+        public async Task<ICollection<Discussion>> GetAllDiscussion()
+        {
+            using var context = _applicationDBContext.CreateDbContext();
+            var list = await context.Discussions.ToListAsync();
+            return list; 
             //context.SaveChanges();
         }
     }
