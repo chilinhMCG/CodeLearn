@@ -1,0 +1,65 @@
+﻿<div class="@Class">
+    <CommentEditor @ref="editor" Class="mb-3" @bind-Content="_boundContent" />
+    <div class="d-flex justify-end">
+        @if (_submitState == State.Loading)
+        {
+            <MudProgressCircular Class="mr-2" Size="Size.Small" Color="Color.Primary" Indeterminate="true" />
+        }
+
+        @if (Cancelable)
+        {
+            <MudButton Class="mr-2" Variant="Variant.Outlined" Color="Color.Primary"
+                       OnClick="OnCancel">
+                Hủy
+            </MudButton>
+        }
+
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="HandleSubmit"
+                   Disabled="(string.IsNullOrWhiteSpace(Content)) || _submitState == State.Loading">
+            @SubmitButtonText
+        </MudButton>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string Class { get; set; }
+
+    [Parameter]
+    public string SubmitButtonText { get; set; } = "Bình luận";
+
+    [Parameter]
+    public bool Cancelable { get; set; } = false;
+
+    [Parameter]
+    public string Content { get; set; }
+
+    [Parameter]
+    public EventCallback<string> ContentChanged { get; set; }
+
+    private string _boundContent
+    {
+        get => Content;
+        set => ContentChanged.InvokeAsync(value);
+    }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    [Parameter]
+    public EventCallback OnSubmit { get; set; }
+
+    private CommentEditor editor;
+
+    private State _submitState;
+
+    private async Task HandleSubmit()
+    {
+        _submitState = State.Loading;
+
+        await editor.ClearTextBoxAsync();
+        await OnSubmit.InvokeAsync();
+
+        _submitState = State.Complete;
+    }
+}
