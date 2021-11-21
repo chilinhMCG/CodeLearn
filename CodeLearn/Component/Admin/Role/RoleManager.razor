@@ -1,6 +1,6 @@
 ﻿@page "/admin/role"
 @using System.Net.Http.Json
-@inject IUserRepository UserRepositoy
+@inject IUserRepository UserRepository
 @inject IDiscussionRepository DicussionRepository
 @inject IRoleRepository RoleRepository
 @inject IDialogService DialogService
@@ -27,12 +27,12 @@
                     <MudTd DataLabel="Is Blocked">
                         @if (string.IsNullOrEmpty(context.Role) )
                         {
-                            <MudLink Href="@($"/admin/role/user/{context.Id}")">+Thêm</MudLink>
+                            <MudLink Href="@($"/admin/role/user/{context.Id.ToString()}")">+Thêm</MudLink>
                         }
                         else
                         {
 
-                    <MudLink Href="@($"/admin/role/user/{context.Id}")">
+                    <MudLink Href="@($"/admin/role/user/{context.Id.ToString()}")">
                        @context.Role
                     </MudLink>
                         }
@@ -104,12 +104,12 @@
 
     protected override async Task OnInitializedAsync()
     {
-        listUsers = await UserRepositoy.GetAllUser();
+        listUsers = await UserRepository.GetAllUser();
         listRoles = await RoleRepository.GetAllRole();
 
         foreach (var user in listUsers)
         {
-            var userIdentity = await UserManager.FindByIdAsync(user.Id.ToString());
+            var userIdentity = await UserManager.FindByNameAsync(user.Name.ToString());
             var roles = await UserManager.GetRolesAsync(userIdentity);
             user.Discussions = await DicussionRepository.GetDiscussionByAuthor(user.Id);
             user.Role = string.Join(",", roles);

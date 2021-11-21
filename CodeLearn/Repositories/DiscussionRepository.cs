@@ -72,7 +72,7 @@ namespace CodeLearn.Repositories
         {
             using var context = _applicationDBContext.CreateDbContext();
             context.Update(discussion);
-            //context.SaveChanges();
+            context.SaveChanges();
         }
 
         public async Task<ICollection<Discussion>> GetAllDiscussion()

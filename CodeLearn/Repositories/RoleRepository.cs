@@ -45,5 +45,10 @@ namespace CodeLearn.Repositories
             var listRole = await _roleManager.Roles.ToListAsync();
             return listRole;
         }
+
+        public async Task<IList<string>> GetRoleName()
+        {
+            return await _roleManager.Roles.Select(r => r.Name).ToListAsync();
+        }
     }
 }

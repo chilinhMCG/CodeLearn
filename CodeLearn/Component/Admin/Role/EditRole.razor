@@ -1,0 +1,77 @@
+﻿@page "/admin/role/user/{UserId}"
+@inject IUserRepository UserRepositoy
+@inject IDiscussionRepository DicussionRepository
+@inject IRoleRepository RoleRepository
+@inject RoleManager<IdentityRole> RoleManager
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+@inject UserManager<IdentityUser> UserManager
+<MudPaper Class="p-4 mt-4 ">
+
+    <MudGrid>
+        <MudItem xs="12" md="12">
+
+            <MudText Typo="Typo.h5"> Thiết lập role cho thành viên @user.Name </MudText>
+            <MudSelect Class="ml-2 mr-2 mt-2" T="string" Label="Chọn role hiện có" HelperText="Vui lòng chọn role " MultiSelection="true" @bind-Value="value" @bind-SelectedValues="options">
+                @foreach (var role in roles)
+                {
+                    <MudSelectItem T="string" Value="@role">@role</MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+
+        <MudButton Class="ml-2 mr-2 mb-2" Variant="Variant.Filled" Color="Color.Primary" OnClick="()=>EditUserRole()">Xác nhận các role</MudButton>
+    </MudGrid>
+
+</MudPaper>
+@code {
+    [Parameter]
+    public string UserId { set; get; }
+    private string value { get; set; } = "Nothing selected";
+    private HashSet<string> options { get; set; } = new HashSet<string>();
+    private IdentityUser userIdentity { set; get; }
+    private IList<string> roles { set; get; } = new List<string>();
+    private string[] RoleNames { get; set; }
+    User user { set; get; } = new User();
+    protected override async Task OnInitializedAsync()
+    {
+        user = UserRepositoy.GetUserById(UserId);
+        userIdentity = await UserManager.FindByNameAsync(user.Name);
+        options = (await UserManager.GetRolesAsync(userIdentity)).ToHashSet();
+        roles = await RoleRepository.GetRoleName();
+    }
+
+    public async Task EditUserRole()
+    {
+        RoleNames = options.ToArray();
+        var oldRoleNames = (await UserManager.GetRolesAsync(userIdentity)).ToArray();
+
+        var deleteRoles = oldRoleNames.Where(r => !RoleNames.Contains(r));
+        var addRoles = RoleNames.Where(r => !oldRoleNames.Contains(r));
+        List<string> roleNames = RoleManager.Roles.Select(r => r.Name).ToList();
+
+        foreach (var role in deleteRoles)
+        {
+            var resultDelete = await UserManager.RemoveFromRoleAsync(userIdentity, role);
+            if (!resultDelete.Succeeded)
+            {
+                Snackbar.Add("Thay đổi role không thành công!", Severity.Error);
+                await Task.Delay(1500);
+            }
+        }
+        foreach (var role in addRoles)
+        {
+            var resultDelete = await UserManager.AddToRoleAsync(userIdentity, role);
+            if (!resultDelete.Succeeded)
+            {
+                Snackbar.Add("Thay đổi role không thành công!", Severity.Error);
+                await Task.Delay(1500);
+            }
+        }
+        Snackbar.Add("Thay đổi role thành công!", Severity.Success);
+        Navigation.NavigateTo($"/admin/role");
+    }
+
+
+}

@@ -13,6 +13,7 @@ namespace CodeLearn.Repositories.Interface
         Task<IdentityRole> Edit(IdentityRole role);
         Task<IEnumerable<IdentityRole>> GetAllRole();
         Task<IdentityRole> FindByName(string name);
+        Task<IList<string>> GetRoleName();
 
     }
 }

@@ -5,6 +5,8 @@
 @using System.ComponentModel.DataAnnotations
 @inject IDiscussionRepository DiscussionRepository
 @inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+
 
 <MudPaper Class="p-4 pb-1 mt-4 ">
     <MudContainer>
@@ -72,7 +74,7 @@
                                 <button class="ql-list" value="bullet"></button>
                             </span>
                         </ToolbarContent>
-                        <EditorContent >
+                        <EditorContent>
                             @_discussion.Content
                         </EditorContent>
                     </BlazoredTextEditor>
@@ -94,7 +96,7 @@
     public string discussion_id { set; get; }
     [CascadingParameter] public Guid _userId { get; set; }
     private MudForm _form;
-    private BlazoredTextEditor QuillHtml ;
+    private BlazoredTextEditor QuillHtml;
     private bool _sucess;
     private string _searchString = String.Empty;
     private CodeLearn.Models.Discussion _discussion = new();
@@ -107,7 +109,7 @@
 
 
     public async void GetHTML()
-    {   
+    {
         _discussion.Content = await QuillHtml.GetHTML();
         StateHasChanged();
         if (string.IsNullOrWhiteSpace(await QuillHtml.GetText()) == false && _sucess == true && _hashTags != null)
@@ -142,5 +144,6 @@
         _discussion.LastUpdated = DateTime.Now;
         DiscussionRepository.UpdateDiscussion(_discussion);
         Snackbar.Add("Sửa bài viết thành công!", Severity.Success);
+        Navigation.NavigateTo($"/admin/discussions");
     }
 }
