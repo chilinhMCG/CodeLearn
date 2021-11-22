@@ -29,6 +29,9 @@ namespace CodeLearn.Seeders
             if (await _roleManager.RoleExistsAsync("Admin") == false)
                 await _roleManager.CreateAsync(new IdentityRole("Admin"));
 
+            if (await _roleManager.RoleExistsAsync("User") == false)
+                await _roleManager.CreateAsync(new IdentityRole("User"));
+
             if (await _userManager.FindByEmailAsync("seed_user1@gmail.com") != null)
                 return;
 
@@ -41,6 +44,8 @@ namespace CodeLearn.Seeders
             };
             await _userManager.CreateAsync(identityUser1, "seed_user1");
 
+            await _userManager.AddToRoleAsync(identityUser1, "User");
+
             var identityUser2 = new IdentityUser
             {
                 Id = "513879b5-9105-487d-946a-25e82d9c99fa",
@@ -49,6 +54,8 @@ namespace CodeLearn.Seeders
                 EmailConfirmed = true
             };
             await _userManager.CreateAsync(identityUser2, "seed_user2");
+
+            await _userManager.AddToRoleAsync(identityUser2, "User");
 
             var identityAdmin = new IdentityUser
             {
@@ -62,6 +69,7 @@ namespace CodeLearn.Seeders
             await _userManager.AddToRoleAsync(identityAdmin, "Admin");
 
             using var context = _contextFactory.CreateDbContext();
+
 
             var user1 = new User
             {
