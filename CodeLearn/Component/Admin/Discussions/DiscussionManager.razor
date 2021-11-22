@@ -4,6 +4,7 @@
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 @inject IDiscussionRepository DiscussionRepository
+@attribute [Authorize(Roles = "Admin")]
 
 <MudPaper Class="p-4 pb-1 mt-4 ">
     <MudTable Items="@listDiscussions" Hover="true" SortLabel="Sort By" Filter="new Func<Discussion,bool>(FilterDiscussion)">
@@ -89,7 +90,13 @@
         {
 
             DiscussionRepository.DeleteDiscussionByID(discussion.Id);
+            StateHasChanged();
+            listDiscussions = await DiscussionRepository.GetAllDiscussion();
+            foreach (var item in listDiscussions)
+            {
+                item.User = UserRepositoy.GetUserById(item.UserId.ToString());
 
+            }
             Snackbar.Add("Xóa thành công!", Severity.Success);
             await Task.Delay(1500);
         }

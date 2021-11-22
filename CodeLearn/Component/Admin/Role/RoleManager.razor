@@ -6,7 +6,8 @@
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 @inject UserManager<IdentityUser> UserManager
-
+@using System.ComponentModel.DataAnnotations
+@attribute [Authorize(Roles = "Admin")]
 
 <MudPaper class="p-4 pb-1 mt-4">
     <MudTabs Elevation="1" Rounded="true" PanelClass="pa-6">
@@ -24,22 +25,22 @@
                 </HeaderContent>
                 <RowTemplate>
                     <MudTd DataLabel="Name">@context.Name</MudTd>
-                    <MudTd DataLabel="Is Blocked">
-                        @if (string.IsNullOrEmpty(context.Role) )
+                    <MudTd DataLabel="Role">
+                        @if (string.IsNullOrEmpty(context.Role))
                         {
                             <MudLink Href="@($"/admin/role/user/{context.Id.ToString()}")">+Thêm</MudLink>
                         }
                         else
                         {
 
-                    <MudLink Href="@($"/admin/role/user/{context.Id.ToString()}")">
-                       @context.Role
-                    </MudLink>
+                            <MudLink Href="@($"/admin/role/user/{context.Id.ToString()}")">
+                                @context.Role
+                            </MudLink>
                         }
                     </MudTd>
                     <MudTd DataLabel="Is Blocked"><CodeLearn.Component.DashBoard.Component.StatusLabel IsBlocked="@context.IsBlocked"></CodeLearn.Component.DashBoard.Component.StatusLabel></MudTd>
 
-                </RowTemplate>  
+                </RowTemplate>
                 <PagerContent>
                     <MudTablePager PageSizeOptions="new int[] { 25, 50 }" />
                 </PagerContent>
@@ -49,37 +50,46 @@
         </MudTabPanel>
         <MudTabPanel Text="Role" ToolTip="Role">
             @if (AddRole)
-               {
-               <CreateRole></CreateRole>
-               <MudButton Color="Color.Primary" @onclick="(() => AddRole = false)">Quay lại</MudButton>
-               }
-            else{
-            <MudButton Color="Color.Success" @onclick="(() => AddRole = true)">Thêm role</MudButton>
-            <MudTable  Items="@listRoles" Hover="true" SortLabel="Sort By">
-                <ToolBarContent>
-                    <MudText Typo="Typo.h6">Danh sách quyền hạn</MudText>
-                </ToolBarContent>
-              
-                <HeaderContent>
-                    <MudTh>Tên Role</MudTh>
-                    <MudTh>Tác vụ</MudTh>
-                </HeaderContent>
-                <RowTemplate>
-                    <MudTd DataLabel="Name">
-                        <MudText @onclick="(() => EditRole(context.Name))">
-                            @context.Name
-                        </MudText>
-                    </MudTd>
-                    <MudTd>
-                        <MudButton @onclick="(() => DeleteRole(context))" Variant="Variant.Filled" Color="Color.Error">Xóa </MudButton>
-                        <MudButton Variant="Variant.Filled" Color="Color.Success">Sửa</MudButton>
-                    </MudTd>
-                </RowTemplate>
-                <PagerContent>
-                    <MudTablePager PageSizeOptions="new int[] { 25, 50 }" />
-                </PagerContent>
-            </MudTable>
-                        }
+            {
+                <MudText>Thêm Role</MudText>
+                <EditForm Model="@model" OnValidSubmit="OnValidSubmit">
+                    <DataAnnotationsValidator />
+
+                    <MudTextField Label="Tên Role" HelperText="Max. 20 characters"
+                                  @bind-Value="model.Name" For="@(() => model.Name)" />
+                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary" Class="ml-auto">Create</MudButton>
+
+                </EditForm>
+                <MudButton Color="Color.Primary" @onclick="(() => AddRole = false)">Quay lại</MudButton>
+            }
+            else
+            {
+                <MudButton Color="Color.Success" @onclick="(() => AddRole = true)">Thêm role</MudButton>
+                <MudTable Items="@listRoles" Hover="true" SortLabel="Sort By">
+                    <ToolBarContent>
+                        <MudText Typo="Typo.h6">Danh sách quyền hạn</MudText>
+                    </ToolBarContent>
+
+                    <HeaderContent>
+                        <MudTh>Tên Role</MudTh>
+                        <MudTh>Tác vụ</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="Name">
+                            <MudText @onclick="(() => EditRole(context.Name))">
+                                @context.Name
+                            </MudText>
+                        </MudTd>
+                        <MudTd>
+                            <MudButton @onclick="(() => DeleteRole(context))" Variant="Variant.Filled" Color="Color.Error">Xóa </MudButton>
+                            <MudLink Href="@($"/admin/role/edit/{context.Id}")"><MudButton Variant="Variant.Filled" Color="Color.Success">Sửa</MudButton></MudLink>
+                        </MudTd>
+                    </RowTemplate>
+                    <PagerContent>
+                        <MudTablePager PageSizeOptions="new int[] { 25, 50 }" />
+                    </PagerContent>
+                </MudTable>
+            }
         </MudTabPanel>
     </MudTabs>
 
@@ -159,9 +169,30 @@
         {
 
             await RoleRepository.Delete(role);
-
+            listRoles = await RoleRepository.GetAllRole();
             Snackbar.Add("Xóa thành công!", Severity.Success);
             await Task.Delay(1500);
         }
     }
+    IdentityRole model = new IdentityRole();
+    bool success;
+
+    public class RoleForm
+    {
+        [Required]
+        [StringLength(20, ErrorMessage = "Role Name length can't' be more than 20.")]
+        public string Name { get; set; }
+
+    }
+
+    private async Task OnValidSubmit(EditContext context)
+    {
+        success = true;
+        await RoleRepository.Add(model);
+        Snackbar.Add("Thêm role thành công!", Severity.Success);
+        listRoles = await RoleRepository.GetAllRole();
+        StateHasChanged();
+        await Task.Delay(1500);
+    }
+
 }

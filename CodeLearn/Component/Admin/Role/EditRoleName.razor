@@ -1,0 +1,46 @@
+﻿@page "/admin/role/edit/{roleid}"
+@using System.ComponentModel.DataAnnotations
+@inject IRoleRepository RoleRepository
+@inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+@attribute [Authorize(Roles = "Admin")]
+
+<MudPaper Class="p-4 mt-4 ">
+    <MudForm Model="model" @bind-IsValid="formSuccess">
+        <MudItem>
+            <MudTextField Margin="Margin.Dense" Variant="Variant.Outlined" @bind-Value="model.Name"
+                          Label="Tên bài học" Required="true"></MudTextField>
+        </MudItem>
+        <MudItem Class="text-center">
+            <MudButton Color="Color.Success" @onclick="(()=> UpdateRoleName())" Disabled="@(!formSuccess)">Update</MudButton>
+            <MudButton Color="Color.Dark">
+                <MudLink Color="Color.Dark" Underline="Underline.None" Href="@($"/admin/role")">Quay lại</MudLink>
+            </MudButton>
+        </MudItem>
+    </MudForm>
+        
+</MudPaper>
+@code {
+
+    [Parameter]
+    public string roleid { set; get; }
+    bool formSuccess;
+    IdentityRole model { set; get; } = new IdentityRole();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        model = await RoleRepository.GetRoleById(roleid);
+    }
+
+    private void UpdateRoleName()
+    {
+        formSuccess = true;
+        RoleRepository.Edit(model);
+        Snackbar.Add("Chỉnh sửa thành công!", Severity.Success);
+        Navigation.NavigateTo($"/admin/role");
+
+
+    }
+
+}

@@ -6,6 +6,7 @@
 @inject IDiscussionRepository DiscussionRepository
 @inject ISnackbar Snackbar
 @inject NavigationManager Navigation
+@attribute [Authorize(Roles = "Admin")]
 
 
 <MudPaper Class="p-4 pb-1 mt-4 ">
@@ -13,7 +14,7 @@
         <MudForm @ref="_form" @bind-IsValid="@_sucess">
             <MudItem>
                 <MudText Typo="Typo.h5">Chỉnh sửa bài thảo luận</MudText>
-                <MudText Style="font-size: small; font-style: oblique;" Color="Color.Secondary">*Mọi dữ liệu đều bắt buộc nhập</MudText>
+                <MudText Style="font-size: small; fo    nt-style: oblique;" Color="Color.Secondary">*Mọi dữ liệu đều bắt buộc nhập</MudText>
             </MudItem>
             <br />
             <br />
@@ -75,7 +76,8 @@
                             </span>
                         </ToolbarContent>
                         <EditorContent>
-                            @_discussion.Content
+                            @((MarkupString)_discussion.Content)
+                            
                         </EditorContent>
                     </BlazoredTextEditor>
                 </div>
@@ -92,28 +94,26 @@
     </MudContainer>
 </MudPaper>
 @code {
-    [Parameter]
-    public string discussion_id { set; get; }
-    [CascadingParameter] public Guid _userId { get; set; }
+        [Parameter]
+        public string discussion_id { set; get; }
+        [CascadingParameter] public Guid _userId { get; set; }
     private MudForm _form;
     private BlazoredTextEditor QuillHtml;
     private bool _sucess;
     private string _searchString = String.Empty;
     private CodeLearn.Models.Discussion _discussion = new();
     private IList<string> _hashTags;
-    protected override void OnInitialized()
+    protected override async void OnInitialized()
     {
         _discussion = DiscussionRepository.GetDiscussionById(discussion_id);
         _hashTags = _discussion.HashTag;
     }
 
-
     public async void GetHTML()
     {
-        _discussion.Content = await QuillHtml.GetHTML();
-        StateHasChanged();
         if (string.IsNullOrWhiteSpace(await QuillHtml.GetText()) == false && _sucess == true && _hashTags != null)
         {
+            _discussion.Content = await QuillHtml.GetHTML();
             UpdateDiscussion();
         }
         else
@@ -122,13 +122,6 @@
         }
     }
 
-    public async void SetHTML()
-    {
-        _discussion = DiscussionRepository.GetDiscussionById(discussion_id);
-        _hashTags = _discussion.HashTag;
-        //await QuillHtml.LoadHTMLContent(_discussion.Content);
-        StateHasChanged();
-    }
 
     private void Add()
     {

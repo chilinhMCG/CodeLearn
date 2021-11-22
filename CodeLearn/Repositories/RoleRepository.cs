@@ -29,9 +29,10 @@ namespace CodeLearn.Repositories
             await _roleManager.DeleteAsync(role);
         }
 
-        public Task<IdentityRole> Edit(IdentityRole role)
+        public async Task Edit(IdentityRole role)
         {
-            throw new NotImplementedException();
+            await _roleManager.UpdateAsync(role);
+            
         }
 
         public Task<IdentityRole> FindByName(string name)
@@ -44,6 +45,11 @@ namespace CodeLearn.Repositories
         {
             var listRole = await _roleManager.Roles.ToListAsync();
             return listRole;
+        }
+
+        public async Task<IdentityRole> GetRoleById(string id)
+        {
+            return await _roleManager.FindByIdAsync(id);
         }
 
         public async Task<IList<string>> GetRoleName()

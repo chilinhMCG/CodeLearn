@@ -4,6 +4,7 @@
 @inject IDiscussionRepository DicussionRepository
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
+@attribute [Authorize(Roles = "Admin")]
 
 <MudPaper Class="p-4 pb-1 mt-4 ">
     <MudTable Items="@listUsers" Hover="true" SortLabel="Sort By" Filter="new Func<User,bool>(FilterUser)">
@@ -37,7 +38,6 @@
     <MudSwitch @bind-Checked="enabled" Color="Color.Info">Cho phép sắp xếp theo cột</MudSwitch>
 </MudPaper>
 @code {
-    int count = 1;
     private bool enabled = true;
     private IEnumerable<User> listUsers = new List<User>();
     private bool resetValueOnEmptyText;
@@ -84,19 +84,19 @@
     }
     async Task BlockUser(User user)
     {
-        var dialog = DialogService.Show<DeleteDialog>("Khóa/Mở khóa tài khoản người dùng");
+        var dialog = DialogService.Show<DeleteDialog>("Xóa quyền truy cập tài khoản người dùng");
 
         var result = await dialog.Result;
         if (user.IsBlocked == true)
             user.IsBlocked = false;
-        else user.IsBlocked = true; 
+        else user.IsBlocked = true;
 
         if (!result.Cancelled)
         {
 
             UserRepository.UpdateUser(user);
-
-            Snackbar.Add("Xóa thành công!", Severity.Success);
+            StateHasChanged();
+            Snackbar.Add("Xóa quyền truy cập thành công!", Severity.Success);
             await Task.Delay(1500);
         }
     }

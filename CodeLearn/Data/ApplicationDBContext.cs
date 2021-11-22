@@ -55,6 +55,10 @@ namespace CodeLearn.Data
                .HasOne(h => h.User)
                .WithMany(t => t.Discussions)
                .HasForeignKey(t => t.UserId);
+            modelBuilder.Entity<Post>()
+              .HasOne(h => h.User)
+              .WithMany(t => t.Posts)
+              .HasForeignKey(t => t.UserId);
             modelBuilder.Entity<Comment>()
                .HasOne(h => h.Discussion)
                .WithMany(t => t.Comments);
