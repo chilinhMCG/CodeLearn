@@ -1,0 +1,97 @@
+﻿@page "/posts/edit/{PostId}"
+@attribute [Authorize]
+@inject IUserRepository UserRepository
+@inject IPostRepository PostRepository
+@inject IDialogService DialogService
+@inject NavigationManager NavManager
+
+@if (_post == null)
+{
+    <MudProgressCircular Class="d-block mx-auto" Size="Size.Large" Color="Color.Primary" Indeterminate="true" />
+}
+else if (!_isAuthorized)
+{
+    <MudText>Bạn không có quyền chỉnh sửa bài viết này.</MudText>
+}
+else
+{
+    <MudContainer MaxWidth="MaxWidth.Medium" Class="mt-10 mb-4">
+        <EditForm Model="_post" OnSubmit="OnValidSubmit">
+            <DataAnnotationsValidator />
+
+            <MudPaper Class="pa-6">
+                <MudTextField Class="mb-4" @bind-Value="_post.Title" Immediate="true"
+                              Label="Tiêu đề bài viết..."
+                              Variant="Variant.Outlined" For="() => _post.Title" />
+
+                <PostEditor @bind-Content="_post.Content" @bind-TextContent="_textContent" />
+
+                <div class="d-flex justify-end mt-4">
+                    <MudButton Class="mr-2" OnClick="@(() => NavManager.NavigateTo($"/posts/{_post.UserId}/{_post.Slug}"))">Hủy</MudButton>
+                    <MudButton Class="px-10" Disabled="_disabled" ButtonType="ButtonType.Submit" Variant="Variant.Filled" Color="Color.Primary">
+                        Sửa
+                    </MudButton>
+                </div>
+
+            </MudPaper>
+        </EditForm>
+    </MudContainer>
+}
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> _authenticationStateTask { get; set; }
+
+
+    [CascadingParameter]
+    private Task<User> _userTask { get; set; }
+
+    [Parameter]
+    public string PostId { get; set; }
+
+    private string _textContent;
+
+    private string _uneditedContent;
+
+    private string _uneditedTitle;
+
+    private Post _post;
+
+    private User _user;
+
+    private bool _isAuthorized;
+
+    private bool _disabled => string.IsNullOrWhiteSpace(_post.Title) || string.IsNullOrWhiteSpace(_textContent)
+                              || _uneditedContent == _post.Content && _uneditedTitle == _post.Title.Trim();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _user = await _userTask;
+
+        _post = await PostRepository.GetAsync(new Guid(PostId));
+
+        _uneditedContent = _post.Content;
+        _uneditedTitle = _post.Title;
+
+        var authState = await _authenticationStateTask;
+
+        _isAuthorized = _post.UserId == _user.Id || authState.User.IsInRole("Admin");
+    }
+
+    private async Task OnValidSubmit()
+    {
+        _post.Title = _post.Title.Trim();
+        _post.DateLastEdited = DateTime.Now;
+        _post.Slug = StringUtils.GenerateSlug(_post.Title, 100);
+        _post.UnaccentedTitle = _post.Title.RemoveDiacritics();
+        _post.UnaccentedContent = _textContent.RemoveDiacritics();
+
+        var postWithSameSlug = await PostRepository.GetAsync(_post.Id, _post.Slug);
+
+        if (postWithSameSlug != null)
+            _post.Slug = Guid.NewGuid().ToString();
+
+        await PostRepository.UpdateAsync(_post);
+        NavManager.NavigateTo($"/posts/{_post.UserId}/{_post.Slug}");
+    }
+}
