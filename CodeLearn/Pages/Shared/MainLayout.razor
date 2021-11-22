@@ -4,27 +4,39 @@
 @inherits LayoutComponentBase
 @inject IHttpContextAccessor httpContextAccsessor
 @inject IUserRepository UserRepository
+@inject IRoleRepository RoleRepository
+@inject UserManager<IdentityUser> UserManager
 
-    <MudThemeProvider Theme="MCGTheme" />
-    <MudDialogProvider />
-    <MudSnackbarProvider />
 
-    <MudLayout>
-        <NavBar />
-        <MudMainContent>
-            <MudContainer MaxWidth="MaxWidth.Large">
 
-                <CascadingValue Value="_userId">
+<MudThemeProvider Theme="MCGTheme" />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <NavBar />
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.Large">
+
+            <CascadingValue Value="_userId">
+
+                @if (_isAdmin)
+                {
                     <MudGrid>
 
-                    <MudItem Style="height : fit-content" xs="12" sm="3">
-                        <CodeLearn.Component.DashBoard.Menu.DashBoardMenu></CodeLearn.Component.DashBoard.Menu.DashBoardMenu>
-                    </MudItem>
-                    <MudItem xs="12" sm="9">
-                        @Body
-                    </MudItem>
+                        <MudItem Style="height : fit-content" xs="12" sm="3">
+                            <CodeLearn.Component.DashBoard.Menu.DashBoardMenu></CodeLearn.Component.DashBoard.Menu.DashBoardMenu>
+                        </MudItem>
+                        <MudItem xs="12" sm="9">
+                            @Body
+                        </MudItem>
                     </MudGrid>
-                </CascadingValue>
+                }
+                else
+                {
+                    @Body
+                }
+            </CascadingValue>
 
                 <MudScrollToTop>
                     <MudFab Color="Color.Success" Icon="@Icons.Filled.ArrowCircleUp" />
@@ -32,34 +44,45 @@
             </MudContainer>
 
         </MudMainContent>
-        
 
-        
+
+
         <Footer />
     </MudLayout>
 
 
-@code{
-    bool _drawerOpen = false;
+    @code{
+            bool _drawerOpen = false;
+            bool _isAdmin = false;
 
-    MudTheme MCGTheme = new()
-    {
-        Palette = new Palette()
+            MudTheme MCGTheme = new()
+            {
+                Palette = new Palette()
+                {
+                    Primary = "#19B33D",
+                    AppbarBackground = "#19B33D",
+
+                }
+            };
+
+            Guid _userId;
+            IList<string> _roles = new List<string>();
+        protected override async Task OnInitializedAsync()
         {
-            Primary = "#19B33D",
-            AppbarBackground = "#19B33D",
-            
-        }
-    };
+            if (httpContextAccsessor.HttpContext.User.Identity.IsAuthenticated == true)
+            {
+                User user = UserRepository.GetUserByName(httpContextAccsessor.HttpContext.User.Identity.Name);
+                var identityUser = await UserManager.FindByNameAsync(user.Name);
+                _userId = user.Id;
+                if (identityUser != null)
+                {
+                    _roles = await UserManager.GetRolesAsync(identityUser);
 
-    Guid _userId;
-
-    protected override void OnInitialized()
-    {
-        if (httpContextAccsessor.HttpContext.User.Identity.IsAuthenticated == true)
-        {
-            User user =  UserRepository.GetUserByName(httpContextAccsessor.HttpContext.User.Identity.Name);
-            _userId = user.Id;
+                    foreach (var role in _roles)
+                    {
+                        if (role == "Admin") _isAdmin = true;
+                    }
+                }
+            }
         }
     }
-}
