@@ -1,7 +1,6 @@
 using CodeLearn.Data;
 using CodeLearn.Repositories;
 using CodeLearn.Repositories.Interface;
-using CodeLearn.Seeders;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Hosting;
@@ -51,7 +50,6 @@ namespace CodeLearn
             services.AddServerSideBlazor();
             services.AddSingleton<WeatherForecastService>();
 
-            services.AddScoped<IApplicationDbSeeder, ApplicationDbSeeder>();
             //Repository
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<ICourseTypeRepository, CourseTypeRepository>();
@@ -63,14 +61,11 @@ namespace CodeLearn
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IApplicationDbSeeder seeder)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            Task seederTask = null;
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                seederTask = seeder.SeedPostManagerData();
             }
             else
             {
@@ -94,8 +89,6 @@ namespace CodeLearn
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
             });
-
-            seederTask?.Wait();
         }
     }
 }
