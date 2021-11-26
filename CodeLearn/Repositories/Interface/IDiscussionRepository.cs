@@ -17,6 +17,7 @@ namespace CodeLearn.Repositories.Interface
         int GetPageNumbers(int sizePage, string search);
         Task<ICollection<Discussion>> GetDiscussionByAuthor(Guid id);
         Task<ICollection<Discussion>> GetAllDiscussion();
+        int CountAllDiscussion();
 
     }
 }

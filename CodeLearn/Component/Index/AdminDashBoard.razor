@@ -23,7 +23,7 @@
             <MudCard Class="statistic-box blue">
                 <MudCardHeader>
                     <CardHeaderContent>
-                        <MudText Style="color : white ;" Class="number">@listPosts.Count()</MudText>
+                        <MudText Style="color : white ;" Class="number">@PostNumber</MudText>
                         <MudText Style="color : white ;" Class="caption">Số bài đăng </MudText>
                     </CardHeaderContent>
                 </MudCardHeader>
@@ -33,7 +33,7 @@
             <MudCard Class="statistic-box green">
                 <MudCardHeader>
                     <CardHeaderContent>
-                        <MudText Style="color : white ;" Class="number">@listDiscussions.Count()</MudText>
+                        <MudText Style="color : white ;" Class="number">@DiscussionNumber</MudText>
                         <MudText Style="color : white ;" Class="caption">Số bài thảo luận </MudText>
                     </CardHeaderContent>
                 </MudCardHeader>
@@ -70,18 +70,19 @@
 </MudPaper>
 @code {
     private IEnumerable<User> listUsers { set; get; } = new List<User>();
-    private IEnumerable<Post> listPosts { set; get; } = new List<Post>();
-    private IEnumerable<Discussion> listDiscussions { set; get; } = new List<Discussion>();
+    private int PostNumber { set; get; }
+    private int DiscussionNumber { set; get; }
     protected override async Task OnInitializedAsync()
     {
         listUsers = await UserRepository.GetAllUser();
-        listPosts = await PostRepository.GetAllPost();
-        listDiscussions = await DiscussionRepository.GetAllDiscussion();
+        PostNumber = PostRepository.CountAllPost();
+        DiscussionNumber = DiscussionRepository.CountAllDiscussion();
 
         foreach (var user in listUsers)
         {
             var userIdentity = await UserManager.FindByNameAsync(user.Name.ToString());
             user.Discussions = await DiscussionRepository.GetDiscussionByAuthor(user.Id);
+            user.Posts = await PostRepository.GetPostsByAuthor(user.Id.ToString());
             var roles = await UserManager.GetRolesAsync(userIdentity);
             user.Role = string.Join(",", roles);
         }

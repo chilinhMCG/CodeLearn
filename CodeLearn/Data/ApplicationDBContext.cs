@@ -25,9 +25,9 @@ namespace CodeLearn.Data
         public DbSet<User> Users { get; set; }
 
         public DbSet<Post> Posts { set; get; }
-        public DbSet<PostRating> PostRatings { set; get; }
+        public DbSet<PostReact> PostReacts { set; get; }
 
-        public DbSet<DiscussionRating> DiscussionRatings { set; get; }
+        public DbSet<DiscussionReact> DiscussionReacts { set; get; }
         
         public DbSet<CourseRating> CourseRatings { get; set; }
 
@@ -86,7 +86,11 @@ namespace CodeLearn.Data
 
             modelBuilder.Entity<CourseRating>()
                 .HasKey(nameof(CourseRating.CourseId), nameof(CourseRating.UserId));
-            
+            modelBuilder.Entity<PostReact>()
+                .HasKey(nameof(PostReact.PostId), nameof(PostReact.UserId));
+            modelBuilder.Entity<DiscussionReact>()
+                .HasKey(nameof(DiscussionReact.DiscussionId), nameof(DiscussionReact.UserId));
+
         }
     }
 }

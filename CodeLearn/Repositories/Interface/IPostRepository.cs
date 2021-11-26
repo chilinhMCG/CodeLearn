@@ -15,5 +15,6 @@ namespace CodeLearn.Repositories.Interface
         void UpdatePost(Post post);
         void DeletePostByID(Guid id);
         Task<ICollection<Post>> GetAllPost();
+        int CountAllPost();
     }
 }

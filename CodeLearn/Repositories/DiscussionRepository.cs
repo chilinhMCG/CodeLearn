@@ -82,5 +82,12 @@ namespace CodeLearn.Repositories
             return list; 
             //context.SaveChanges();
         }
+
+        public int CountAllDiscussion()
+        {
+            using var context = _applicationDBContext.CreateDbContext();
+            var result = context.Discussions.Count();
+            return result;
+        }
     }
 }

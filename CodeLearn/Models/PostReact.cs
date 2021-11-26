@@ -8,15 +8,12 @@ using System.Threading.Tasks;
 
 namespace ManageForum.Api.Entities
 {
-    public class DiscussionRating
+    public class PostReact
     {
-        [Key]
-        [Column("id")]
-        public Guid Id { set; get; }
-        [Column("discussion_id")]
-        public Guid DiscussionId { set; get; }
-        [ForeignKey(name: "DiscussionId")]
-        public Discussion Discussion { set; get; }
+        [Column("post_id")]
+        public Guid PostId { set; get; }
+        [ForeignKey(name: "PostId")]
+        public Post Post { set; get; }
         [Column("user_id")]
         public Guid UserId { set; get; }
         [ForeignKey(name: "UserId")]

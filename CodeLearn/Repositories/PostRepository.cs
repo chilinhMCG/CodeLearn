@@ -61,5 +61,12 @@ namespace CodeLearn.Repositories
                                select p).ToListAsync(); 
             return result;
         }
+
+        public int CountAllPost()
+        {
+            using var context = _applicationDBContext.CreateDbContext();
+            var result = context.Posts.Count();
+            return result;
+        }
     }
 }

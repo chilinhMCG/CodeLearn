@@ -4,8 +4,9 @@
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 @inject IPostRepository PostRepository
+@inject IPostReactRepository PostReactRepository
 @attribute [Authorize(Roles = "Admin")]
-    
+
 <MudPaper Class="p-4 pb-1 mt-4 ">
     <MudTable Items="@listPosts" Hover="true" SortLabel="Sort By" Filter="new Func<Post,bool>(FilterPost)">
         <ToolBarContent>
@@ -16,8 +17,9 @@
         <HeaderContent>
             <MudTh><MudTableSortLabel SortBy="new Func<Post, object>(x => x.Title)">Câu hỏi</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<Post, object>(x => x.User.Name)">Người tạo</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel Enabled="@enabled" SortBy="new Func<Post, object>(x => x.CreateAt)">Ngày tạo</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel Enabled="true" SortBy="new Func<Post, object>(x => x.CreateAt)">Ngày tạo</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<Post, object>(x => x.LastUpdated)">Ngày sửa </MudTableSortLabel></MudTh>
+            <MudTh>Tương tác </MudTh>
             <MudTh>Tác vụ </MudTh>
         </HeaderContent>
         <RowTemplate>
@@ -25,6 +27,7 @@
             <MudTd DataLabel="Người tạo">@context.User.Name</MudTd>
             <MudTd DataLabel="Ngày tạo">@context.CreateAt</MudTd>
             <MudTd DataLabel="Ngày sửa">@context.LastUpdated</MudTd>
+            <MudTd DataLabel="Tương tác">@CountInteract(context)</MudTd>
             <MudTd DataLabel="Tác vụ">
                 <MudButton @onclick="(() => DeletePost(context))" Variant="Variant.Filled" Color="Color.Error">Xóa </MudButton>
             </MudTd>
@@ -35,15 +38,13 @@
         </PagerContent>
     </MudTable>
 
-    <MudSwitch @bind-Checked="enabled" Color="Color.Info">Cho phép sắp xếp theo cột</MudSwitch>
 </MudPaper>
 @code {
-    private bool enabled = true;
+    public class PostAndInteract : Post
+    {
+        int InteractNumber { set; get; } = 0;
+    }
     private IEnumerable<Post> listPosts = new List<Post>();
-    private bool resetValueOnEmptyText;
-    private bool coerceText;
-    private bool coerceValue;
-    private string value1, value2;
 
     protected override async Task OnInitializedAsync()
     {
@@ -66,6 +67,12 @@
         if ($"{element.Title} ".Contains(searchString))
             return true;
         return false;
+    }
+    private int CountInteract(Post post)
+    {
+        var result = PostReactRepository.CountPostReactFromPost(post.Id.ToString());
+        return result; 
+
     }
 
     private async Task<IEnumerable<string>> SearchPost(string value)
