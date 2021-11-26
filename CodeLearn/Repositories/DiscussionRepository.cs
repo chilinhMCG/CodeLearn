@@ -64,7 +64,7 @@ namespace CodeLearn.Repositories
             using var context = _applicationDBContext.CreateDbContext();
             var result = await (from d in context.Discussions
                                 where d.UserId == id
-                                select d).ToListAsync(); ;
+                                select d).OrderBy(p => p.CreateAt).ToListAsync(); ;
             return result;
         }
 
@@ -78,7 +78,7 @@ namespace CodeLearn.Repositories
         public async Task<ICollection<Discussion>> GetAllDiscussion()
         {
             using var context = _applicationDBContext.CreateDbContext();
-            var list = await context.Discussions.OrderBy(d=>d.Question).ToListAsync();
+            var list = await context.Discussions.OrderBy(d=>d.CreateAt).ToListAsync();
             return list; 
             //context.SaveChanges();
         }

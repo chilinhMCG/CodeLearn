@@ -49,7 +49,7 @@ namespace CodeLearn.Repositories
         public async Task<ICollection<Post>> GetAllPost()
         {
             using var context = _applicationDBContext.CreateDbContext();
-            var list = await context.Posts.OrderBy(p=>p.Title).ToListAsync();
+            var list = await context.Posts.OrderBy(p=>p.CreateAt).ToListAsync();
             return list;
         }
 
@@ -58,7 +58,7 @@ namespace CodeLearn.Repositories
             using var context = _applicationDBContext.CreateDbContext();
             var result = await(from p in context.Posts
                                where p.UserId.ToString() == userid
-                               select p).ToListAsync(); 
+                               select p).OrderBy(p => p.CreateAt).ToListAsync(); 
             return result;
         }
 
