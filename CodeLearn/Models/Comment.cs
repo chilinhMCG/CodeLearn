@@ -23,10 +23,14 @@ namespace CodeLearn.Models
         public string Content { get; set; }
         [Column("user_id")]
         public Guid? UserId { get; set; }
-        [Column("DiscussionId")]
+        [Column("discussion_id")]
         public Guid? DiscussionId { get; set; }
+        [Column("post_id")]
+        public Guid? PostId { get; set; }
         public User User { get; set; }
         public Discussion Discussion { get; set; }
+        public Post Post { get; set; }
+
         public object Clone()
         {
             return this.MemberwiseClone();

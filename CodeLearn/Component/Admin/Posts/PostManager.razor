@@ -4,6 +4,7 @@
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 @inject IPostRepository PostRepository
+@inject ICommentRepository CommentRepository
 @inject IPostReactRepository PostReactRepository
 @attribute [Authorize(Roles = "Admin")]
 
@@ -40,10 +41,6 @@
 
 </MudPaper>
 @code {
-    public class PostAndInteract : Post
-    {
-        int InteractNumber { set; get; } = 0;
-    }
     private IEnumerable<Post> listPosts = new List<Post>();
 
     protected override async Task OnInitializedAsync()
@@ -71,7 +68,8 @@
     private int CountInteract(Post post)
     {
         var result = PostReactRepository.CountPostReactFromPost(post.Id.ToString());
-        return result; 
+        +CommentRepository.CountCommentInPost(post.Id);
+        return result;
 
     }
 

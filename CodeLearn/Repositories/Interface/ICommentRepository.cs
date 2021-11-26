@@ -12,5 +12,8 @@ namespace CodeLearn.Repositories.Interface
         void AddComment(Comment comment);
         void DeleteAllCommentsInPost(Guid postID);
         public void DeleteCommentbyObject(Comment comment);
+        int CountCommentInDiscussion(Guid id);
+        int CountCommentInPost(Guid id);
+
     }
 }

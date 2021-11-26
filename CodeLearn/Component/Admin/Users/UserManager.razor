@@ -18,16 +18,14 @@
             <MudTh><MudTableSortLabel Enabled="true" SortBy="new Func<User, object>(x => x.Name)">Tên</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<User, object>(x => x.Email)">Email</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<User, object>(x => x.IsBlocked)">Trạng thái</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<User, object>(x => x.Discussions.Count)">Số bài thảo luận</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<User, object>(x => x.Posts.Count)">Số bài đăng</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<User, object>(x => x.Discussions.Count+x.Posts.Count)">Tổng bài viết</MudTableSortLabel></MudTh>
             <MudTh>Tác vụ</MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Name">@context.Name</MudTd>
             <MudTd DataLabel="Email">@context.Email</MudTd>
             <MudTd DataLabel="Is Blocked"><CodeLearn.Component.DashBoard.Component.StatusLabel IsBlocked="@context.IsBlocked"></CodeLearn.Component.DashBoard.Component.StatusLabel></MudTd>
-            <MudTd DataLabel="Discussions">@context.Discussions.Count</MudTd>
-            <MudTd DataLabel="Posts">@context.Posts.Count</MudTd>
+            <MudTd DataLabel="Discussions">@(context.Discussions.Count+ context.Posts.Count)</MudTd>
             <MudTd DataLabel="Tác vụ">
                 <MudButton @onclick="(() => BlockUser(context))" Variant="Variant.Filled" Color="Color.Error">Khóa </MudButton>
             </MudTd>

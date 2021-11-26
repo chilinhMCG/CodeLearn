@@ -29,7 +29,10 @@ namespace CodeLearn.Models
         public string Content { get; set; }
         [Column("user_id")]
         public Guid? UserId { get; set; }
+        [Column("user_id")]
+        int NumberInteract { set; get; }
         public ICollection<Comment> Comments { get; set; }
         public User User { get; set; }
+
     }
 }
