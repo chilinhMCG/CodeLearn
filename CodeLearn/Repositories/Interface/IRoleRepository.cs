@@ -8,7 +8,7 @@ namespace CodeLearn.Repositories.Interface
 {
     public interface IRoleRepository
     {
-        Task<IdentityRole> Add(IdentityRole role);
+        Task<IdentityResult> Add(IdentityRole role);
         Task Delete(IdentityRole role);
         Task Edit(IdentityRole role);
         Task<IEnumerable<IdentityRole>> GetAllRole();

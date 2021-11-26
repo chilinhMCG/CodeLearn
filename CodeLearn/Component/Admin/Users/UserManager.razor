@@ -2,6 +2,7 @@
 @using System.Net.Http.Json
 @inject IUserRepository UserRepository
 @inject IDiscussionRepository DicussionRepository
+@inject IPostRepository PostRepository
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 @attribute [Authorize(Roles = "Admin")]
@@ -14,36 +15,32 @@
             <MudTextField @bind-Value="searchUser" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
         </ToolBarContent>
         <HeaderContent>
-            <MudTh><MudTableSortLabel SortBy="new Func<User, object>(x => x.Name)">Tên</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel Enabled="@enabled" SortBy="new Func<User, object>(x => x.Email)">Email</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel Enabled="true" SortBy="new Func<User, object>(x => x.Name)">Tên</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<User, object>(x => x.Email)">Email</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<User, object>(x => x.IsBlocked)">Trạng thái</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<User, object>(x => x.Discussions.Count)">Số bài đăng</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<User, object>(x => x.Discussions.Count)">Số bài thảo luận</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<User, object>(x => x.Posts.Count)">Số bài đăng</MudTableSortLabel></MudTh>
             <MudTh>Tác vụ</MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Name">@context.Name</MudTd>
             <MudTd DataLabel="Email">@context.Email</MudTd>
             <MudTd DataLabel="Is Blocked"><CodeLearn.Component.DashBoard.Component.StatusLabel IsBlocked="@context.IsBlocked"></CodeLearn.Component.DashBoard.Component.StatusLabel></MudTd>
-            <MudTd DataLabel="Posts">@context.Discussions.Count</MudTd>
+            <MudTd DataLabel="Discussions">@context.Discussions.Count</MudTd>
+            <MudTd DataLabel="Posts">@context.Posts.Count</MudTd>
             <MudTd DataLabel="Tác vụ">
                 <MudButton @onclick="(() => BlockUser(context))" Variant="Variant.Filled" Color="Color.Error">Khóa </MudButton>
             </MudTd>
 
         </RowTemplate>
         <PagerContent>
-            <MudTablePager PageSizeOptions="new int[] { 25, 50 }" />
+            <MudTablePager PageSizeOptions="new int[] { 10,25, 50 }" />
         </PagerContent>
     </MudTable>
 
-    <MudSwitch @bind-Checked="enabled" Color="Color.Info">Cho phép sắp xếp theo cột</MudSwitch>
 </MudPaper>
 @code {
-    private bool enabled = true;
     private IEnumerable<User> listUsers = new List<User>();
-    private bool resetValueOnEmptyText;
-    private bool coerceText;
-    private bool coerceValue;
-    private string value1, value2;
 
     protected override async Task OnInitializedAsync()
     {
@@ -51,7 +48,7 @@
         foreach (var user in listUsers)
         {
             user.Discussions = await DicussionRepository.GetDiscussionByAuthor(user.Id);
-
+            user.Posts = await PostRepository.GetPostsByAuthor(user.Id.ToString());
         }
     }
     private string searchUser = "";
@@ -63,8 +60,6 @@
             return true;
         if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
-        if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
-            return true;
         if ($"{element.Email} {element.Discussions.Count}".Contains(searchString))
             return true;
         return false;
@@ -72,9 +67,7 @@
 
     private async Task<IEnumerable<string>> SearchUser(string value)
     {
-        // In real life use an asynchronous function for fetching data from an api.
-
-        await Task.Delay(5);
+        //await Task.Delay(5);
         if (string.IsNullOrEmpty(value))
             return new string[0];
         var users = listUsers.Where(x => x.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase));
@@ -84,19 +77,20 @@
     }
     async Task BlockUser(User user)
     {
-        var dialog = DialogService.Show<DeleteDialog>("Xóa quyền truy cập tài khoản người dùng");
+        var dialog = DialogService.Show<BlockDialog>("Khóa/Mở khóa tài khoản người dùng");
 
         var result = await dialog.Result;
-        if (user.IsBlocked == true)
-            user.IsBlocked = false;
-        else user.IsBlocked = true;
+
 
         if (!result.Cancelled)
         {
+            if (user.IsBlocked == true)
+                user.IsBlocked = false;
+            else user.IsBlocked = true;
 
             UserRepository.UpdateUser(user);
             StateHasChanged();
-            Snackbar.Add("Xóa quyền truy cập thành công!", Severity.Success);
+            Snackbar.Add("Khóa/Mở khóa quyền truy cập thành công!", Severity.Success);
             await Task.Delay(1500);
         }
     }

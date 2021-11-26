@@ -8,21 +8,21 @@ using System.Threading.Tasks;
 
 namespace ManageForum.Api.Entities
 {
-    public class PostCreact
+    public class DiscussionRating
     {
         [Key]
         [Column("id")]
         public Guid Id { set; get; }
-        [Column("post_id")]
-        public Guid PostId { set; get; }
-        [ForeignKey(name: "PostId")]
-        public Post Post { set; get; }
+        [Column("discussion_id")]
+        public Guid DiscussionId { set; get; }
+        [ForeignKey(name: "DiscussionId")]
+        public Discussion Discussion { set; get; }
         [Column("user_id")]
         public Guid UserId { set; get; }
         [ForeignKey(name: "UserId")]
         public User User { set; get; }
-        [Column("is_like")]
-        public bool IsLike { set; get; }
+        [Column("is_liked")]
+        public bool IsLiked { set; get; }
 
     }
 }

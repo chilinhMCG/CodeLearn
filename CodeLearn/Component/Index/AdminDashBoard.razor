@@ -49,7 +49,7 @@
         </ToolBarContent>
         <HeaderContent>
             <MudTh><MudTableSortLabel SortBy="new Func<User, object>(x => x.Name)">Tên</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel Enabled="@enabled" SortBy="new Func<User, object>(x => x.Email)">Email</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel Enabled="true" SortBy="new Func<User, object>(x => x.Email)">Email</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<User, object>(x => x.IsBlocked)">Trạng thái</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<User, object>(x => x.Discussions.Count)">Số bài thảo luận    </MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<User, object>(x => x.Posts.Count)">Số bài đăng</MudTableSortLabel></MudTh>
@@ -62,21 +62,13 @@
             <MudTd DataLabel="Discussions">@context.Discussions.Count</MudTd>
             <MudTd DataLabel="Posts">@context.Posts.Count</MudTd>
             <MudTd DataLabel="Role">@context.Role</MudTd>
-
         </RowTemplate>
         <PagerContent>
-            <MudTablePager PageSizeOptions="new int[] { 25, 50 }" />
+            <MudTablePager PageSizeOptions="new int[] {10, 25, 50 }" />
         </PagerContent>
     </MudTable>
-
-    <MudSwitch @bind-Checked="enabled" Color="Color.Info">Cho phép sắp xếp theo cột</MudSwitch>
 </MudPaper>
 @code {
-    private bool enabled = true;
-    private bool resetValueOnEmptyText;
-    private bool coerceText;
-    private bool coerceValue;
-    private string value1, value2;
     private IEnumerable<User> listUsers { set; get; } = new List<User>();
     private IEnumerable<Post> listPosts { set; get; } = new List<Post>();
     private IEnumerable<Discussion> listDiscussions { set; get; } = new List<Discussion>();
@@ -100,8 +92,6 @@
     private bool FilterFunc(User element, string searchString)
     {
         if (string.IsNullOrWhiteSpace(searchString))
-            return true;
-        if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;
         if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
             return true;

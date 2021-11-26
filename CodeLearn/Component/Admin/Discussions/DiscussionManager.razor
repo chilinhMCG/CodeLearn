@@ -32,7 +32,7 @@
 
         </RowTemplate>
         <PagerContent>
-            <MudTablePager PageSizeOptions="new int[] { 25, 50 }" />
+            <MudTablePager PageSizeOptions="new int[] { 10,25, 50 }" />
         </PagerContent>
     </MudTable>
 
@@ -98,7 +98,6 @@
 
             }
             Snackbar.Add("Xóa thành công!", Severity.Success);
-            await Task.Delay(1500);
         }
     }
 }

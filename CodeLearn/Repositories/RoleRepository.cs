@@ -18,10 +18,10 @@ namespace CodeLearn.Repositories
             _context = context;
             _roleManager = roleManager;
         }
-        public async Task<IdentityRole> Add(IdentityRole role)
+        public async Task<IdentityResult> Add(IdentityRole role)
         {
             var result = await _roleManager.CreateAsync(role);
-            return role; 
+            return result; 
         }
 
         public async Task Delete(IdentityRole role)

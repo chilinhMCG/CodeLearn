@@ -27,12 +27,11 @@
             <MudTd DataLabel="Ngày sửa">@context.LastUpdated</MudTd>
             <MudTd DataLabel="Tác vụ">
                 <MudButton @onclick="(() => DeletePost(context))" Variant="Variant.Filled" Color="Color.Error">Xóa </MudButton>
-                <MudLink Href="@($"/admin/posts/edit/{context.Id}")"><MudButton Variant="Variant.Filled" Color="Color.Success">Sửa</MudButton></MudLink>
             </MudTd>
 
         </RowTemplate>
         <PagerContent>
-            <MudTablePager PageSizeOptions="new int[] { 25, 50 }" />
+            <MudTablePager PageSizeOptions="new int[] {10, 25, 50 }" />
         </PagerContent>
     </MudTable>
 

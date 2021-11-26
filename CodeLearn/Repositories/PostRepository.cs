@@ -23,11 +23,7 @@ namespace CodeLearn.Repositories
             context.SaveChanges();
         }
 
-        public Post GetPostById(Guid id)
-        {
-            using var context = _applicationDBContext.CreateDbContext();
-            return context.Posts.Where(h => h.Id == id).FirstOrDefault();
-        }
+      
 
         public Post GetPostById(string id)
         {
@@ -45,7 +41,7 @@ namespace CodeLearn.Repositories
         public void DeletePostByID(Guid id)
         {
             using var context = _applicationDBContext.CreateDbContext();
-            Post post = GetPostById(id);
+            Post post = GetPostById(id.ToString());
             context.Remove(post);
             context.SaveChanges();
         }
@@ -53,8 +49,17 @@ namespace CodeLearn.Repositories
         public async Task<ICollection<Post>> GetAllPost()
         {
             using var context = _applicationDBContext.CreateDbContext();
-            var list = await context.Posts.ToListAsync();
+            var list = await context.Posts.OrderBy(p=>p.Title).ToListAsync();
             return list;
+        }
+
+        public async Task<ICollection<Post>> GetPostsByAuthor(string userid)
+        {
+            using var context = _applicationDBContext.CreateDbContext();
+            var result = await(from p in context.Posts
+                               where p.UserId.ToString() == userid
+                               select p).ToListAsync(); 
+            return result;
         }
     }
 }

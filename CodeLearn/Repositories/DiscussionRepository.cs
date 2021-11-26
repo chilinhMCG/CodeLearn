@@ -78,7 +78,7 @@ namespace CodeLearn.Repositories
         public async Task<ICollection<Discussion>> GetAllDiscussion()
         {
             using var context = _applicationDBContext.CreateDbContext();
-            var list = await context.Discussions.ToListAsync();
+            var list = await context.Discussions.OrderBy(d=>d.Question).ToListAsync();
             return list; 
             //context.SaveChanges();
         }

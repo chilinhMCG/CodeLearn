@@ -25,10 +25,10 @@ namespace CodeLearn.Data
         public DbSet<User> Users { get; set; }
 
         public DbSet<Post> Posts { set; get; }
-        public DbSet<PostCreact> PostCreacts { set; get; }
+        public DbSet<PostRating> PostRatings { set; get; }
 
-        public DbSet<DiscussionCreact> DiscussionCreacts { set; get; }
-
+        public DbSet<DiscussionRating> DiscussionRatings { set; get; }
+        
         public DbSet<CourseRating> CourseRatings { get; set; }
 
         static ApplicationDBContext() => NpgsqlConnection.GlobalTypeMapper.MapEnum<CourseStatusEnum>();
