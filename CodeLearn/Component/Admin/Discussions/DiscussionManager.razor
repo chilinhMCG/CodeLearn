@@ -9,7 +9,7 @@
 @attribute [Authorize(Roles = "Admin")]
 
 <MudPaper Class="p-4 pb-1 mt-4 ">
-    <MudTable Items="@listDiscussions" Hover="true" SortLabel="Sort By" Filter="new Func<Discussion,bool>(FilterDiscussion)">
+    <MudTable Items="@_listDiscussions" Hover="true" SortLabel="Sort By" Filter="new Func<Discussion,bool>(FilterDiscussion)">
         <ToolBarContent>
             <MudText Typo="Typo.h6">Danh sách bài thảo luận</MudText>
             <MudSpacer />
@@ -20,7 +20,7 @@
             <MudTh><MudTableSortLabel SortBy="new Func<Discussion, object>(x => x.User.Name)">Người tạo</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<Discussion, object>(x => x.CreateAt)">Ngày tạo</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<Discussion, object>(x => x.LastUpdated)">Ngày sửa </MudTableSortLabel></MudTh>
-            <MudTh>Số tương tác </MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<Discussion, object>(x => CountInteract(x))">Số tương tác</MudTableSortLabel></MudTh>
             <MudTh>Tác vụ </MudTh>
         </HeaderContent>
         <RowTemplate>
@@ -42,11 +42,11 @@
 
 </MudPaper>
 @code {
-    private IEnumerable<Discussion> listDiscussions = new List<Discussion>();
+    private IEnumerable<Discussion> _listDiscussions = new List<Discussion>();
     protected override async Task OnInitializedAsync()
     {
-        listDiscussions = await DiscussionRepository.GetAllDiscussion();
-        foreach (var item in listDiscussions)
+        _listDiscussions = await DiscussionRepository.GetAllDiscussion();
+        foreach (var item in _listDiscussions)
         {
             item.User = UserRepositoy.GetUserById(item.UserId.ToString());
 
@@ -70,8 +70,8 @@
     {
         if (string.IsNullOrEmpty(value))
             return new string[0];
-        var users = listDiscussions.Where(x => x.Question.Contains(value, StringComparison.InvariantCultureIgnoreCase));
-        var result = from u in listDiscussions
+        var users = _listDiscussions.Where(x => x.Question.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+        var result = from u in _listDiscussions
                      select u.Question;
         return result;
     }
@@ -85,8 +85,8 @@
 
             DiscussionRepository.DeleteDiscussionByID(discussion.Id);
             StateHasChanged();
-            listDiscussions = await DiscussionRepository.GetAllDiscussion();
-            foreach (var item in listDiscussions)
+            _listDiscussions = await DiscussionRepository.GetAllDiscussion();
+            foreach (var item in _listDiscussions)
             {
                 item.User = UserRepositoy.GetUserById(item.UserId.ToString());
 

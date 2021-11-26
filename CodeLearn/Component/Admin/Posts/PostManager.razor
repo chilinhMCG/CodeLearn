@@ -9,7 +9,7 @@
 @attribute [Authorize(Roles = "Admin")]
 
 <MudPaper Class="p-4 pb-1 mt-4 ">
-    <MudTable Items="@listPosts" Hover="true" SortLabel="Sort By" Filter="new Func<Post,bool>(FilterPost)">
+    <MudTable Items="@_listPosts" Hover="true" SortLabel="Sort By" Filter="new Func<Post,bool>(FilterPost)">
         <ToolBarContent>
             <MudText Typo="Typo.h6">Danh sách bài đăng</MudText>
             <MudSpacer />
@@ -20,11 +20,11 @@
             <MudTh><MudTableSortLabel SortBy="new Func<Post, object>(x => x.User.Name)">Người tạo</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel Enabled="true" SortBy="new Func<Post, object>(x => x.CreateAt)">Ngày tạo</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<Post, object>(x => x.LastUpdated)">Ngày sửa </MudTableSortLabel></MudTh>
-            <MudTh>Tương tác </MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<Post, object>(x => CountInteract(x))">Số tương tác </MudTableSortLabel></MudTh>
             <MudTh>Tác vụ </MudTh>
         </HeaderContent>
         <RowTemplate>
-            <MudTd DataLabel="Câu hỏi "><MudLink Href="@($"/admin/posts/edit/{context.Id}")">@context.Title</MudLink></MudTd>
+            <MudTd DataLabel="Câu hỏi "><MudLink Href="#">@context.Title</MudLink></MudTd>
             <MudTd DataLabel="Người tạo">@context.User.Name</MudTd>
             <MudTd DataLabel="Ngày tạo">@context.CreateAt</MudTd>
             <MudTd DataLabel="Ngày sửa">@context.LastUpdated</MudTd>
@@ -41,12 +41,12 @@
 
 </MudPaper>
 @code {
-    private IEnumerable<Post> listPosts = new List<Post>();
+    private IEnumerable<Post> _listPosts = new List<Post>();
 
     protected override async Task OnInitializedAsync()
     {
-        listPosts = await PostRepository.GetAllPost();
-        foreach (var item in listPosts)
+        _listPosts = await PostRepository.GetAllPost();
+        foreach (var item in _listPosts)
         {
             item.User = UserRepositoy.GetUserById(item.UserId.ToString());
 
@@ -67,7 +67,7 @@
     }
     private int CountInteract(Post post)
     {
-        var result = PostReactRepository.CountPostReactFromPost(post.Id.ToString());
+        var result = PostReactRepository.CountPostReactFromPost(post.Id.ToString())
         +CommentRepository.CountCommentInPost(post.Id);
         return result;
 
@@ -80,8 +80,8 @@
         await Task.Delay(5);
         if (string.IsNullOrEmpty(value))
             return new string[0];
-        var users = listPosts.Where(x => x.Title.Contains(value, StringComparison.InvariantCultureIgnoreCase));
-        var result = from u in listPosts
+        var users = _listPosts.Where(x => x.Title.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+        var result = from u in _listPosts
                      select u.Title;
         return result;
     }
@@ -97,8 +97,8 @@
 
             Snackbar.Add("Xóa thành công!", Severity.Success);
             StateHasChanged();
-            listPosts = await PostRepository.GetAllPost();
-            foreach (var item in listPosts)
+            _listPosts = await PostRepository.GetAllPost();
+            foreach (var item in _listPosts)
             {
                 item.User = UserRepositoy.GetUserById(item.UserId.ToString());
 

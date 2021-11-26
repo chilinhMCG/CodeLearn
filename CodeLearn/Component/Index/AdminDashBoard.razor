@@ -3,6 +3,7 @@
 @inject IUserRepository UserRepository
 @inject IDiscussionRepository DiscussionRepository
 @inject IPostRepository PostRepository
+@inject ICommentRepository CommentRepository
 @inject IDialogService DialogService
 @inject ISnackbar Snackbar
 @inject UserManager<IdentityUser> UserManager
@@ -13,7 +14,7 @@
             <MudCard Class="statistic-box red">
                 <MudCardHeader>
                     <CardHeaderContent>
-                        <MudText Style="color : white ;" Class="number"> @listUsers.Count()</MudText>
+                        <MudText Style="color : white ;" Class="number"> @_listUsers.Count()</MudText>
                         <MudText Style="color : white ;" Class="caption">Số thành viên </MudText>
                     </CardHeaderContent>
                 </MudCardHeader>
@@ -23,7 +24,7 @@
             <MudCard Class="statistic-box blue">
                 <MudCardHeader>
                     <CardHeaderContent>
-                        <MudText Style="color : white ;" Class="number">@PostNumber</MudText>
+                        <MudText Style="color : white ;" Class="number">@_postNumber</MudText>
                         <MudText Style="color : white ;" Class="caption">Số bài đăng </MudText>
                     </CardHeaderContent>
                 </MudCardHeader>
@@ -33,7 +34,7 @@
             <MudCard Class="statistic-box green">
                 <MudCardHeader>
                     <CardHeaderContent>
-                        <MudText Style="color : white ;" Class="number">@DiscussionNumber</MudText>
+                        <MudText Style="color : white ;" Class="number">@_discussionNumber</MudText>
                         <MudText Style="color : white ;" Class="caption">Số bài thảo luận </MudText>
                     </CardHeaderContent>
                 </MudCardHeader>
@@ -41,7 +42,7 @@
         </MudItem>
 
     </MudGrid>
-    <MudTable Items="@listUsers" Hover="true" SortLabel="Sort By" Filter="new Func<User,bool>(FilterUser)">
+    <MudTable Items="@_listUsers" Hover="true" SortLabel="Sort By" Filter="new Func<User,bool>(FilterUser)">
         <ToolBarContent>
             <MudText Typo="Typo.h6">Danh sách thành viên</MudText>
             <MudSpacer />
@@ -51,16 +52,16 @@
             <MudTh><MudTableSortLabel SortBy="new Func<User, object>(x => x.Name)">Tên</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel Enabled="true" SortBy="new Func<User, object>(x => x.Email)">Email</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<User, object>(x => x.IsBlocked)">Trạng thái</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<User, object>(x => x.Discussions.Count)">Số bài thảo luận    </MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<User, object>(x => x.Posts.Count)">Số bài đăng</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<User, object>(x => x.Discussions.Count+x.Posts.Count)">Tổng bài viết</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<User, object>(x => CountInteract(x))">Tổng tương tác</MudTableSortLabel></MudTh>
             <MudTh>Role</MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Name">@context.Name</MudTd>
             <MudTd DataLabel="Email">@context.Email</MudTd>
             <MudTd DataLabel="Is Blocked"><CodeLearn.Component.DashBoard.Component.StatusLabel IsBlocked="@context.IsBlocked"></CodeLearn.Component.DashBoard.Component.StatusLabel></MudTd>
-            <MudTd DataLabel="Discussions">@context.Discussions.Count</MudTd>
-            <MudTd DataLabel="Posts">@context.Posts.Count</MudTd>
+            <MudTd DataLabel="Tổng bài viết">@(context.Discussions.Count+context.Posts.Count)</MudTd>
+            <MudTd DataLabel="Số tương tác">@(CountInteract(context))</MudTd>
             <MudTd DataLabel="Role">@context.Role</MudTd>
         </RowTemplate>
         <PagerContent>
@@ -69,17 +70,17 @@
     </MudTable>
 </MudPaper>
 @code {
-   
-    private IEnumerable<User> listUsers { set; get; } = new List<User>();
-    private int PostNumber { set; get; }
-    private int DiscussionNumber { set; get; }
+
+    private IEnumerable<User> _listUsers { set; get; } = new List<User>();
+    private int _postNumber { set; get; }
+    private int _discussionNumber { set; get; }
     protected override async Task OnInitializedAsync()
     {
-        listUsers = await UserRepository.GetAllUser();
-        PostNumber = PostRepository.CountAllPost();
-        DiscussionNumber = DiscussionRepository.CountAllDiscussion();
+        _listUsers = await UserRepository.GetAllUser();
+        _postNumber = PostRepository.CountAllPost();
+        _discussionNumber = DiscussionRepository.CountAllDiscussion();
 
-        foreach (var user in listUsers)
+        foreach (var user in _listUsers)
         {
             var userIdentity = await UserManager.FindByNameAsync(user.Name.ToString());
             user.Discussions = await DiscussionRepository.GetDiscussionByAuthor(user.Id);
@@ -100,5 +101,11 @@
         if ($"{element.Email} {element.Discussions.Count}".Contains(searchString))
             return true;
         return false;
+    }
+
+    private int CountInteract(User user)
+    {
+        var result = user.Discussions.Count() + user.Posts.Count() + CommentRepository.CountCommentOfUser(user.Id);
+        return result; 
     }
 }
