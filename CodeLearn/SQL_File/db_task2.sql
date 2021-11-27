@@ -170,35 +170,6 @@ CREATE TABLE public."AspNetUsers" (
 ALTER TABLE public."AspNetUsers" OWNER TO postgres;
 
 --
--- Name: CommentStars; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public."CommentStars" (
-    user_id uuid NOT NULL,
-    comment_id uuid NOT NULL
-);
-
-
-ALTER TABLE public."CommentStars" OWNER TO postgres;
-
---
--- Name: Comments; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public."Comments" (
-    id uuid NOT NULL,
-    user_id uuid NOT NULL,
-    post_id uuid NOT NULL,
-    parent_comment_id uuid,
-    content text,
-    date_created timestamp without time zone NOT NULL,
-    date_last_edited timestamp without time zone NOT NULL
-);
-
-
-ALTER TABLE public."Comments" OWNER TO postgres;
-
---
 -- Name: CourseDetails; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -242,6 +213,35 @@ CREATE TABLE public."Courses" (
 
 
 ALTER TABLE public."Courses" OWNER TO postgres;
+
+--
+-- Name: PostCommentStars; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."PostCommentStars" (
+    user_id uuid NOT NULL,
+    comment_id uuid NOT NULL
+);
+
+
+ALTER TABLE public."PostCommentStars" OWNER TO postgres;
+
+--
+-- Name: PostComments; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public."PostComments" (
+    id uuid NOT NULL,
+    user_id uuid NOT NULL,
+    post_id uuid NOT NULL,
+    parent_comment_id uuid,
+    content text,
+    date_created timestamp without time zone NOT NULL,
+    date_last_edited timestamp without time zone NOT NULL
+);
+
+
+ALTER TABLE public."PostComments" OWNER TO postgres;
 
 --
 -- Name: PostRatings; Type: TABLE; Schema: public; Owner: postgres
@@ -369,10 +369,34 @@ COPY public."AspNetUsers" ("Id", "UserName", "NormalizedUserName", "Email", "Nor
 
 
 --
--- Data for Name: CommentStars; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: CourseDetails; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."CommentStars" (user_id, comment_id) FROM stdin;
+COPY public."CourseDetails" (id, created_at, course_id, creator_id) FROM stdin;
+\.
+
+
+--
+-- Data for Name: CourseTypes; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public."CourseTypes" (id, name) FROM stdin;
+\.
+
+
+--
+-- Data for Name: Courses; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public."Courses" (id, thumbnail, name, description, author, rating, created_at, status, course_type_id) FROM stdin;
+\.
+
+
+--
+-- Data for Name: PostCommentStars; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public."PostCommentStars" (user_id, comment_id) FROM stdin;
 3dd2fdd9-ae05-49dd-8dd2-5fa9d2e99ac4	dd50b471-f327-4f14-831d-17a61b889cb9
 3dd2fdd9-ae05-49dd-8dd2-5fa9d2e99ac4	3341a8c3-308e-46a3-9ce0-25f9d0d9a958
 3dd2fdd9-ae05-49dd-8dd2-5fa9d2e99ac4	2aed34a8-189a-4992-b8a0-39edc981f1fa
@@ -384,10 +408,10 @@ COPY public."CommentStars" (user_id, comment_id) FROM stdin;
 
 
 --
--- Data for Name: Comments; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Data for Name: PostComments; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public."Comments" (id, user_id, post_id, parent_comment_id, content, date_created, date_last_edited) FROM stdin;
+COPY public."PostComments" (id, user_id, post_id, parent_comment_id, content, date_created, date_last_edited) FROM stdin;
 b0469da2-45dc-4ffa-bb12-9b85edd7e65e	513879b5-9105-487d-946a-25e82d9c99fa	d1155f5c-6e3d-4f92-ac21-cd3671bdf49d	\N	<p>nice</p>	2021-11-26 22:01:19.007178	2021-11-26 22:01:19.007178
 dd50b471-f327-4f14-831d-17a61b889cb9	8e8aa08d-044c-4e95-a934-7d9ddc1f4fb1	f12cbae4-6211-46e9-bdca-39f4d08820ca	\N	<p>Chuột?</p>	2021-11-27 13:38:01.270804	2021-11-27 13:38:01.270804
 2aed34a8-189a-4992-b8a0-39edc981f1fa	8e8aa08d-044c-4e95-a934-7d9ddc1f4fb1	f12cbae4-6211-46e9-bdca-39f4d08820ca	dd50b471-f327-4f14-831d-17a61b889cb9	<p>maus?</p>	2021-11-27 13:55:53.735501	2021-11-27 13:55:53.735501
@@ -410,30 +434,6 @@ f34ac3f8-1247-46d4-8981-f50b443b041c	3dd2fdd9-ae05-49dd-8dd2-5fa9d2e99ac4	f9bac8
 059bdff4-c504-4f83-835f-220d53704991	8e8aa08d-044c-4e95-a934-7d9ddc1f4fb1	fec1e90b-742b-4e56-9f15-bcdfc641c84f	\N	<p>kem ngon</p>	2021-11-27 15:17:50.172561	2021-11-27 15:17:50.172561
 2d9bd1c4-5a1a-48ed-aa0d-9498642b5e9c	3dd2fdd9-ae05-49dd-8dd2-5fa9d2e99ac4	d1155f5c-6e3d-4f92-ac21-cd3671bdf49d	\N	<p>được &aacute;!!</p>	2021-11-27 14:45:34.979163	2021-11-27 15:25:05.637181
 95dd7c9b-15ba-4519-be6d-d11929ae5bb2	3dd2fdd9-ae05-49dd-8dd2-5fa9d2e99ac4	d1155f5c-6e3d-4f92-ac21-cd3671bdf49d	\N	<p>hay</p>	2021-11-27 14:45:25.666952	2021-11-27 14:45:25.666952
-\.
-
-
---
--- Data for Name: CourseDetails; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public."CourseDetails" (id, created_at, course_id, creator_id) FROM stdin;
-\.
-
-
---
--- Data for Name: CourseTypes; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public."CourseTypes" (id, name) FROM stdin;
-\.
-
-
---
--- Data for Name: Courses; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public."Courses" (id, thumbnail, name, description, author, rating, created_at, status, course_type_id) FROM stdin;
 \.
 
 
@@ -511,6 +511,7 @@ COPY public."__EFMigrationsHistory" ("MigrationId", "ProductVersion") FROM stdin
 20211117110454_RevertChangesToCommentProps	5.0.9
 20211126130202_AddUnaccentedColumns	5.0.9
 20211126130309_AddTsVectorColumns	5.0.9
+20211127104258_RenameColumns	5.0.9
 \.
 
 
@@ -585,18 +586,18 @@ ALTER TABLE ONLY public."AspNetUsers"
 
 
 --
--- Name: CommentStars PK_CommentStars; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: PostCommentStars PK_CommentStars; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public."CommentStars"
+ALTER TABLE ONLY public."PostCommentStars"
     ADD CONSTRAINT "PK_CommentStars" PRIMARY KEY (user_id, comment_id);
 
 
 --
--- Name: Comments PK_Comments; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: PostComments PK_Comments; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public."Comments"
+ALTER TABLE ONLY public."PostComments"
     ADD CONSTRAINT "PK_Comments" PRIMARY KEY (id);
 
 
@@ -695,28 +696,28 @@ CREATE INDEX "IX_AspNetUserRoles_RoleId" ON public."AspNetUserRoles" USING btree
 -- Name: IX_CommentStars_comment_id; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX "IX_CommentStars_comment_id" ON public."CommentStars" USING btree (comment_id);
+CREATE INDEX "IX_CommentStars_comment_id" ON public."PostCommentStars" USING btree (comment_id);
 
 
 --
 -- Name: IX_Comments_parent_comment_id; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX "IX_Comments_parent_comment_id" ON public."Comments" USING btree (parent_comment_id);
+CREATE INDEX "IX_Comments_parent_comment_id" ON public."PostComments" USING btree (parent_comment_id);
 
 
 --
 -- Name: IX_Comments_post_id; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX "IX_Comments_post_id" ON public."Comments" USING btree (post_id);
+CREATE INDEX "IX_Comments_post_id" ON public."PostComments" USING btree (post_id);
 
 
 --
 -- Name: IX_Comments_user_id; Type: INDEX; Schema: public; Owner: postgres
 --
 
-CREATE INDEX "IX_Comments_user_id" ON public."Comments" USING btree (user_id);
+CREATE INDEX "IX_Comments_user_id" ON public."PostComments" USING btree (user_id);
 
 
 --
@@ -831,42 +832,42 @@ ALTER TABLE ONLY public."AspNetUserTokens"
 
 
 --
--- Name: CommentStars FK_CommentStars_Comments_comment_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: PostCommentStars FK_CommentStars_Comments_comment_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public."CommentStars"
-    ADD CONSTRAINT "FK_CommentStars_Comments_comment_id" FOREIGN KEY (comment_id) REFERENCES public."Comments"(id) ON DELETE CASCADE;
+ALTER TABLE ONLY public."PostCommentStars"
+    ADD CONSTRAINT "FK_CommentStars_Comments_comment_id" FOREIGN KEY (comment_id) REFERENCES public."PostComments"(id) ON DELETE CASCADE;
 
 
 --
--- Name: CommentStars FK_CommentStars_Users_user_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: PostCommentStars FK_CommentStars_Users_user_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public."CommentStars"
+ALTER TABLE ONLY public."PostCommentStars"
     ADD CONSTRAINT "FK_CommentStars_Users_user_id" FOREIGN KEY (user_id) REFERENCES public."Users"(id) ON DELETE CASCADE;
 
 
 --
--- Name: Comments FK_Comments_Comments_parent_comment_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: PostComments FK_Comments_Comments_parent_comment_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public."Comments"
-    ADD CONSTRAINT "FK_Comments_Comments_parent_comment_id" FOREIGN KEY (parent_comment_id) REFERENCES public."Comments"(id) ON DELETE CASCADE;
+ALTER TABLE ONLY public."PostComments"
+    ADD CONSTRAINT "FK_Comments_Comments_parent_comment_id" FOREIGN KEY (parent_comment_id) REFERENCES public."PostComments"(id) ON DELETE CASCADE;
 
 
 --
--- Name: Comments FK_Comments_Posts_post_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: PostComments FK_Comments_Posts_post_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public."Comments"
+ALTER TABLE ONLY public."PostComments"
     ADD CONSTRAINT "FK_Comments_Posts_post_id" FOREIGN KEY (post_id) REFERENCES public."Posts"(id) ON DELETE CASCADE;
 
 
 --
--- Name: Comments FK_Comments_Users_user_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: PostComments FK_Comments_Users_user_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public."Comments"
+ALTER TABLE ONLY public."PostComments"
     ADD CONSTRAINT "FK_Comments_Users_user_id" FOREIGN KEY (user_id) REFERENCES public."Users"(id) ON DELETE CASCADE;
 
 
