@@ -1,21 +1,29 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 @inject IUserRepository UserRepository;
 
-<MudThemeProvider Theme="MCGTheme" />
-<MudDialogProvider />
-<MudSnackbarProvider />
+    <MudThemeProvider Theme="MCGTheme" />
+    <MudDialogProvider />
+    <MudSnackbarProvider />
 
-<MudLayout>
-    <NavBar />
-    <MudMainContent>
-        <CascadingValue Value="_userTask">
+    <MudLayout>
+        <NavBar />
+
+        <MudMainContent>
             <MudContainer MaxWidth="MaxWidth.Large">
-                @Body
+
+                <CascadingValue Value="_userTask">
+                    @Body
+                </CascadingValue>
+
+                    <MudScrollToTop>
+                        <MudFab Color="Color.Success" Icon="@Icons.Filled.ArrowCircleUp" />
+                    </MudScrollToTop>
             </MudContainer>
-        </CascadingValue>
-    </MudMainContent>
-    <Footer />
-</MudLayout>
+
+        </MudMainContent>
+
+        <Footer />
+    </MudLayout>
 
 @code{ 
     MudTheme MCGTheme = new()

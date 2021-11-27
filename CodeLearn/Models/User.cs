@@ -14,9 +14,20 @@ namespace CodeLearn.Models
         public string Name { get; set; }
         [Column("email")]
         public string Email { get; set; }
+
+        [Column("role")]
+        public string Role { get; set; }
+
         [Column("is_blocked")]
         public bool IsBlocked { get; set; }
-        public ICollection<CourseDetail> CourseDetails { get; set; }
+        public ICollection<Comment> Comments { get; set; }
+        public ICollection<Discussion> Discussions { get; set; }
+        public User()
+        {
+            this.Discussions = new HashSet<Discussion>();
+            this.Comments = new HashSet<Comment>();
+        }
+        public ICollection<Lesson> Lessons { get; set; }
 
         [Column("profile_picture_path", TypeName = "varchar(260)")]
         public string ProfilePicturePath { get; set; }

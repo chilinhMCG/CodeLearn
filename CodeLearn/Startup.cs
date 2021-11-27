@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,7 +16,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-
 namespace CodeLearn
 {
     public class Startup
@@ -35,6 +35,8 @@ namespace CodeLearn
                 options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection"), o => o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery))
             );
 
+            
+            
             services.AddDistributedMemoryCache();
 
             services.AddSession(options =>
@@ -48,11 +50,19 @@ namespace CodeLearn
             services.AddMudServices();
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddSingleton<WeatherForecastService>();
+            services.AddHttpContextAccessor();
+            services.AddServerSideBlazor();   
 
-            //Repository
+            //Repositories
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<ICourseTypeRepository, CourseTypeRepository>();
+           
+            services.AddScoped<ICourseRepository, CourseRepository>();
+            services.AddScoped<ILessonRepository, LessonRepository>();
+            services.AddScoped<ICourseRatingRepository, CourseRatingRepository>();
+            services.AddScoped<IdentityUser>();
+            services.AddSingleton<IDiscussionRepository, DiscussionRepository>();
+            services.AddSingleton<ICommentRepository, CommentRepository>();
 
             services.AddSingleton<IPostRepository, PostRepository>();
             services.AddSingleton<IPostRatingRepository, PostRatingRepository>();

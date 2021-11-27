@@ -1,4 +1,57 @@
-﻿
+﻿@using MudBlazor
+
+<MudPaper Style="background-color: white; margin: 36px 0 0 0; border-radius: 0; padding-top: 18px;">
+    <MudContainer Style="display: flex; flex-direction: row; position: relative; padding-right: 118px;">
+        <MudGrid Style="margin: auto; float: right; justify-content: space-between;">
+            <MudItem Style="width: 400px;">
+                <img style="width: 214px; height:120px;" src="https://maicogroup.com/wp-content/uploads/2020/10/logo-low.png" alt="MaicoGroup" height="99px" />
+                <MudText Style="margin: 20px 0 6px 0; font-size: 14px;">CodeLearn là một nền tảng trực tuyến giúp mọi người học tập, rèn luyện kỹ năng lập trình và công nghệ.</MudText>
+                <a href="https://www.facebook.com/maicogroup/"><MudIcon Style="margin-right: 4px;" Icon="@Icons.Custom.Brands.Facebook" Title="Facebook" Size="Size.Large" Color="Color.Info"></MudIcon></a>
+                <a href="https://www.youtube.com/channel/UCCtt6_JRpYS4I0-DD0oLEMw"><MudIcon Style="margin-right: 4px;" Icon="@Icons.Custom.Brands.YouTube" Title="Youtube" Size="Size.Large" Color="Color.Error"></MudIcon></a>
+                <MudIcon Style="margin-right: 4px;" Icon="@Icons.Custom.Brands.Twitter" Title="Twitter" Size="Size.Large" Color="Color.Info"></MudIcon>
+                <MudIcon Style="margin-right: 4px;" Icon="@Icons.Custom.Brands.TikTok" Title="Tiktok" Size="Size.Medium" Color="Color.Dark"></MudIcon>
+            </MudItem>
+            <MudList Class="footer-list">
+                <MudText Style="margin-bottom: 6px;" Typo="Typo.h6">Liên kết</MudText>
+                <MudListItem Style="padding: 0;">
+                    <MudLink Underline="Underline.None" Href="#">Học tập</MudLink>
+                    <br />
+                    <MudLink Underline="Underline.None" Href="#">Luyện tập</MudLink>
+                    <br />
+                    <MudLink Underline="Underline.None" Href="#">Thi đấu</MudLink>
+                    <br />
+                    <MudLink Underline="Underline.None" Href="#">Giải đố</MudLink>
+                </MudListItem>
+            </MudList>
+            <MudList Class="footer-list">
+                <MudText Style="margin-bottom: 6px;" Typo="Typo.h6">Thông tin</MudText>
+                <MudListItem Style="padding: 0;">
+                    <MudLink Underline="Underline.None" Href="https://maicogroup.com/">Về chúng tôi</MudLink>
+                    <br />
+                    <MudLink Underline="Underline.None" Href="#">Điều khoản</MudLink>
+                    <br />
+                    <MudLink Underline="Underline.None" Href="#">Đánh giá</MudLink>
+                </MudListItem>
+            </MudList>
+            <MudList Class="footer-list">
+                <MudText Style="margin-bottom: 6px;" Typo="Typo.h6">Trợ giúp</MudText>
+                <MudListItem Style="padding: 0;">
+                    <MudLink Underline="Underline.None" Href="#">Help</MudLink>
+                    <br />
+                    <MudLink Underline="Underline.None" Href="#">Thảo luận</MudLink>
+                    <br />
+                    <MudLink Underline="Underline.None" Href="https://maicogroup.com/">Liên hệ</MudLink>
+                </MudListItem>
+            </MudList>
+        </MudGrid>
+    </MudContainer>
+    <footer class="footer border-top text-muted" style="text-align: center;">
+        <div class="container">
+            &copy; 2021 - CodeLearn - <a asp-area="" asp-page="Privacy">Privacy | All rights reserved</a>
+        </div>
+    </footer>
+</MudPaper>
+
 @code {
 
 }

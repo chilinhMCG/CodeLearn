@@ -86,6 +86,7 @@ namespace CodeLearn.Areas.Identity.Pages.Account
 
                 if (result.Succeeded)
                 {
+                    await _userManager.AddToRoleAsync(user, "User");
                     //Create ower User 
                     CreateUser();
 
