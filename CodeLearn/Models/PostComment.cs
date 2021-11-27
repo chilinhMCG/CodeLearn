@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CodeLearn.Models
 {
-    public class Comment
+    public class PostComment
     {
         [Column("id")]
         public Guid Id { get; set; }
@@ -31,9 +31,9 @@ namespace CodeLearn.Models
 
         public Post Post { get; set; }
 
-        public Comment ParentComment { get; set; }
+        public PostComment ParentComment { get; set; }
 
-        public List<Comment> Replies { get; set; }
+        public List<PostComment> Replies { get; set; }
 
         public User User { get; set; }
     }

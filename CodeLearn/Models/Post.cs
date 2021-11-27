@@ -48,7 +48,7 @@ namespace CodeLearn.Models
 
         public User User { get; set; }
 
-        public List<Comment> Comments { get; set; }
+        public List<PostComment> Comments { get; set; }
 
         public List<PostRating> PostRatings { get; set; }
     }

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace CodeLearn.Repositories
 {
-    public class CommentRepository : Repository<Comment>, ICommentRepository
+    public class PostCommentRepository : Repository<PostComment>, IPostCommentRepository
     {
         private class PropCount
         {
@@ -18,26 +18,26 @@ namespace CodeLearn.Repositories
             public int Value { get; set; }
         }
 
-        public CommentRepository(IDbContextFactory<ApplicationDBContext> dbContextFactory) : base(dbContextFactory)
+        public PostCommentRepository(IDbContextFactory<ApplicationDBContext> dbContextFactory) : base(dbContextFactory)
         {
         }
 
         /// <summary>
         /// clientQuery can be used for ordering, filtering items before the pagination process
         /// </summary>
-        public async Task<Page<CommentInfo>> GetPageTopLevelCommentInfoAsync(
-            int pageSize, int pageNumber, Guid postId, OrderingQueryDelegate<CommentInfo> orderingQuery = null)
+        public async Task<Page<PostCommentInfo>> GetPageTopLevelCommentInfoAsync(
+            int pageSize, int pageNumber, Guid postId, OrderingQueryDelegate<PostCommentInfo> orderingQuery = null)
         {
             using var context = DbContextFactory.CreateDbContext();
 
-            var tlcommentsQuery = context.Comments.Where(c => c.PostId == postId && c.ParentCommentId == null)
+            var tlcommentsQuery = context.PostComments.Where(c => c.PostId == postId && c.ParentCommentId == null)
                                                 .Include(c => c.User);
 
             int pageCount = PaginationUtils.GetPageCount(pageSize, await tlcommentsQuery.CountAsync());
 
             if (pageNumber > pageCount)
             {
-                return new Page<CommentInfo>()
+                return new Page<PostCommentInfo>()
                 {
                     Size = pageSize,
                     CurrentPage = pageNumber,
@@ -56,7 +56,7 @@ namespace CodeLearn.Repositories
                                         join replyCount in replyCountsQuery
                                              on comment.Id equals replyCount.CommentId
 
-                                        select new CommentInfo
+                                        select new PostCommentInfo
                                         {
                                             Comment = comment,
                                             UserName = comment.User.Name,
@@ -67,14 +67,14 @@ namespace CodeLearn.Repositories
 
             if (orderingQuery != null)
             {
-                commentInfoListQuery = orderingQuery(new OrderingQuery<CommentInfo>(commentInfoListQuery))
+                commentInfoListQuery = orderingQuery(new OrderingQuery<PostCommentInfo>(commentInfoListQuery))
                                        .GetInnerQuery();
             }
 
             var commentInfoList = await commentInfoListQuery.TakeFromPage(pageNumber, pageSize)
                                                             .ToListAsync();
 
-            return new Page<CommentInfo>
+            return new Page<PostCommentInfo>
             {
                 Items = commentInfoList,
                 Size = pageSize,
@@ -85,13 +85,13 @@ namespace CodeLearn.Repositories
 
         private static IQueryable<PropCount> GetStarCountsQuery(ApplicationDBContext context)
         {
-            var nonZerostarCounts = from commentStar in context.CommentStars
+            var nonZerostarCounts = from commentStar in context.PostCommentStars
                                     group commentStar by commentStar.CommentId into g
                                     select new PropCount { CommentId = g.Key, Value = g.Count() };
 
             var commentIdsWithNonZeroStarCount = nonZerostarCounts.Select(sc => sc.CommentId);
 
-            var zeroStarCounts = from comment in context.Comments
+            var zeroStarCounts = from comment in context.PostComments
                                  where !commentIdsWithNonZeroStarCount.Contains(comment.Id)
                                  select new PropCount { CommentId = comment.Id, Value = 0 };
 
@@ -100,33 +100,33 @@ namespace CodeLearn.Repositories
 
         private static IQueryable<PropCount> GetReplyCountsQuery(ApplicationDBContext context)
         {
-            var nonZeroReplyCounts = from comment in context.Comments
+            var nonZeroReplyCounts = from comment in context.PostComments
                                      group comment by comment.ParentCommentId into g
                                      where g.Key != null
                                      select new PropCount { CommentId = g.Key ?? default, Value = g.Count() };
 
             var commentIdsWithNonZeroReplies = nonZeroReplyCounts.Select(sc => sc.CommentId);
 
-            var zeroReplyCounts = from comment in context.Comments
+            var zeroReplyCounts = from comment in context.PostComments
                                   where !commentIdsWithNonZeroReplies.Contains(comment.Id)
                                   select new PropCount { CommentId = comment.Id, Value = 0 };
 
             return nonZeroReplyCounts.Union(zeroReplyCounts);
         }
 
-        public async Task<Page<CommentInfo>> GetPageReplyInfoAsync(
-            int pageSize, int pageNumber, Guid commentId, OrderingQueryDelegate<CommentInfo> orderingQuery = null)
+        public async Task<Page<PostCommentInfo>> GetPageReplyInfoAsync(
+            int pageSize, int pageNumber, Guid commentId, OrderingQueryDelegate<PostCommentInfo> orderingQuery = null)
         {
             using var context = DbContextFactory.CreateDbContext();
 
-            var repliesQuery = context.Comments.Where(c => c.ParentCommentId == commentId)
+            var repliesQuery = context.PostComments.Where(c => c.ParentCommentId == commentId)
                                                .Include(c => c.User);
 
             int pageCount = PaginationUtils.GetPageCount(pageSize, await repliesQuery.CountAsync());
 
             if (pageNumber > pageCount)
             {
-                return new Page<CommentInfo>()
+                return new Page<PostCommentInfo>()
                 {
                     Size = pageSize,
                     CurrentPage = pageNumber,
@@ -146,7 +146,7 @@ namespace CodeLearn.Repositories
                                              on reply.Id equals replyCount.CommentId
 
                                         orderby reply.DateCreated ascending
-                                        select new CommentInfo
+                                        select new PostCommentInfo
                                         {
                                             Comment = reply,
                                             UserName = reply.User.Name,
@@ -156,14 +156,14 @@ namespace CodeLearn.Repositories
 
             if (orderingQuery != null)
             {
-                repliesInfoListQuery = orderingQuery(new OrderingQuery<CommentInfo>(repliesInfoListQuery))
+                repliesInfoListQuery = orderingQuery(new OrderingQuery<PostCommentInfo>(repliesInfoListQuery))
                                        .GetInnerQuery();
             }
 
             var repliesInfoList = await repliesInfoListQuery.TakeFromPage(pageNumber, pageSize)
                                                             .ToListAsync();
 
-            return new Page<CommentInfo>
+            return new Page<PostCommentInfo>
             {
                 Items = repliesInfoList,
                 Size = pageSize,
@@ -172,19 +172,19 @@ namespace CodeLearn.Repositories
             };
         }
 
-        public async Task<CommentInfo> GetCommentInfoAsync(Guid commentId)
+        public async Task<PostCommentInfo> GetCommentInfoAsync(Guid commentId)
         {
             using var context = DbContextFactory.CreateDbContext();
 
-            var commentQuery = context.Comments.Where(c => c.Id == commentId)
+            var commentQuery = context.PostComments.Where(c => c.Id == commentId)
                                                .Include(c => c.User);
 
 
-            var starCountQuery = context.CommentStars.Where(cs => cs.CommentId == commentId);
+            var starCountQuery = context.PostCommentStars.Where(cs => cs.CommentId == commentId);
 
-            var replyCountQuery = context.Comments.Where(c => c.ParentCommentId == commentId);
+            var replyCountQuery = context.PostComments.Where(c => c.ParentCommentId == commentId);
 
-            var commentInfoQuery = commentQuery.Select(c => new CommentInfo
+            var commentInfoQuery = commentQuery.Select(c => new PostCommentInfo
             {
                 Comment = c,
                 UserName = c.User.Name,

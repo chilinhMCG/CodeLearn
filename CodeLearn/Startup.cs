@@ -56,8 +56,8 @@ namespace CodeLearn
 
             services.AddSingleton<IPostRepository, PostRepository>();
             services.AddSingleton<IPostRatingRepository, PostRatingRepository>();
-            services.AddSingleton<ICommentRepository, CommentRepository>();
-            services.AddSingleton<ICommentStarRepository, CommentStarRepository>();
+            services.AddSingleton<IPostCommentRepository, PostCommentRepository>();
+            services.AddSingleton<IPostCommentStarRepository, PostCommentStarRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

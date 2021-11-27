@@ -9,39 +9,39 @@ using System.Threading.Tasks;
 
 namespace CodeLearn.Repositories
 {
-    public class CommentStarRepository : ICommentStarRepository
+    public class PostCommentStarRepository : IPostCommentStarRepository
     {
         private readonly IDbContextFactory<ApplicationDBContext> _dbContextFactory;
 
-        public CommentStarRepository(IDbContextFactory<ApplicationDBContext> dbContextFactory)
+        public PostCommentStarRepository(IDbContextFactory<ApplicationDBContext> dbContextFactory)
         {
             _dbContextFactory = dbContextFactory;
         }
 
-        public async Task<CommentStar> GetAsync(Guid userId, Guid commentId)
+        public async Task<PostCommentStar> GetAsync(Guid userId, Guid commentId)
         {
             using var context = _dbContextFactory.CreateDbContext();
-            return await context.CommentStars.FindAsync(userId, commentId);
+            return await context.PostCommentStars.FindAsync(userId, commentId);
         }
 
-        public async Task<IList<CommentStar>> GetRangeAsync(Guid userId, IEnumerable<Guid> commentIds)
+        public async Task<IList<PostCommentStar>> GetRangeAsync(Guid userId, IEnumerable<Guid> commentIds)
         {
             using var context = _dbContextFactory.CreateDbContext();
-            var commentIdsThatUserGaveStar = await context.CommentStars
+            var commentIdsThatUserGaveStar = await context.PostCommentStars
                                                           .Where(cs => cs.UserId == userId && commentIds.Contains(cs.CommentId))
                                                           .Select(cs => cs.CommentId)
                                                           .ToListAsync();
 
             var commentIdsSet = new HashSet<Guid>(commentIdsThatUserGaveStar);
 
-            var commentStars = new List<CommentStar>();
+            var commentStars = new List<PostCommentStar>();
             foreach (Guid commentId in commentIds)
             {
-                CommentStar commentStar = null;
+                PostCommentStar commentStar = null;
 
                 if (commentIdsSet.Contains(commentId))
                 {
-                    commentStar = new CommentStar
+                    commentStar = new PostCommentStar
                     {
                         UserId = userId,
                         CommentId = commentId
@@ -54,17 +54,17 @@ namespace CodeLearn.Repositories
             return commentStars;
         }
 
-        public async Task AddAsync(CommentStar commentStar)
+        public async Task AddAsync(PostCommentStar commentStar)
         {
             using var context = _dbContextFactory.CreateDbContext();
-            await context.CommentStars.AddAsync(commentStar);
+            await context.PostCommentStars.AddAsync(commentStar);
             await context.SaveChangesAsync();
         }
 
-        public async Task RemoveAsync(CommentStar commentStar)
+        public async Task RemoveAsync(PostCommentStar commentStar)
         {
             using var context = _dbContextFactory.CreateDbContext();
-            context.CommentStars.Remove(commentStar);
+            context.PostCommentStars.Remove(commentStar);
             await context.SaveChangesAsync();
         }
 

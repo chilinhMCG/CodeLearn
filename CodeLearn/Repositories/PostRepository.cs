@@ -151,7 +151,7 @@ namespace CodeLearn.Repositories
             float overallRating = ratingCount == 0 ? 0 : (float)ratingSum / ratingCount;
             overallRating = MathF.Round(overallRating, 2);
 
-            int commentCount = await context.Comments.Where(c => c.PostId == post.Id).CountAsync();
+            int commentCount = await context.PostComments.Where(c => c.PostId == post.Id).CountAsync();
 
             var postInfo = new PostInfo
             {
@@ -203,7 +203,7 @@ namespace CodeLearn.Repositories
 
         private static IQueryable<CommentCount> GetCommentCountsQuery(ApplicationDBContext context)
         {
-            var nonZeroCommentCounts = from comment in context.Comments
+            var nonZeroCommentCounts = from comment in context.PostComments
                                        group comment by comment.PostId into g
                                        select new CommentCount { PostId = g.Key, Value = g.Count() };
 

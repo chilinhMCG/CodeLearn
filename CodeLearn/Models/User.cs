@@ -23,10 +23,10 @@ namespace CodeLearn.Models
 
         public List<Post> Posts { get; set; }
 
-        public List<Comment> Comments { get; set; }
+        public List<PostComment> PostComments { get; set; }
 
         public List<PostRating> PostRatings { get; set; }
 
-        public List<CommentStar> CommentStars { get; set; }
+        public List<PostCommentStar> PostCommentStars { get; set; }
     }
 }

@@ -21,8 +21,8 @@ namespace CodeLearn.Data
 
         public DbSet<Post> Posts { get; set; }
         public DbSet<PostRating> PostRatings { get; set; }
-        public DbSet<Comment> Comments { get; set; }
-        public DbSet<CommentStar> CommentStars { get; set; }
+        public DbSet<PostComment> PostComments { get; set; }
+        public DbSet<PostCommentStar> PostCommentStars { get; set; }
 
 
         static ApplicationDBContext() => NpgsqlConnection.GlobalTypeMapper.MapEnum<CourseStatusEnum>();
@@ -77,10 +77,10 @@ namespace CodeLearn.Data
                         .HasIndex(p => p.ContentSearchVector)
                         .HasMethod("GIN");
 
-            modelBuilder.Entity<CommentStar>()
+            modelBuilder.Entity<PostCommentStar>()
                         .HasKey(cs => new { cs.UserId, cs.CommentId });
 
-            modelBuilder.Entity<Comment>()
+            modelBuilder.Entity<PostComment>()
                         .HasOne(u => u.ParentComment)
                         .WithMany(c => c.Replies)
                         .OnDelete(DeleteBehavior.Cascade);

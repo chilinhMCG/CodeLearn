@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace CodeLearn.Models
 {
-    public class CommentInfo
+    public class PostCommentInfo
     {
-        public Comment Comment { get; set; }
+        public PostComment Comment { get; set; }
 
         public string UserName { get; set; }
 

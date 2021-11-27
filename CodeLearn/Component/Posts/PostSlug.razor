@@ -2,9 +2,9 @@
 @using Data.OrderingQuery;
 @inject IPostRepository PostRepository;
 @inject IPostRatingRepository PostRatingRepository;
-@inject ICommentRepository CommentRepository;
+@inject IPostCommentRepository CommentRepository;
 @inject IUserRepository UserRepository;
-@inject ICommentStarRepository CommentStarRepository;
+@inject IPostCommentStarRepository CommentStarRepository;
 
 <MudContainer MaxWidth="MaxWidth.Medium" Class="mt-10">
     <MudPaper Class="pa-6">
@@ -106,16 +106,16 @@
 
     private PostInfo _postInfo;
 
-    private Page<CommentInfo> _topLevelCommentInfoPage;
+    private Page<PostCommentInfo> _topLevelCommentInfoPage;
 
-    private List<CommentInfo> _topLevelCommentInfoList;
+    private List<PostCommentInfo> _topLevelCommentInfoList;
 
     private List<bool> _userTopLevelCommentStarredList;
 
     /// <summary>
     /// comment info list of user's submitted top level comments since page loaded
     /// </summary>
-    private List<CommentInfo> _newUserTopLevelCommentInfoList;
+    private List<PostCommentInfo> _newUserTopLevelCommentInfoList;
 
     /// <summary>
     /// user starred states of user's submitted top level comment since page loaded
@@ -129,10 +129,10 @@
         _postState = State.Loading;
         _loadCommentsState = State.Loading;
 
-        _topLevelCommentInfoList = new List<CommentInfo>();
+        _topLevelCommentInfoList = new List<PostCommentInfo>();
         _userTopLevelCommentStarredList = new List<bool>();
 
-        _newUserTopLevelCommentInfoList = new List<CommentInfo>();
+        _newUserTopLevelCommentInfoList = new List<PostCommentInfo>();
         _newUserTopLevelCommentStarredList = new List<bool>();
 
         _commentContent = "";
@@ -167,7 +167,7 @@
         _loadCommentsState = State.Complete;
     }
 
-    private OrderedOrderingQuery<CommentInfo> StarCountDescDateDesc(OrderingQuery<CommentInfo> oq)
+    private OrderedOrderingQuery<PostCommentInfo> StarCountDescDateDesc(OrderingQuery<PostCommentInfo> oq)
     {
         return oq.OrderByDescending(ci => ci.StarCount)
                  .ThenByDescending(ci => ci.Comment.DateCreated);
@@ -196,7 +196,7 @@
     private async Task SubmitComment()
     {
         DateTime dateCreated = DateTime.Now;
-        var comment = new Comment
+        var comment = new PostComment
         {
             UserId = _user.Id,
             ParentCommentId = null,
@@ -208,7 +208,7 @@
 
         await CommentRepository.AddAsync(comment);
 
-        _newUserTopLevelCommentInfoList.Insert(0, new CommentInfo
+        _newUserTopLevelCommentInfoList.Insert(0, new PostCommentInfo
         {
             Comment = comment,
             UserName = _user.Name,

@@ -1,5 +1,5 @@
-﻿@inject ICommentRepository CommentRepository;
-@inject ICommentStarRepository CommentStarRepository;
+﻿@inject IPostCommentRepository CommentRepository;
+@inject IPostCommentStarRepository CommentStarRepository;
 @inject IUserRepository UserRepository;
 @inject IDialogService DialogService
 
@@ -156,9 +156,9 @@
     public Post Post { get; set; }
 
     [Parameter]
-    public CommentInfo CommentInfo { get; set; }
+    public PostCommentInfo CommentInfo { get; set; }
 
-    private CommentInfo _commentInfo;
+    private PostCommentInfo _commentInfo;
 
     [Parameter]
     public bool Starred { get; set; }
@@ -167,7 +167,7 @@
     public User User { get; set; }
 
     [Parameter]
-    public EventCallback<CommentInfo> CommentInfoChanged { get; set; }
+    public EventCallback<PostCommentInfo> CommentInfoChanged { get; set; }
 
     [Parameter]
     public EventCallback OnCommentRemove { get; set; }
@@ -209,16 +209,16 @@
 
     private State _loadRepliesState;
 
-    private Page<CommentInfo> _repliesPage { get; set; }
+    private Page<PostCommentInfo> _repliesPage { get; set; }
 
-    private List<CommentInfo> _replyInfoList { get; set; }
+    private List<PostCommentInfo> _replyInfoList { get; set; }
 
     private List<bool> _replyStarredList { get; set; }
 
     /// <summary>
     /// comment info list of user's submitted replies since page loaded
     /// </summary>
-    private List<CommentInfo> _newUserReplyInfoList { get; set; }
+    private List<PostCommentInfo> _newUserReplyInfoList { get; set; }
 
     /// <summary>
     /// user starred states of user's submitted replies since page loaded
@@ -239,10 +239,10 @@
         _showReplyEditor = false;
         _userReplyContent = "";
 
-        _replyInfoList = new List<CommentInfo>();
+        _replyInfoList = new List<PostCommentInfo>();
         _replyStarredList = new List<bool>();
 
-        _newUserReplyInfoList = new List<CommentInfo>();
+        _newUserReplyInfoList = new List<PostCommentInfo>();
         _newUserReplyStarredList = new List<bool>();
 
         _loadRepliesState = State.NotLoaded;
@@ -257,7 +257,7 @@
 
         if (_commentInfo?.Comment.Id != CommentInfo?.Comment.Id)
         {
-            _replyInfoList = new List<CommentInfo>();
+            _replyInfoList = new List<PostCommentInfo>();
             _repliesPage = null;
             _loadRepliesState = State.NotLoaded;
         }
@@ -310,7 +310,7 @@
     {
         bool newStarredState = !Starred;
 
-        var userCommentStar = new CommentStar
+        var userCommentStar = new PostCommentStar
         {
             UserId = User.Id,
             CommentId = CommentInfo.Comment.Id,
@@ -338,7 +338,7 @@
     private async Task SubmitReply()
     {
         DateTime dateCreated = DateTime.Now;
-        var comment = new Comment
+        var comment = new PostComment
         {
             UserId = User.Id,
             ParentCommentId = _commentInfo.Comment.Id,
@@ -350,7 +350,7 @@
 
         await CommentRepository.AddAsync(comment);
 
-        _newUserReplyInfoList.Add(new CommentInfo
+        _newUserReplyInfoList.Add(new PostCommentInfo
         {
             Comment = comment,
             UserName = User.Name,
