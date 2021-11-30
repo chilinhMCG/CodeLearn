@@ -1,4 +1,4 @@
-﻿@page "/posts"
+@page "/posts"
 @inject IPostRepository PostRepository;
 @inject IPostRatingRepository PostRatingRepository;
 @inject IUserRepository UserRepository;
@@ -200,6 +200,7 @@
         else
             await SearchAllPosts(_selectedPage);
 
+        if (_user != null)
         _userPostRatings = await PostRatingRepository.GetRangeAsync(_user.Id, _postInfoPage.Items.Select(p => p.Id));
     }
 
