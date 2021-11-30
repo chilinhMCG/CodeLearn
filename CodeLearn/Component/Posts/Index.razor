@@ -1,4 +1,4 @@
-@page "/posts"
+﻿@page "/posts"
 @inject IPostRepository PostRepository;
 @inject IPostRatingRepository PostRatingRepository;
 @inject IUserRepository UserRepository;
@@ -130,6 +130,8 @@
         _selectedPage = 1;
         _inputOrderingOption = OrderingOption.Relevance;
         _inputOrderByOption = OrderByOption.Descending;
+        _orderingOption = _inputOrderingOption;
+        _orderByOption = _inputOrderByOption;
         _prevSearchUsedKeywords = false;
         _inputSearch = "";
         _search = "";
@@ -201,7 +203,7 @@
             await SearchAllPosts(_selectedPage);
 
         if (_user != null)
-        _userPostRatings = await PostRatingRepository.GetRangeAsync(_user.Id, _postInfoPage.Items.Select(p => p.Id));
+            _userPostRatings = await PostRatingRepository.GetRangeAsync(_user.Id, _postInfoPage.Items.Select(p => p.Id));
     }
 
     private async Task HandleSearchByKeywordsButtonClicked()
