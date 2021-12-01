@@ -88,10 +88,20 @@ namespace CodeLearn.Repositories
         public async Task<Page<PostInfo>> GetPagePostInfoByKeywords(int pageSize, int pageNumber,
             IEnumerable<string> keywords, OrderingQueryDelegate<PostInfo> orderingQuery = null)
         {
+            if (!keywords.Any())
+            {
+                return new Page<PostInfo>
+                {
+                    Size = pageSize,
+                    CurrentPage = pageNumber,
+                    PageCount = 0
+                };
+            }
+
             using var context = DbContextFactory.CreateDbContext();
 
             string tsQueryStr = string.Join(" | ", keywords);
-            tsQueryStr += $"| {keywords.Last()}:*"; 
+            tsQueryStr += $" | {keywords.Last()}:*"; 
 
             var postsQuery = context.Posts.Where(
                 p => p.TitleSearchVector
@@ -115,7 +125,7 @@ namespace CodeLearn.Repositories
             {
                 postsQuery = postsQuery.OrderByDescending(
                     p => p.TitleSearchVector.SetWeight(NpgsqlTsVector.Lexeme.Weight.A)
-                          .Concat(p.ContentSearchVector.SetWeight(NpgsqlTsVector.Lexeme.Weight.C))
+                          .Concat(p.ContentSearchVector.SetWeight(NpgsqlTsVector.Lexeme.Weight.D))
                           .Rank(EF.Functions.ToTsQuery("simple", tsQueryStr)));
             }
 
