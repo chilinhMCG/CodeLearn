@@ -25,24 +25,53 @@
 
     @if (_postState == State.Complete)
     {
-        <MudPaper Class="mt-4 pa-6">
+        <MudPaper Class="mt-4 px-6 pt-2 pb-6">
+            <div class="d-flex justify-space-between">
+                <MudText Typo="Typo.subtitle1" Class="mb-2"><b>@_postInfo.CommentCount bình luận</b></MudText>
+
+                <AuthorizeView>
+                    <NotAuthorized>
+                        <MudLink Href="Identity/Account/Login">
+                            <MudButton Variant="Variant.Outlined" Color="Color.Primary">Đăng nhập để bình luận</MudButton>
+                        </MudLink>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </div>
+
             <AuthorizeView>
                 <CommentBox Class="mb-3" SubmitButtonText="Bình luận" @bind-Content="_commentContent" OnSubmit="SubmitComment" />
             </AuthorizeView>
+
+            @if (_postInfo.CommentCount == 0)
+            {
+                <div class="d-flex flex-column align-center my-10" style="@($"color:{Colors.Grey.Lighten1}")">
+                    <MudIcon Class="mr-2" Size="Size.Large" Icon="@Icons.Material.Filled.Comment" />
+                    <MudText Align="Align.Center">Chưa có bình luận...</MudText>
+                    <MudText Align="Align.Center">Hãy là người đầu tiên bình luận bài viết này!</MudText>
+                </div>
+            }
 
             @for (int i = 0; i < _newUserTopLevelCommentInfoList.Count; i++)
             {
                 int index = i;
 
+                @if (index != 0)
+                {
+                    <MudDivider Class="mt-4 mb-6" />
+                }
+
                 <CommentItem @key="_newUserTopLevelCommentInfoList[index].Comment.Id" User="_user" Post="_post"
                              @bind-Starred="_newUserTopLevelCommentStarredList[index]" @bind-CommentInfo="_newUserTopLevelCommentInfoList[index]"
                              OnCommentRemove="() => HandleNewUserTopLevelCommentRemoved(index)" />
-
-                <MudDivider Class="mt-4 mb-6" />
             }
 
             @if (_topLevelCommentInfoList.Count != 0)
             {
+                @if (_newUserTopLevelCommentInfoList.Count != 0)
+                {
+                    <MudDivider Class="mt-4 mb-6" />
+                }
+
                 @for (int i = 0; i < _topLevelCommentInfoList.Count; i++)
                 {
                     int index = i;
