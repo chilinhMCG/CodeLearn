@@ -206,19 +206,19 @@
         if (_searchByOption == SearchByOption.PostContent)
         {
             if (_orderingOption == PostOrderingOption.Relevance)
-                _postInfoPage = await PostRepository.GetPagePostInfoSearchByKeywords(_postInfoPerPage, _selectedPage, _searchText);
+                _postInfoPage = await PostRepository.GetPagePostInfoSearchByKeywordsAsync(_postInfoPerPage, _selectedPage, _searchText);
 
             else
-                _postInfoPage = await PostRepository.GetPagePostInfoSearchByKeywords(_postInfoPerPage, _selectedPage, _searchText,
+                _postInfoPage = await PostRepository.GetPagePostInfoSearchByKeywordsAsync(_postInfoPerPage, _selectedPage, _searchText,
                     oq => PostInfoUtils.CreatePostInfoOrderingQuery(_orderingOption, _orderByOption, oq));
         }
         else
         {
             if (_orderingOption == PostOrderingOption.Relevance)
-                _postInfoPage = await PostRepository.GetPagePostInfoSearchByAuthorName(_postInfoPerPage, _selectedPage, _searchText);
+                _postInfoPage = await PostRepository.GetPagePostInfoSearchByAuthorNameAsync(_postInfoPerPage, _selectedPage, _searchText);
 
             else
-                _postInfoPage = await PostRepository.GetPagePostInfoSearchByAuthorName(_postInfoPerPage, _selectedPage, _searchText,
+                _postInfoPage = await PostRepository.GetPagePostInfoSearchByAuthorNameAsync(_postInfoPerPage, _selectedPage, _searchText,
                     oq => PostInfoUtils.CreatePostInfoOrderingQuery(_orderingOption, _orderByOption, oq));
         }
 

@@ -157,7 +157,7 @@
     {
         _selectedPage = pageNumber;
 
-        _postInfoPage = await PostRepository.GetPagePostInfo(_postInfoPerPage, pageNumber,
+        _postInfoPage = await PostRepository.GetPagePostInfoAsync(_postInfoPerPage, pageNumber,
             oq => PostInfoUtils.CreatePostInfoOrderingQuery(_orderingOption, _orderByOption, oq));
 
         if (_user != null)

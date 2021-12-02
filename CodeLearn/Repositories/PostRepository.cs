@@ -46,7 +46,7 @@ namespace CodeLearn.Repositories
             return await ToPostInfoAsync(context, post);
         }
 
-        public async Task<Page<PostInfo>> GetPagePostInfo(int pageSize, int pageNumber, OrderingQueryDelegate<PostInfo> orderingQuery = null)
+        public async Task<Page<PostInfo>> GetPagePostInfoAsync(int pageSize, int pageNumber, OrderingQueryDelegate<PostInfo> orderingQuery = null)
         {
             using var context = DbContextFactory.CreateDbContext();
             var allPosts = context.Posts.OrderByDescending(p => p.DateCreated);
@@ -85,7 +85,7 @@ namespace CodeLearn.Repositories
             };
         }
 
-        public async Task<Page<PostInfo>> GetPagePostInfoSearchByKeywords(int pageSize, int pageNumber,
+        public async Task<Page<PostInfo>> GetPagePostInfoSearchByKeywordsAsync(int pageSize, int pageNumber,
             string keywordsText, OrderingQueryDelegate<PostInfo> orderingQuery = null)
         {
             if (string.IsNullOrWhiteSpace(keywordsText))
@@ -141,7 +141,7 @@ namespace CodeLearn.Repositories
             var postInfoList = await postInfoListQuery.TakeFromPage(pageNumber, pageSize)
                                                       .ToListAsync();
 
-            postInfoList.ForEach(p => p.OverallRating = MathF.Round(p.OverallRating, 2));
+            FormatOverallRatings(postInfoList);
 
             return new Page<PostInfo>
             {
@@ -152,7 +152,7 @@ namespace CodeLearn.Repositories
             };
         }
 
-        public async Task<Page<PostInfo>> GetPagePostInfoSearchByAuthorName(int pageSize, int pageNumber, 
+        public async Task<Page<PostInfo>> GetPagePostInfoSearchByAuthorNameAsync(int pageSize, int pageNumber, 
             string authorName, OrderingQueryDelegate<PostInfo> orderQuery = null)
         {
             authorName = authorName.RemoveDiacritics().Trim();
@@ -201,7 +201,7 @@ namespace CodeLearn.Repositories
             var postInfoList = await postInfoListQuery.TakeFromPage(pageNumber, pageSize)
                                                       .ToListAsync();
 
-            FormatOverallRating(postInfoList);
+            FormatOverallRatings(postInfoList);
 
             return new Page<PostInfo>
             {
@@ -241,7 +241,7 @@ namespace CodeLearn.Repositories
             return postInfo;
         }
 
-        private static void FormatOverallRating(List<PostInfo> postInfoList) 
+        private static void FormatOverallRatings(List<PostInfo> postInfoList) 
             => postInfoList.ForEach(p => p.OverallRating = MathF.Round(p.OverallRating, 2));
 
         private static IQueryable<PostInfo> ToPostInfoListQuery(ApplicationDBContext context, IQueryable<Post> postsQuery)

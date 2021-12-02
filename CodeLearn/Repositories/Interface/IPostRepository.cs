@@ -11,14 +11,14 @@ namespace CodeLearn.Repositories.Interface
     {
         public Task<Post> GetAsync(Guid userId, string slug);
 
-        public Task<Page<PostInfo>> GetPagePostInfo(int pageSize, int pageNumber, OrderingQueryDelegate<PostInfo> orderingQuery = null);
+        public Task<Page<PostInfo>> GetPagePostInfoAsync(int pageSize, int pageNumber, OrderingQueryDelegate<PostInfo> orderingQuery = null);
 
         public Task<PostInfo> GetPostInfoAsync(Guid id);
 
-        public Task<Page<PostInfo>> GetPagePostInfoSearchByKeywords(int pageSize, int pageNumber,
+        public Task<Page<PostInfo>> GetPagePostInfoSearchByKeywordsAsync(int pageSize, int pageNumber,
             string keywordsText, OrderingQueryDelegate<PostInfo> orderingQuery = null);
 
-        public Task<Page<PostInfo>> GetPagePostInfoSearchByAuthorName(int pageSize, int pageNumber,
+        public Task<Page<PostInfo>> GetPagePostInfoSearchByAuthorNameAsync(int pageSize, int pageNumber,
             string authorName, OrderingQueryDelegate<PostInfo> orderQuery = null);
     }
 }
