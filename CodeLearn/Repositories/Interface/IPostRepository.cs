@@ -17,5 +17,8 @@ namespace CodeLearn.Repositories.Interface
 
         public Task<Page<PostInfo>> GetPagePostInfoByKeywords(int pageSize, int pageNumber,
             IEnumerable<string> keywords, OrderingQueryDelegate<PostInfo> orderingQuery = null);
+
+        public Task<Page<PostInfo>> GetPagePostInfoSearchByAuthorName(int pageSize, int pageNumber,
+            string authorName, OrderingQueryDelegate<PostInfo> orderQuery = null);
     }
 }

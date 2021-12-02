@@ -151,6 +151,66 @@ namespace CodeLearn.Repositories
             };
         }
 
+        public async Task<Page<PostInfo>> GetPagePostInfoSearchByAuthorName(int pageSize, int pageNumber, 
+            string authorName, OrderingQueryDelegate<PostInfo> orderQuery = null)
+        {
+            authorName = authorName.RemoveDiacritics().Trim();
+
+            if (string.IsNullOrWhiteSpace(authorName))
+            {
+                return new Page<PostInfo>
+                {
+                    Size = pageSize,
+                    CurrentPage = pageNumber,
+                    PageCount = 0
+                };
+            }
+
+            using var context = DbContextFactory.CreateDbContext();
+
+            string pattern = $"%{authorName}%";
+
+            var usersQuery = context.Users.Where(u => EF.Functions.ILike(u.Name, pattern));
+
+            var postsQuery = from post in context.Posts
+                             join user in usersQuery
+                             on post.UserId equals user.Id
+                             select post;
+
+            int pageCount = PaginationUtils.GetPageCount(pageSize, await postsQuery.CountAsync());
+
+            if (pageNumber > pageCount)
+            {
+                return new Page<PostInfo>
+                {
+                    Size = pageSize,
+                    CurrentPage = pageNumber,
+                    PageCount = pageCount
+                };
+            }
+
+            var postInfoListQuery = ToPostInfoListQuery(context, postsQuery);
+
+            if (orderQuery != null)
+            {
+                postInfoListQuery = orderQuery(new OrderingQuery<PostInfo>(postInfoListQuery))
+                                                 .GetInnerQuery();
+            }
+
+            var postInfoList = await postInfoListQuery.TakeFromPage(pageNumber, pageSize)
+                                                      .ToListAsync();
+
+            FormatOverallRating(postInfoList);
+
+            return new Page<PostInfo>
+            {
+                Items = postInfoList,
+                Size = pageSize,
+                CurrentPage = pageNumber,
+                PageCount = pageCount
+            };
+        }
+
         private static async Task<PostInfo> ToPostInfoAsync(ApplicationDBContext context, Post post)
         {
             var user = await context.Users.FindAsync(post.UserId);
@@ -179,6 +239,9 @@ namespace CodeLearn.Repositories
 
             return postInfo;
         }
+
+        private static void FormatOverallRating(List<PostInfo> postInfoList) 
+            => postInfoList.ForEach(p => p.OverallRating = MathF.Round(p.OverallRating, 2));
 
         private static IQueryable<PostInfo> ToPostInfoListQuery(ApplicationDBContext context, IQueryable<Post> postsQuery)
         {
