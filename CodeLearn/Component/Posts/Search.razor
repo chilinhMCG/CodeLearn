@@ -205,13 +205,11 @@
     {
         if (_searchByOption == SearchByOption.PostContent)
         {
-            string[] keywords = _searchText.Trim().RemoveDiacritics().Split();
-
             if (_orderingOption == PostOrderingOption.Relevance)
-                _postInfoPage = await PostRepository.GetPagePostInfoByKeywords(_postInfoPerPage, _selectedPage, keywords);
+                _postInfoPage = await PostRepository.GetPagePostInfoSearchByKeywords(_postInfoPerPage, _selectedPage, _searchText);
 
             else
-                _postInfoPage = await PostRepository.GetPagePostInfoByKeywords(_postInfoPerPage, _selectedPage, keywords,
+                _postInfoPage = await PostRepository.GetPagePostInfoSearchByKeywords(_postInfoPerPage, _selectedPage, _searchText,
                     oq => PostInfoUtils.CreatePostInfoOrderingQuery(_orderingOption, _orderByOption, oq));
         }
         else

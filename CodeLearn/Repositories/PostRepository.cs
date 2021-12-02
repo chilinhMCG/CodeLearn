@@ -85,10 +85,10 @@ namespace CodeLearn.Repositories
             };
         }
 
-        public async Task<Page<PostInfo>> GetPagePostInfoByKeywords(int pageSize, int pageNumber,
-            IEnumerable<string> keywords, OrderingQueryDelegate<PostInfo> orderingQuery = null)
+        public async Task<Page<PostInfo>> GetPagePostInfoSearchByKeywords(int pageSize, int pageNumber,
+            string keywordsText, OrderingQueryDelegate<PostInfo> orderingQuery = null)
         {
-            if (!keywords.Any())
+            if (string.IsNullOrWhiteSpace(keywordsText))
             {
                 return new Page<PostInfo>
                 {
@@ -100,6 +100,7 @@ namespace CodeLearn.Repositories
 
             using var context = DbContextFactory.CreateDbContext();
 
+            string[] keywords = keywordsText.Trim().RemoveDiacritics().Split();
             string tsQueryStr = string.Join(" | ", keywords);
             tsQueryStr += $" | {keywords.Last()}:*"; 
 
