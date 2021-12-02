@@ -29,26 +29,29 @@ namespace CodeLearn.Repositories
         {
             using var context = _dbContextFactory.CreateDbContext();
 
-            var postRatings = new List<PostRating>(postIds.Count());
+            var postRatings = await context.PostRatings
+                                            .Where(pr => pr.UserId == userId && postIds.Contains(pr.PostId))
+                                            .ToListAsync();
+
+            var PostRatingByPostId = new Dictionary<Guid, PostRating>(
+                    postRatings.Select(pr => new KeyValuePair<Guid, PostRating>(pr.PostId, pr))
+                );
+
+            var orderedPostRatings = new List<PostRating>();
 
             foreach (Guid postId in postIds)
             {
-                var rating = await context.PostRatings.FindAsync(userId, postId);
-
-                if (rating == null)
+                var defaultValue = new PostRating()
                 {
-                    rating = new PostRating()
-                    {
-                        PostId = postId,
-                        UserId = userId,
-                        Value = 0,
-                    };
-                }
+                    PostId = postId,
+                    UserId = userId,
+                    Value = 0,
+                };
 
-                postRatings.Add(rating);
+                orderedPostRatings.Add(PostRatingByPostId.GetValueOrDefault(postId, defaultValue));
             }
 
-            return postRatings;
+            return orderedPostRatings;
         }
 
         public async Task AddAsync(PostRating postRating)
