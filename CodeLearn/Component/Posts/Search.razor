@@ -12,6 +12,13 @@
     <MudPaper Class="py-4 px-6">
         <MudText Class="flex-grow-1 mb-2" Typo="Typo.h4">Tìm kiếm bài viết chia sẻ</MudText>
         <div class="d-flex align-center mb-6">
+            <div>
+                <MudSelect Dense="true" Class="mr-2" T="SearchByOption" Label="Tìm kiếm dựa trên" ToStringFunc="SearchByOptionToString"
+                           @bind-Value="_inputSearchByOption">
+                    <MudSelectItem Value="SearchByOption.PostContent" />
+                    <MudSelectItem Value="SearchByOption.AuthorName" />
+                </MudSelect>
+            </div>
             <MudTextField Class="mr-2" Immediate="true" @bind-Value="@_inputSearchText" OnKeyPress="HandleKeyPressed"
                           Label="Tìm kiếm" Variant="@Variant.Outlined" Margin="Margin.Dense"
                           Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" />
@@ -22,7 +29,7 @@
         </div>
         <MudText Class="flex-grow-1 mb-2" Typo="Typo.h6">Kết quả tìm kiếm của "@_searchText"</MudText>
         <div class="d-flex justify-end align-end w-75 mb-6">
-            <MudSelect Class="mr-2" T="PostOrderingOption" Label="Tìm kiếm dựa trên" ToStringFunc="(option) => option.ToUserFriendlyText()"
+            <MudSelect Class="mr-2" T="PostOrderingOption" Label="Sắp xếp dựa trên" ToStringFunc="(option) => option.ToUserFriendlyText()"
                        Value="_orderingOption" ValueChanged="HandleOrderingOptionChanged">
                 <MudSelectItem Value="PostOrderingOption.Relevance" />
                 <MudSelectItem Value="PostOrderingOption.OverallRating" />
@@ -89,21 +96,33 @@
 
     private User _user = null;
 
+    private PostOrderingOption _orderingOption;
+
+    private OrderByOption _orderByOption;
+
+    private bool _searchButtonDisabled => string.IsNullOrWhiteSpace(_inputSearchText) || _loadPostsState == State.Loading;
+
     private string _inputSearchText;
 
     private string _searchText;
 
-    private bool _searchButtonDisabled => string.IsNullOrWhiteSpace(_inputSearchText) || _loadPostsState == State.Loading;
+    private SearchByOption _inputSearchByOption;
 
-    private PostOrderingOption _orderingOption;
+    private SearchByOption _searchByOption;
 
-    private OrderByOption _orderByOption;
+    private enum SearchByOption
+    {
+        PostContent, AuthorName
+    };
 
     protected override async Task OnInitializedAsync()
     {
         _selectedPage = 1;
         _orderingOption = PostOrderingOption.Relevance;
         _orderByOption = OrderByOption.Descending;
+
+        _searchByOption = SearchByOption.PostContent;
+        _inputSearchByOption = _searchByOption;
 
         _loadPostsState = State.Loading;
 
@@ -133,7 +152,7 @@
             };
         }
         else
-            await SearchByKeywords(1);
+            await StartSearch();
 
         _loadPostsState = State.Complete;
     }
@@ -141,17 +160,18 @@
     private async Task HandleOrderingOptionChanged(PostOrderingOption option)
     {
         _orderingOption = option;
+        _selectedPage = 1;
         _loadPostsState = State.Loading;
-        await SearchByKeywords(1);
+        await StartSearch();
         _loadPostsState = State.Complete;
-
     }
 
     private async Task HandleOrderByOptionChanged(OrderByOption option)
     {
         _orderByOption = option;
+        _selectedPage = 1;
         _loadPostsState = State.Loading;
-        await SearchByKeywords(1);
+        await StartSearch();
         _loadPostsState = State.Complete;
     }
 
@@ -159,41 +179,63 @@
     {
         _selectedPage = selected;
         _loadPostsState = State.Loading;
-        await SearchByKeywords(_selectedPage);
+        await StartSearch();
         _loadPostsState = State.Complete;
     }
 
-    private async Task HandleSearchButtonPressed()
+    private void HandleSearchButtonPressed()
     {
-        if (_searchText == _inputSearchText.Trim())
+        if (_searchText == _inputSearchText.Trim() && _searchByOption == _inputSearchByOption && _selectedPage == 1)
             return;
 
+        _selectedPage = 1;
+        _searchByOption = _inputSearchByOption;
         _searchText = _inputSearchText.Trim();
 
         NavManager.NavigateTo($"posts/search/?q={HttpUtility.UrlEncode(_searchText)}");
     }
 
-    private async Task HandleKeyPressed(KeyboardEventArgs args)
+    private void HandleKeyPressed(KeyboardEventArgs args)
     {
         if (args.Key == "Enter" && !_searchButtonDisabled)
-            await HandleSearchButtonPressed();
+            HandleSearchButtonPressed();
     }
 
-    private async Task SearchByKeywords(int pageNumber)
+    private async Task StartSearch()
     {
-        string[] keywords = _searchText.Trim().RemoveDiacritics().Split();
+        if (_searchByOption == SearchByOption.PostContent)
+        {
+            string[] keywords = _searchText.Trim().RemoveDiacritics().Split();
 
-        _selectedPage = pageNumber;
+            if (_orderingOption == PostOrderingOption.Relevance)
+                _postInfoPage = await PostRepository.GetPagePostInfoByKeywords(_postInfoPerPage, _selectedPage, keywords);
 
-        if (_orderingOption == PostOrderingOption.Relevance)
-            _postInfoPage = await PostRepository.GetPagePostInfoByKeywords(_postInfoPerPage, pageNumber, keywords);
-
+            else
+                _postInfoPage = await PostRepository.GetPagePostInfoByKeywords(_postInfoPerPage, _selectedPage, keywords,
+                    oq => PostInfoUtils.CreatePostInfoOrderingQuery(_orderingOption, _orderByOption, oq));
+        }
         else
-            _postInfoPage = await PostRepository.GetPagePostInfoByKeywords(_postInfoPerPage, pageNumber, keywords,
-                oq => PostInfoUtils.CreatePostInfoOrderingQuery(_orderingOption, _orderByOption, oq));
+        {
+            if (_orderingOption == PostOrderingOption.Relevance)
+                _postInfoPage = await PostRepository.GetPagePostInfoSearchByAuthorName(_postInfoPerPage, _selectedPage, _searchText);
+
+            else
+                _postInfoPage = await PostRepository.GetPagePostInfoSearchByAuthorName(_postInfoPerPage, _selectedPage, _searchText,
+                    oq => PostInfoUtils.CreatePostInfoOrderingQuery(_orderingOption, _orderByOption, oq));
+        }
 
         if (_user != null)
             _userPostRatings = await PostRatingRepository.GetRangeAsync(_user.Id, _postInfoPage.Items.Select(p => p.Id));
+    }
+
+    private string SearchByOptionToString(SearchByOption option)
+    {
+        return option switch
+        {
+            SearchByOption.PostContent => "Nội dung bài viết",
+            SearchByOption.AuthorName => "Tên người đăng bài",
+            _ => throw new ArgumentException(),
+        };
     }
 }
 
