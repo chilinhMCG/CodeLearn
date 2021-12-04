@@ -15,7 +15,7 @@
         statusbar: false,
         toolbar_sticky: true,
         toolbar_location: 'bottom',
-        min_height: 600,
+        min_height: 300,
         placeholder: "Nội dung bài viết...",
         plugins: ['autoresize', 'lists', 'image', 'imagetools', 'media', 'link', 'codesample', 'autolink', 'paste', 'table'],
         image_caption: true,
