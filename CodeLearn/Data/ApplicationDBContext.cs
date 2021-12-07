@@ -1,5 +1,7 @@
 using CodeLearn.Models;
 using ManageForum.Api.Entities;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using System;
@@ -9,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace CodeLearn.Data
 {
-    public class ApplicationDBContext : DbContext
+    public class ApplicationDBContext : IdentityDbContext<IdentityUser>
     {
         public ApplicationDBContext(DbContextOptions<ApplicationDBContext> options) : base(options)
         { }
@@ -35,6 +37,8 @@ namespace CodeLearn.Data
       
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         { 
+            base.OnModelCreating(modelBuilder);
+            
             modelBuilder.HasPostgresEnum<CourseStatusEnum>();
 
             modelBuilder.Entity<Course>(entity =>
