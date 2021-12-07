@@ -16,11 +16,10 @@
     </div>
 }
 
-@if (_confObjName != null)
+@if (_jsConfSrc != null)
 {
     <div hidden="@(_state != State.Complete)" class="@Class">
-        <TinyMCE.Blazor.Editor JsConfSrc="@_confObjName"
-                               Id="@_confObjName"
+        <TinyMCE.Blazor.Editor JsConfSrc="@_jsConfSrc"
                                ApiKey="@Configuration["TinyMceApiKey"]"
                                @bind-Value="@_boundContent"
                                @bind-Text="@_boundTextContent" />
@@ -29,10 +28,7 @@
 
 @code {
     [Parameter]
-    public string JsInitEditorFuncName { get; set; }
-
-    [Parameter]
-    public string JsDisposeEditorFuncName { get; set; }
+    public string JsConfigObjName { get; set; }
 
     [Parameter]
     public string Class { get; set; }
@@ -44,7 +40,9 @@
     public EventCallback<string> ContentChanged { get; set; }
 
     /// <summary>
-    /// 
+    /// Khi đánh tiếng việt và có sử dụng binding, đôi khi từ trên trả xuống giá trị khác, 
+    /// dẫn đến text cursor chuyện lại thành vị trí ban đầu. Để ngăn việc này, ta không cho bind giá trị 
+    /// từ trên xuống mà chỉ cho bind giá trị từ đây lên trên.
     /// </summary>
     private string _content;
 
@@ -54,8 +52,19 @@
         set
         {
             _content = value;
-            ContentChanged.InvokeAsync(_content);
+            ContentChanged.InvokeAsync(value);
         }
+    }
+
+    protected override void OnInitialized()
+    {
+        _content = Content;
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (Content == "")
+            _content = Content;
     }
 
     [Parameter]
@@ -72,16 +81,11 @@
 
     private string _editorId = Guid.NewGuid().ToString();
 
-    private string _confObjName;
+    private string _jsConfSrc;
 
     private State _state = State.Init;
 
     private DotNetObjectReference<Editor> _objRef;
-
-    protected override void OnParametersSet()
-    {
-        _content = Content;
-    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -89,7 +93,7 @@
         {
             _state = State.Loading;
             _objRef = DotNetObjectReference.Create(this);
-            await JS.InvokeVoidAsync(JsInitEditorFuncName, _objRef, _editorId);
+            await JS.InvokeVoidAsync("createEditorConfigObj", _objRef, _editorId, JsConfigObjName);
             StateHasChanged();
         }
     }
@@ -97,7 +101,7 @@
     [JSInvokable]
     public void OnConfigObjReady(string name)
     {
-        _confObjName = name;
+        _jsConfSrc = name;
         StateHasChanged();
     }
 
@@ -110,7 +114,7 @@
 
     public async ValueTask DisposeAsync()
     {
-        await JS.InvokeVoidAsync(JsDisposeEditorFuncName, _editorId);
+        await JS.InvokeVoidAsync("disposeEditorConfigObj", _editorId);
         _objRef?.Dispose();
     }
 }

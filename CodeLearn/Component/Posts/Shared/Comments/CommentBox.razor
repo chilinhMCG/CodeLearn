@@ -1,5 +1,5 @@
 ﻿<div class="@Class">
-    <CommentEditor @ref="editor" Class="mb-3" @bind-Content="_boundContent" />
+    <CommentEditor Class="mb-3" @bind-Content="_boundContent" />
     <div class="d-flex justify-end">
         @if (_submitState == State.Loading)
         {
@@ -49,16 +49,14 @@
     [Parameter]
     public EventCallback OnSubmit { get; set; }
 
-    private CommentEditor editor;
-
     private State _submitState;
 
     private async Task HandleSubmit()
     {
         _submitState = State.Loading;
 
-        await editor.ClearTextBoxAsync();
         await OnSubmit.InvokeAsync();
+        _boundContent = "";
 
         _submitState = State.Complete;
     }

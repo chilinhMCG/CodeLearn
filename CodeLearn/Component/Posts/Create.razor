@@ -14,7 +14,6 @@
             <MudTextField Class="mb-4" @bind-Value="_post.Title" Immediate="true"
                           Label="Tiêu đề bài viết..."
                           Variant="Variant.Outlined" For="() => _post.Title" />
-
             <PostEditor @bind-Content="_post.Content" @bind-TextContent="_textContent" />
 
             <div class="d-flex justify-end mt-4">
