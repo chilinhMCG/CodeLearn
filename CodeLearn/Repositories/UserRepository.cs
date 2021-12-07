@@ -27,7 +27,7 @@ namespace CodeLearn.Repositories
         public async Task<List<User>> GetAllUser()
         {
             using var context = _applicationDBContext.CreateDbContext();
-            return await context.Users.ToListAsync();
+            return await context.Users.OrderBy(u => u.Name).ToListAsync();
         }
 
         public List<User> GetUser()

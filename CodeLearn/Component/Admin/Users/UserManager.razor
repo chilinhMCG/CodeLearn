@@ -1,0 +1,88 @@
+﻿@page "/admin/users"
+@using System.Net.Http.Json
+@inject IUserRepository UserRepository
+@inject IDiscussionRepository DicussionRepository
+@inject IPostRepository PostRepository
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@attribute [Authorize(Roles = "Admin")]
+
+<MudPaper Class="p-4 pb-1 mt-4 ">
+    <MudTable Items="@_listUsers" Hover="true" SortLabel="Sort By" Filter="new Func<User,bool>(FilterUser)">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Danh sách thành viên</MudText>
+            <MudSpacer />
+            <MudTextField @bind-Value="searchUser" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent>
+        <HeaderContent>
+            <MudTh><MudTableSortLabel Enabled="true" SortBy="new Func<User, object>(x => x.Name)">Tên</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<User, object>(x => x.Email)">Email</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<User, object>(x => x.IsBlocked)">Trạng thái</MudTableSortLabel></MudTh>
+            <MudTh>Tác vụ</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Name">@context.Name</MudTd>
+            <MudTd DataLabel="Email">@context.Email</MudTd>
+            <MudTd DataLabel="Is Blocked"><CodeLearn.Component.DashBoard.Component.StatusLabel IsBlocked="@context.IsBlocked"></CodeLearn.Component.DashBoard.Component.StatusLabel></MudTd>
+            <MudTd DataLabel="Discussions">@(context.Discussions.Count+ context.Posts.Count)</MudTd>
+            <MudTd DataLabel="Tác vụ">
+                <MudButton @onclick="(() => BlockUser(context))" Variant="Variant.Filled" Color="Color.Error">Khóa </MudButton>
+            </MudTd>
+
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager PageSizeOptions="new int[] { 10,25, 50 }" />
+        </PagerContent>
+    </MudTable>
+
+</MudPaper>
+@code {
+    private IEnumerable<User> _listUsers = new List<User>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _listUsers = await UserRepository.GetAllUser();
+    }
+    private string searchUser = "";
+    private bool FilterUser(User element) => FilterFunc(element, searchUser);
+
+    private bool FilterFunc(User element, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if ($"{element.Email} {element.Discussions.Count}".Contains(searchString))
+            return true;
+        return false;
+    }
+
+    private async Task<IEnumerable<string>> SearchUser(string value)
+    {
+        if (string.IsNullOrEmpty(value))
+            return new string[0];
+        var users = _listUsers.Where(x => x.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+        var result = from u in users
+                     select u.Name;
+        return result;
+    }
+    async Task BlockUser(User user)
+    {
+        var dialog = DialogService.Show<BlockDialog>("Khóa/Mở khóa tài khoản người dùng");
+
+        var result = await dialog.Result;
+
+
+        if (!result.Cancelled)
+        {
+            if (user.IsBlocked == true)
+                user.IsBlocked = false;
+            else user.IsBlocked = true;
+
+            UserRepository.UpdateUser(user);
+            StateHasChanged();
+            Snackbar.Add("Khóa/Mở khóa quyền truy cập thành công!", Severity.Success);
+            await Task.Delay(1500);
+        }
+    }
+}

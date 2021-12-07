@@ -1,4 +1,5 @@
 using CodeLearn.Models;
+using ManageForum.Api.Entities;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using System;
@@ -25,6 +26,10 @@ namespace CodeLearn.Data
         public DbSet<PostRating> PostRatings { get; set; }
         public DbSet<PostComment> PostComments { get; set; }
         public DbSet<PostCommentStar> PostCommentStars { get; set; }
+
+
+        public DbSet<PostReact> PostReacts { set; get; }
+        public DbSet<DiscussionReact> DiscussionReacts { set; get; }
 
         static ApplicationDBContext() => NpgsqlConnection.GlobalTypeMapper.MapEnum<CourseStatusEnum>();
       
@@ -101,6 +106,14 @@ namespace CodeLearn.Data
                         .HasOne(u => u.ParentComment)
                         .WithMany(c => c.Replies)
                         .OnDelete(DeleteBehavior.Cascade);
+
+
+            modelBuilder.Entity<CourseRating>()
+                .HasKey(nameof(CourseRating.CourseId), nameof(CourseRating.UserId));
+            modelBuilder.Entity<PostReact>()
+                .HasKey(nameof(PostReact.PostId), nameof(PostReact.UserId));
+            modelBuilder.Entity<DiscussionReact>()
+                .HasKey(nameof(DiscussionReact.DiscussionId), nameof(DiscussionReact.UserId));
         }
     }
 }

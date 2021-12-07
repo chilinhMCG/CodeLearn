@@ -10,9 +10,14 @@ namespace CodeLearn.Repositories.Interface
     {
         void AddDiscussion(Discussion discussion);
         Discussion GetDiscussionById(Guid id);
+        Discussion GetDiscussionById(string id);
         void UpdateDiscussion(Discussion discussion);
         void DeleteDiscussionByID(Guid id);
         List<Discussion> GetDiscussionPage(int pageNumbers, int pageSize, string search);
         int GetPageNumbers(int sizePage, string search);
+        Task<ICollection<Discussion>> GetDiscussionByAuthor(Guid id);
+        Task<ICollection<Discussion>> GetAllDiscussion();
+        int CountAllDiscussion();
+
     }
 }

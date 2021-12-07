@@ -1,0 +1,187 @@
+﻿@page "/admin/role"
+@using System.Net.Http.Json
+@inject IUserRepository UserRepository
+@inject IDiscussionRepository DicussionRepository
+@inject IRoleRepository RoleRepository
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject UserManager<IdentityUser> UserManager
+@using System.ComponentModel.DataAnnotations
+@attribute [Authorize(Roles = "Admin")]
+
+<MudPaper class="p-4 pb-1 mt-4">
+    <MudTabs Elevation="1" Rounded="true" PanelClass="pa-6">
+        <MudTabPanel Text="Danh sách quyền" ToolTip="Danh sách các quyền ">
+            <MudTable Items="@listUsers" Hover="true" SortLabel="Sort By" Filter="new Func<User,bool>(FilterUser)">
+                <ToolBarContent>
+                    <MudText Typo="Typo.h6">Danh sách quyền hạn của thành viên</MudText>
+                    <MudSpacer />
+                    <MudTextField @bind-Value="searchUser" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                </ToolBarContent>
+                <HeaderContent>
+                    <MudTh><MudTableSortLabel Enabled="@enabled" SortBy="new Func<User, object>(x => x.Name)">Tài khoản</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<User, object>(x => x)">Quyền hạn</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="new Func<User, object>(x => x.IsBlocked)">Trạng thái</MudTableSortLabel></MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Name">@context.Name</MudTd>
+                    <MudTd DataLabel="Role">
+                        @if (string.IsNullOrEmpty(context.Role))
+                        {
+                            <MudLink Href="@($"/admin/role/user/{context.Id.ToString()}")">+Thêm</MudLink>
+                        }
+                        else
+                        {
+
+                            <MudLink Href="@($"/admin/role/user/{context.Id.ToString()}")">
+                                @context.Role
+                            </MudLink>
+                        }
+                    </MudTd>
+                    <MudTd DataLabel="Is Blocked"><CodeLearn.Component.DashBoard.Component.StatusLabel IsBlocked="@context.IsBlocked"></CodeLearn.Component.DashBoard.Component.StatusLabel></MudTd>
+
+                </RowTemplate>
+                <PagerContent>
+                    <MudTablePager PageSizeOptions="new int[] { 10,25, 50 }" />
+                </PagerContent>
+            </MudTable>
+
+        </MudTabPanel>
+        <MudTabPanel Text="Role" ToolTip="Role">
+            <MudGrid>
+                <MudItem lg="12">
+                    
+                    <MudGrid>
+                        <MudItem lg="12">
+                            <MudText Color="Color.Success">Thêm role</MudText>
+                        </MudItem>
+                        <MudItem lg="9">
+                            <MudTextField @bind-Value="_model.Name" Label="Tên role"
+                                          Variant="Variant.Outlined"
+                                          Margin="Margin.Dense" >
+                            </MudTextField>
+                        </MudItem>
+                        <MudItem lg="3">
+                            <MudIconButton Icon="@Icons.Material.Outlined.AddCircleOutline"
+                                           Color="@Color.Success" @onclick="AddRole" />
+                        </MudItem>
+                    </MudGrid>
+                            
+                        
+                 
+                </MudItem>
+                <MudItem lg="12">
+                        <MudSimpleTable Hover="true" Bordered="true">
+                            <thead>
+                                <tr>
+                                    <th class="text-center font-weight-bold">Tên các role</th>
+                                    <th>Tác vụ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var context in listRoles)
+                                {
+                                    <tr @key="context">
+                                        <td>
+                                            <MudTextField @bind-Value="context.Name" Variant="Variant.Outlined"
+                                                          Margin="Margin.Dense" Required="true" @onfocusout="(() => EditRole(context))"></MudTextField>
+                                        </td>
+                                        <td class="text-center">
+                                            <MudButton Color="Color.Error" @onclick="(() => DeleteRole(context))">Delete</MudButton>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </MudSimpleTable>
+                </MudItem>
+            </MudGrid>
+        </MudTabPanel>
+    </MudTabs>
+
+</MudPaper>
+@code {
+    bool _addRole = false;
+    private bool enabled = true;
+    private IEnumerable<User> listUsers = new List<User>();
+    private IEnumerable<IdentityRole> listRoles = new List<IdentityRole>();
+    IdentityRole _model = new IdentityRole();
+    private string searchUser = "";
+    private bool FilterUser(User element) => FilterFunc(element, searchUser);
+    protected override async Task OnInitializedAsync()
+    {
+        listUsers = await UserRepository.GetAllUser();
+        listRoles = await RoleRepository.GetAllRole();
+
+        foreach (var user in listUsers)
+        {
+            var userIdentity = await UserManager.FindByNameAsync(user.Name.ToString());
+            var roles = await UserManager.GetRolesAsync(userIdentity);
+            user.Discussions = await DicussionRepository.GetDiscussionByAuthor(user.Id);
+            user.Role = string.Join(",", roles);
+
+        }
+    }
+    private bool FilterFunc(User element, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        return false;
+    }
+
+    private async Task<IEnumerable<string>> SearchUser(string value)
+    {
+        if (string.IsNullOrEmpty(value))
+            return new string[0];
+        var users = listUsers.Where(x => x.Name.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+        var result = from u in users
+                     select u.Name;
+        return result;
+    }
+    async Task DeleteRole(IdentityRole role)
+    {
+        var dialog = DialogService.Show<DeleteDialog>("Xóa quyền hạn");
+        var result = await dialog.Result;
+
+        if (!result.Cancelled)
+        {
+
+            await RoleRepository.Delete(role);
+            listRoles = await RoleRepository.GetAllRole();
+            Snackbar.Add("Xóa thành công!", Severity.Success);
+            await Task.Delay(1500);
+        }
+    }
+    private async Task AddRole()
+    {
+        var result = await RoleRepository.Add(_model);
+        if (result.Succeeded)
+        {
+            Snackbar.Add("Thêm role thành công!", Severity.Success);
+            listRoles = await RoleRepository.GetAllRole();
+            StateHasChanged();
+        }
+        else
+        {
+            if (_model.Name =="")
+            {
+
+                Snackbar.Add("Tên role không được để trống! ", Severity.Error);
+            }
+            Snackbar.Add("Thêm role thất bại!", Severity.Error);
+            StateHasChanged();
+        }
+
+    }
+    private async Task EditRole(IdentityRole role)
+    {
+        IdentityRole currentRole =await RoleRepository.GetRoleById(role.Id.ToString());
+        if (role.Name != currentRole.Name)
+        {
+            await RoleRepository.Edit(role);
+            Snackbar.Add("Chỉnh sửa thành công!", Severity.Success);
+        }
+    }
+
+}

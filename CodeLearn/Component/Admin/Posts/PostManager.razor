@@ -1,0 +1,109 @@
+﻿@page "/admin/posts"
+@using System.Net.Http.Json
+@inject IUserRepository UserRepositoy
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject IPostRepository PostRepository
+@inject ICommentRepository CommentRepository
+@inject IPostReactRepository PostReactRepository
+@attribute [Authorize(Roles = "Admin")]
+
+<MudPaper Class="p-4 pb-1 mt-4 ">
+    <MudTable Items="@_listPosts" Hover="true" SortLabel="Sort By" Filter="new Func<Post,bool>(FilterPost)">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Danh sách bài đăng</MudText>
+            <MudSpacer />
+            <MudTextField @bind-Value="searchPost" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent>
+        <HeaderContent>
+            <MudTh><MudTableSortLabel SortBy="new Func<Post, object>(x => x.Title)">Câu hỏi</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<Post, object>(x => x.User.Name)">Người tạo</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel Enabled="true" SortBy="new Func<Post, object>(x => x.DateCreated)">Ngày tạo</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<Post, object>(x => x.DateLastEdited)">Ngày sửa </MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<Post, object>(x => CountInteract(x))">Số tương tác </MudTableSortLabel></MudTh>
+            <MudTh>Tác vụ </MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Câu hỏi "><MudLink Href="#">@context.Title</MudLink></MudTd>
+            <MudTd DataLabel="Người tạo">@context.User.Name</MudTd>
+            <MudTd DataLabel="Ngày tạo">@context.DateCreated</MudTd>
+            <MudTd DataLabel="Ngày sửa">@context.DateLastEdited</MudTd>
+            <MudTd DataLabel="Tương tác">@CountInteract(context)</MudTd>
+            <MudTd DataLabel="Tác vụ">
+                <MudButton @onclick="(() => DeletePost(context))" Variant="Variant.Filled" Color="Color.Error">Xóa </MudButton>
+            </MudTd>
+
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager PageSizeOptions="new int[] {10, 25, 50 }" />
+        </PagerContent>
+    </MudTable>
+
+</MudPaper>
+@code {
+    private IEnumerable<Post> _listPosts = new List<Post>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _listPosts = await PostRepository.GetAllPost();
+        foreach (var item in _listPosts)
+        {
+            item.User = UserRepositoy.GetUserById(item.UserId.ToString());
+
+        }
+    }
+    private string searchPost = "";
+    private bool FilterPost(Post element) => FilterFunc(element, searchPost);
+
+    private bool FilterFunc(Post element, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.Title.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if ($"{element.Title} ".Contains(searchString))
+            return true;
+        return false;
+    }
+    private int CountInteract(Post post)
+    {
+        var result = PostReactRepository.CountPostReactFromPost(post.Id.ToString())
+        + CommentRepository.CountCommentInPost(post.Id);
+        return result;
+
+    }
+
+    private async Task<IEnumerable<string>> SearchPost(string value)
+    {
+        // In real life use an asynchronous function for fetching data from an api.
+
+        await Task.Delay(5);
+        if (string.IsNullOrEmpty(value))
+            return new string[0];
+        var users = _listPosts.Where(x => x.Title.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+        var result = from u in _listPosts
+                     select u.Title;
+        return result;
+    }
+    async Task DeletePost(Post post)
+    {
+        var dialog = DialogService.Show<DeleteDialog>("Xóa thảo luận");
+        var result = await dialog.Result;
+
+        if (!result.Cancelled)
+        {
+
+            PostRepository.DeletePostByID(post.Id);
+
+            Snackbar.Add("Xóa thành công!", Severity.Success);
+            StateHasChanged();
+            _listPosts = await PostRepository.GetAllPost();
+            foreach (var item in _listPosts)
+            {
+                item.User = UserRepositoy.GetUserById(item.UserId.ToString());
+
+            }
+            await Task.Delay(1500);
+        }
+    }
+}

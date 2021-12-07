@@ -46,5 +46,31 @@ namespace CodeLearn.Repositories
             context.Comments.Remove(comment);
             context.SaveChanges();
         }
+
+        public int CountCommentInDiscussion(Guid id)
+        {
+            using var context = _applicationDBContext.CreateDbContext();
+            var result = (from c in context.Comments
+                          where c.DiscussionId == id
+                          select c).Count();
+            return result; 
+        }
+        public int CountCommentInPost(Guid id)
+        {
+            using var context = _applicationDBContext.CreateDbContext();
+            var result = (from c in context.Comments
+                          where c.PostId == id
+                          select c).Count();
+            return result;
+        }
+
+        public int CountCommentOfUser(Guid id)
+        {
+            using var context = _applicationDBContext.CreateDbContext();
+            var result = (from c in context.Comments
+                          where c.UserId == id
+                          select c).Count();
+            return result;
+        }
     }
 }

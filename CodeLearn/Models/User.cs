@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Identity;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -22,8 +23,10 @@ namespace CodeLearn.Models
         public bool IsBlocked { get; set; }
         public ICollection<Comment> Comments { get; set; }
         public ICollection<Discussion> Discussions { get; set; }
+        public ICollection<Post> Posts { get; set; }
         public User()
         {
+            this.Posts = new HashSet<Post>();
             this.Discussions = new HashSet<Discussion>();
             this.Comments = new HashSet<Comment>();
         }
@@ -31,8 +34,6 @@ namespace CodeLearn.Models
 
         [Column("profile_picture_path", TypeName = "varchar(260)")]
         public string ProfilePicturePath { get; set; }
-
-        public List<Post> Posts { get; set; }
 
         public List<PostComment> PostComments { get; set; }
 

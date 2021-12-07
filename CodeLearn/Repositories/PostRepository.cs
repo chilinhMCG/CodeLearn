@@ -1,4 +1,4 @@
-﻿using CodeLearn.Data;
+using CodeLearn.Data;
 using CodeLearn.Data.OrderingQuery;
 using CodeLearn.Models;
 using CodeLearn.Repositories.Interface;
@@ -32,6 +32,7 @@ namespace CodeLearn.Repositories
         {
         }
 
+        //các method của task 2
         public async Task<Post> GetAsync(Guid userId, string slug)
         {
             using var context = DbContextFactory.CreateDbContext();
@@ -308,6 +309,60 @@ namespace CodeLearn.Repositories
                                      select new OverallRating { PostId = post.Id, RatingCount = 0, Value = 0 };
 
             return nonZeroOverallRatings.Union(zeroOverallRatings);
+        }
+
+        //các method của task 7
+        public void AddPost(Post post)
+        {
+            using var context = DbContextFactory.CreateDbContext();
+            context.Add(post);
+            context.SaveChanges();
+        }
+
+
+
+        public Post GetPostById(string id)
+        {
+            using var context = DbContextFactory.CreateDbContext();
+            return context.Posts.Where(h => h.Id.ToString() == id).FirstOrDefault();
+        }
+
+        public void UpdatePost(Post post)
+        {
+            using var context = DbContextFactory.CreateDbContext();
+            context.Update(post);
+            context.SaveChanges();
+        }
+
+        public void DeletePostByID(Guid id)
+        {
+            using var context = DbContextFactory.CreateDbContext();
+            Post post = GetPostById(id.ToString());
+            context.Remove(post);
+            context.SaveChanges();
+        }
+
+        public async Task<ICollection<Post>> GetAllPost()
+        {
+            using var context = DbContextFactory.CreateDbContext();
+            var list = await context.Posts.OrderBy(p => p.DateCreated).ToListAsync();
+            return list;
+        }
+
+        public async Task<ICollection<Post>> GetPostsByAuthor(string userid)
+        {
+            using var context = DbContextFactory.CreateDbContext();
+            var result = await (from p in context.Posts
+                                where p.UserId.ToString() == userid
+                                select p).OrderBy(p => p.DateCreated).ToListAsync();
+            return result;
+        }
+
+        public int CountAllPost()
+        {
+            using var context = DbContextFactory.CreateDbContext();
+            var result = context.Posts.Count();
+            return result;
         }
     }
 }

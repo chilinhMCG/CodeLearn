@@ -1,0 +1,28 @@
+﻿@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        Bạn có chắc chắn muốn khóa/mở khóa ?
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Quay lại</MudButton>
+        <MudButton OnClick="Submit" Color="Color.Primary">Khóa/Mở khóa</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    protected void Submit()
+    {
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    protected void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+}

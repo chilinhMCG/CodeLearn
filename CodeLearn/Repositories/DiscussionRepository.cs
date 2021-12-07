@@ -54,12 +54,40 @@ namespace CodeLearn.Repositories
             using var context = _applicationDBContext.CreateDbContext();
             return context.Discussions.Where(h => h.Id == id).FirstOrDefault();
         }
+        public Discussion GetDiscussionById(string id)
+        {
+            using var context = _applicationDBContext.CreateDbContext();
+            return context.Discussions.Where(h => h.Id.ToString() == id).FirstOrDefault();
+        }
+        public async Task<ICollection<Discussion>> GetDiscussionByAuthor(Guid id)
+        {
+            using var context = _applicationDBContext.CreateDbContext();
+            var result = await (from d in context.Discussions
+                                where d.UserId == id
+                                select d).OrderBy(p => p.CreateAt).ToListAsync(); ;
+            return result;
+        }
 
         public void UpdateDiscussion(Discussion discussion)
         {
             using var context = _applicationDBContext.CreateDbContext();
             context.Update(discussion);
+            context.SaveChanges();
+        }
+
+        public async Task<ICollection<Discussion>> GetAllDiscussion()
+        {
+            using var context = _applicationDBContext.CreateDbContext();
+            var list = await context.Discussions.OrderBy(d=>d.CreateAt).ToListAsync();
+            return list; 
             //context.SaveChanges();
+        }
+
+        public int CountAllDiscussion()
+        {
+            using var context = _applicationDBContext.CreateDbContext();
+            var result = context.Discussions.Count();
+            return result;
         }
     }
 }

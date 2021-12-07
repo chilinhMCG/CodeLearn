@@ -1,0 +1,15 @@
+﻿@attribute [Authorize(Roles = "Admin")]
+<MudPaper Class="sidebar d-flex align-center justify-start py-8 p-4 pb-1 mt-4">
+    <MudList Clickable="true">
+        <MudLink Href="/admin/dashboard"><MudListItem Text="Tổng quan" Icon="@Icons.Material.Filled.Inbox" /></MudLink>
+        <MudLink Href="/admin/users"><MudListItem Text="Thành viên" Icon="@Icons.Filled.People" /></MudLink>
+        <MudLink Href="/admin/discussions"><MudListItem Text="Bài thảo luận" Icon="@Icons.Filled.AutoAwesomeMotion" /></MudLink>
+        <MudLink Href="/admin/posts"><MudListItem Text="Bài đăng" Icon="@Icons.Filled.NotificationAdd" /></MudLink>
+        <MudLink Href="/admin/role"><MudListItem Text="Quyền hạn" Icon="@Icons.Filled.BorderColor" /></MudLink>
+    </MudList>
+</MudPaper>
+
+
+@code {
+
+}

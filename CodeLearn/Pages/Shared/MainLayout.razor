@@ -1,26 +1,42 @@
 @inherits LayoutComponentBase
 @inject IUserRepository UserRepository;
 
-    <MudThemeProvider Theme="MCGTheme" />
-    <MudDialogProvider />
-    <MudSnackbarProvider />
+<MudThemeProvider Theme="MCGTheme" />
+<MudDialogProvider />
+<MudSnackbarProvider />
 
-    <MudLayout>
-        <NavBar />
-
-        <MudMainContent>
-            <MudContainer MaxWidth="MaxWidth.Large">
+<MudLayout>
+    <NavBar />
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.Large">
 
                 <CascadingValue Value="_userTask">
-                    @Body
-                </CascadingValue>
+                @if (_isAdmin)
+                {
+                    <MudGrid>
 
-                    <MudScrollToTop>
-                        <MudFab Color="Color.Success" Icon="@Icons.Filled.ArrowCircleUp" />
-                    </MudScrollToTop>
+                        <MudItem Style="height : fit-content" xs="12" sm="3">
+                            <CodeLearn.Component.DashBoard.Menu.DashBoardMenu></CodeLearn.Component.DashBoard.Menu.DashBoardMenu>
+                        </MudItem>
+                        <MudItem xs="12" sm="9">
+                            @Body
+                        </MudItem>
+                    </MudGrid>
+                }
+                else
+                {
+                    @Body
+                }
+            </CascadingValue>
+
+                <MudScrollToTop>
+                    <MudFab Color="Color.Success" Icon="@Icons.Filled.ArrowCircleUp" />
+                </MudScrollToTop>
             </MudContainer>
 
         </MudMainContent>
+
+
 
         <Footer />
     </MudLayout>
@@ -40,19 +56,26 @@
 
     private Task<User> _userTask;
 
-    protected override void OnInitialized()
+    private bool _isAdmin = false;
+
+    private ClaimsPrincipal _identityUser;
+
+    protected override async Task OnInitializedAsync()
     {
+
+        var authState = await _authenticationStateTask;
+        _identityUser = authState.User;
+
         _userTask = GetUser();
+
+        _isAdmin = _identityUser.IsInRole("Admin");
     }
 
     private async Task<User> GetUser()
     {
-        var authState = await _authenticationStateTask;
-        var identityUser = authState.User;
+        if (_identityUser.Identity.IsAuthenticated)
+            return await UserRepository.GetUserByEmailAsync(_identityUser.FindFirst(ClaimTypes.Email).Value);
 
-        if (identityUser.Identity.IsAuthenticated)
-          return await UserRepository.GetUserByEmailAsync(identityUser.FindFirst(ClaimTypes.Email).Value);
-        
         else
             return null;
     }

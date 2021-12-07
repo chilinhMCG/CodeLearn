@@ -1,4 +1,4 @@
-﻿using NpgsqlTypes;
+using NpgsqlTypes;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -41,6 +41,11 @@ namespace CodeLearn.Models
         
         [Column("unaccented_content")]
         public string UnaccentedContent { get; set; }
+
+        [Column("hashtag")]
+        public List<string> HashTag { get; set; }
+
+        int NumberInteract { set; get; }
 
         public NpgsqlTsVector TitleSearchVector { get; set; }
 

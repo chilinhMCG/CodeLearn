@@ -19,6 +19,8 @@ namespace CodeLearn.Models
         public Guid Id { get; set; }
         [Column("create_at")]
         public DateTime CreateAt { get; set; }
+        [Column("last_updated")]
+        public DateTime LastUpdated { get; set; }
         [Column("hashtag")]
         public List<string> HashTag { get; set; }
         [Column("question")]

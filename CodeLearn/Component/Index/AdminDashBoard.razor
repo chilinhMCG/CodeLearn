@@ -1,0 +1,111 @@
+﻿@page "/admin/dashboard"
+@using System.Net.Http.Json
+@inject IUserRepository UserRepository
+@inject IDiscussionRepository DiscussionRepository
+@inject IPostRepository PostRepository
+@inject ICommentRepository CommentRepository
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+@inject UserManager<IdentityUser> UserManager
+@attribute [Authorize(Roles = "Admin")]
+<MudPaper Style=" margin : 0 auto ;  text-align: center; justify-content : center" Class="p-4 mt-4 align-item-center white">
+    <MudGrid>
+        <MudItem xs="4">
+            <MudCard Class="statistic-box red">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Style="color : white ;" Class="number"> @_listUsers.Count()</MudText>
+                        <MudText Style="color : white ;" Class="caption">Số thành viên </MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+            </MudCard>
+        </MudItem>
+        <MudItem xs="4">
+            <MudCard Class="statistic-box blue">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Style="color : white ;" Class="number">@_postNumber</MudText>
+                        <MudText Style="color : white ;" Class="caption">Số bài đăng </MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+            </MudCard>
+        </MudItem>
+        <MudItem xs="4">
+            <MudCard Class="statistic-box green">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Style="color : white ;" Class="number">@_discussionNumber</MudText>
+                        <MudText Style="color : white ;" Class="caption">Số bài thảo luận </MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+            </MudCard>
+        </MudItem>
+
+    </MudGrid>
+    <MudTable Items="@_listUsers" Hover="true" SortLabel="Sort By" Filter="new Func<User,bool>(FilterUser)">
+        <ToolBarContent>
+            <MudText Typo="Typo.h6">Danh sách thành viên</MudText>
+            <MudSpacer />
+            <MudTextField @bind-Value="searchUser" Placeholder="Search" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+        </ToolBarContent>
+        <HeaderContent>
+            <MudTh><MudTableSortLabel SortBy="new Func<User, object>(x => x.Name)">Tên</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel Enabled="true" SortBy="new Func<User, object>(x => x.Email)">Email</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<User, object>(x => x.IsBlocked)">Trạng thái</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<User, object>(x => x.Discussions.Count+x.Posts.Count)">Tổng bài viết</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<User, object>(x => CountInteract(x))">Tổng tương tác</MudTableSortLabel></MudTh>
+            <MudTh>Role</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Name">@context.Name</MudTd>
+            <MudTd DataLabel="Email">@context.Email</MudTd>
+            <MudTd DataLabel="Is Blocked"><CodeLearn.Component.DashBoard.Component.StatusLabel IsBlocked="@context.IsBlocked"></CodeLearn.Component.DashBoard.Component.StatusLabel></MudTd>
+            <MudTd DataLabel="Tổng bài viết">@(context.Discussions.Count+context.Posts.Count)</MudTd>
+            <MudTd DataLabel="Số tương tác">@(CountInteract(context))</MudTd>
+            <MudTd DataLabel="Role">@context.Role</MudTd>
+        </RowTemplate>
+        <PagerContent>
+            <MudTablePager PageSizeOptions="new int[] {10, 25, 50 }" />
+        </PagerContent>
+    </MudTable>
+</MudPaper>
+@code {
+
+    private IEnumerable<User> _listUsers { set; get; } = new List<User>();
+    private int _postNumber { set; get; }
+    private int _discussionNumber { set; get; }
+    protected override async Task OnInitializedAsync()
+    {
+        _listUsers = await UserRepository.GetAllUser();
+        _postNumber = PostRepository.CountAllPost();
+        _discussionNumber = DiscussionRepository.CountAllDiscussion();
+
+        foreach (var user in _listUsers)
+        {
+            var userIdentity = await UserManager.FindByNameAsync(user.Name.ToString());
+            user.Discussions = await DiscussionRepository.GetDiscussionByAuthor(user.Id);
+            user.Posts = await PostRepository.GetPostsByAuthor(user.Id.ToString());
+            var roles = await UserManager.GetRolesAsync(userIdentity);
+            user.Role = string.Join(",", roles);
+        }
+    }
+    private string searchUser = "";
+    private bool FilterUser(User element) => FilterFunc(element, searchUser);
+
+    private bool FilterFunc(User element, string searchString)
+    {
+        if (string.IsNullOrWhiteSpace(searchString))
+            return true;
+        if (element.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+            return true;
+        if ($"{element.Email} {element.Discussions.Count}".Contains(searchString))
+            return true;
+        return false;
+    }
+
+    private int CountInteract(User user)
+    {
+        var result = user.Discussions.Count() + user.Posts.Count() + CommentRepository.CountCommentOfUser(user.Id);
+        return result; 
+    }
+}
