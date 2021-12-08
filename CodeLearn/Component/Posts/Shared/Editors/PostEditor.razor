@@ -1,8 +1,11 @@
 ﻿
-<Editor Class="@Class" JsConfigObjName="postEditorConfig"
+<Editor CharacterLimit="CharacterLimit" Class="@Class" JsConfigObjName="postEditorConfig"
         @bind-Content="@_boundContent" @bind-TextContent="_boundTextContent" />
 
 @code {
+    //Vì một lý do nào đó, tinyMCE bị dừng hoạt động khi cao hơn con số này một chút.
+    public const int CharacterLimit = 29000;
+
     [Parameter]
     public string Class { get; set; }
 
@@ -16,6 +19,7 @@
     {
         get => Content;
         set => ContentChanged.InvokeAsync(value);
+
     }
 
     [Parameter]

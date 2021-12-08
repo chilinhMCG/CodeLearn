@@ -62,7 +62,8 @@ else
     private bool _isAuthorized;
 
     private bool _disabled => string.IsNullOrWhiteSpace(_post.Title) || string.IsNullOrWhiteSpace(_textContent)
-                              || _uneditedContent == _post.Content && _uneditedTitle == _post.Title.Trim();
+                              || _uneditedContent == _post.Content && _uneditedTitle == _post.Title.Trim()
+                              || _post.Content.Length > PostEditor.CharacterLimit;
 
     protected override async Task OnInitializedAsync()
     {

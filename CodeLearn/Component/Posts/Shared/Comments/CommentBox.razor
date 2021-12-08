@@ -1,5 +1,5 @@
 ﻿<div class="@Class">
-    <CommentEditor Class="mb-3" @bind-Content="_boundContent" />
+    <CommentEditor  Class="mb-3" @bind-Content="_boundContent" />
     <div class="d-flex justify-end">
         @if (_submitState == State.Loading)
         {
@@ -15,7 +15,9 @@
         }
 
         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="HandleSubmit"
-                   Disabled="(string.IsNullOrWhiteSpace(Content)) || _submitState == State.Loading">
+                   Disabled="(string.IsNullOrWhiteSpace(Content)) 
+                             || _submitState == State.Loading 
+                             || _boundContent.Length > CommentEditor.CharacterLimit ">
             @SubmitButtonText
         </MudButton>
     </div>

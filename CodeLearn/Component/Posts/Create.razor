@@ -40,7 +40,9 @@
 
     private User _user;
 
-    private bool _disabled => string.IsNullOrWhiteSpace(_post.Title) || string.IsNullOrWhiteSpace(_textContent);
+    private bool _disabled => string.IsNullOrWhiteSpace(_post.Title) 
+                              || string.IsNullOrWhiteSpace(_textContent)
+                              || _post.Content.Length > PostEditor.CharacterLimit;
 
     protected override async Task OnInitializedAsync()
     {

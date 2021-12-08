@@ -1,8 +1,10 @@
 ﻿
-<Editor Class="@Class" JsConfigObjName="commentEditorConfig"
+<Editor Class="@Class" CharacterLimit="CharacterLimit" JsConfigObjName="commentEditorConfig"
         @bind-Content="@_boundContent" @bind-TextContent="@_boundTextContent" />
 
 @code {
+    public const int CharacterLimit = 5000;
+
     [Parameter]
     public string Class { get; set; }
 

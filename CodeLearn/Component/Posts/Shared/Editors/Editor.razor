@@ -8,28 +8,44 @@
     /// Editor này được sử dụng làm base cho các editor khác như PostEditor, CommentEditor.
     /// </summary>
 *@
+<div class="@Class">
+    @if (_state == State.Loading)
+    {
+        <MudProgressLinear Color="Color.Primary" Indeterminate="true" />
+        <div class="d-flex flex-column align-center my-10" style="@($"color:{Colors.Grey.Lighten1}")">
+            <MudIcon Class="mr-2" Size="Size.Large" Icon="@Icons.Material.Filled.LibraryBooks" />
+            <MudText Align="Align.Center">Đang tải editor...</MudText>
+            <MudText Align="Align.Center">Vui lòng đợi trong giây lát!</MudText>
+        </div>
+    }
 
-@if (_state == State.Loading)
-{
-    <MudProgressLinear Color="Color.Primary" Indeterminate="true" />
-    <div class="d-flex flex-column align-center my-10 @Class" style="@($"color:{Colors.Grey.Lighten1}")">
-        <MudIcon Class="mr-2" Size="Size.Large" Icon="@Icons.Material.Filled.LibraryBooks" />
-        <MudText Align="Align.Center">Đang tải editor...</MudText>
-        <MudText Align="Align.Center">Vui lòng đợi trong giây lát!</MudText>
-    </div>
-}
+    @if (_jsConfSrc != null)
+    {
+        <div hidden="@(_state != State.Complete)">
+            <TinyMCE.Blazor.Editor JsConfSrc="@_jsConfSrc"
+                                   ApiKey="@Configuration["TinyMceApiKey"]"
+                                   @bind-Value="@_boundContent"
+                                   @bind-Text="@_boundTextContent" />
+        </div>
+    }
 
-@if (_jsConfSrc != null)
-{
-    <div hidden="@(_state != State.Complete)" class="@Class">
-        <TinyMCE.Blazor.Editor JsConfSrc="@_jsConfSrc"
-                               ApiKey="@Configuration["TinyMceApiKey"]"
-                               @bind-Value="@_boundContent"
-                               @bind-Text="@_boundTextContent" />
-    </div>
-}
+    @if (_state == State.Complete)
+    {
+        @if (_content.Length > CharacterLimit)
+        {
+            <MudText Class="mt-1" Color="Color.Error">@_content.Length/@CharacterLimit ký tự - vượt quá độ dài cho phép!</MudText>
+        }
+        else
+        {
+            <MudText Class="mt-1" style="@($"color:{Colors.Grey.Lighten1}")">@_content.Length/@CharacterLimit ký tự</MudText>
+        }
+    }
+</div>
 
 @code {
+    [Parameter]
+    public int CharacterLimit { get; set; }
+
     [Parameter]
     public string JsConfigObjName { get; set; }
 
@@ -54,8 +70,12 @@
         get => _content;
         set
         {
-            _content = value;
-            ContentChanged.InvokeAsync(value);
+            //nếu người dùng nhìn thấy lỗi nhưng vẫn đánh tiếp, cắt nội dung bài viết
+            if (value.Length <= CharacterLimit + 500)
+            {
+                _content = value;
+                ContentChanged.InvokeAsync(value);
+            }
         }
     }
 
