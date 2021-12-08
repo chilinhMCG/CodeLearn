@@ -9,33 +9,34 @@ namespace CodeLearn.Data.OrderingQuery
 {
     public static class PostInfoUtils
     {
+        //tạo query sắp xếp bài viết dựa trên lựa chọn của người dùng
         public static OrderedOrderingQuery<PostInfo> CreatePostInfoOrderingQuery(
-            PostOrderingOption orderingOption, OrderByOption orderByOption, OrderingQuery<PostInfo> orderingQuery)
+            PostOrderByOption orderingOption, OrderOption orderByOption, OrderingQuery<PostInfo> orderingQuery)
         {
             var ordered = (orderingOption, orderByOption) switch
             {
-                (PostOrderingOption.OverallRating, OrderByOption.Descending)
+                (PostOrderByOption.OverallRating, OrderOption.Descending)
                     => orderingQuery.OrderByDescending(p => p.OverallRating),
 
-                (PostOrderingOption.OverallRating, OrderByOption.Ascending)
+                (PostOrderByOption.OverallRating, OrderOption.Ascending)
                     => orderingQuery.OrderBy(p => p.OverallRating),
 
-                (PostOrderingOption.DateCreated, OrderByOption.Descending)
+                (PostOrderByOption.DateCreated, OrderOption.Descending)
                     => orderingQuery.OrderByDescending(p => p.DateCreated),
 
-                (PostOrderingOption.DateCreated, OrderByOption.Ascending)
+                (PostOrderByOption.DateCreated, OrderOption.Ascending)
                     => orderingQuery.OrderBy(p => p.DateCreated),
 
-                (PostOrderingOption.Ratings, OrderByOption.Descending)
+                (PostOrderByOption.Ratings, OrderOption.Descending)
                     => orderingQuery.OrderByDescending(p => p.RatingCount),
 
-                (PostOrderingOption.Ratings, OrderByOption.Ascending)
+                (PostOrderByOption.Ratings, OrderOption.Ascending)
                     => orderingQuery.OrderBy(p => p.RatingCount),
 
-                (PostOrderingOption.Comments, OrderByOption.Descending)
+                (PostOrderByOption.Comments, OrderOption.Descending)
                     => orderingQuery.OrderByDescending(p => p.CommentCount),
 
-                (PostOrderingOption.Comments, OrderByOption.Ascending)
+                (PostOrderByOption.Comments, OrderOption.Ascending)
                     => orderingQuery.OrderBy(p => p.CommentCount),
 
                 _ => throw new ArgumentOutOfRangeException(nameof(orderingOption), "Provided options are invalid."),

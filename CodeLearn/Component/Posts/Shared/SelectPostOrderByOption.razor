@@ -1,9 +1,9 @@
 ﻿@using Data.Ordering;
 
-<MudSelect Class="@Class" T="OrderByOption" Label="Sắp xếp" Disabled="OrderingOption == PostOrderingOption.Relevance"
-           @bind-Value="_boundOrderByOption" ToStringFunc="OrderByOptionToString">
-    <MudSelectItem Value="OrderByOption.Descending" />
-    <MudSelectItem Value="OrderByOption.Ascending" />
+<MudSelect Class="@Class" T="OrderOption" Label="Sắp xếp" Disabled="OrderByOption == PostOrderByOption.Relevance"
+           @bind-Value="_boundOrderOption" ToStringFunc="OrderOptionToString">
+    <MudSelectItem Value="OrderOption.Descending" />
+    <MudSelectItem Value="OrderOption.Ascending" />
 </MudSelect>
 
 @code {
@@ -11,42 +11,42 @@
     public string Class { get; set; }
 
     [Parameter]
-    public PostOrderingOption OrderingOption { get; set; }
+    public PostOrderByOption OrderByOption { get; set; }
 
     [Parameter]
-    public OrderByOption OrderByOption { get; set; }
+    public OrderOption OrderOption { get; set; }
 
     [Parameter]
-    public EventCallback<OrderByOption> OrderByOptionChanged { get; set; }
+    public EventCallback<OrderOption> OrderOptionChanged { get; set; }
 
-    private OrderByOption _boundOrderByOption
+    private OrderOption _boundOrderOption
     {
-        get => OrderByOption;
-        set => OrderByOptionChanged.InvokeAsync(value);
+        get => OrderOption;
+        set => OrderOptionChanged.InvokeAsync(value);
     }
 
     protected override void OnParametersSet()
     {
-        if (OrderingOption == PostOrderingOption.Relevance && _boundOrderByOption != OrderByOption.Descending)
-            _boundOrderByOption = OrderByOption.Descending;
+        if (OrderByOption == PostOrderByOption.Relevance && _boundOrderOption != OrderOption.Descending)
+            _boundOrderOption = OrderOption.Descending;
     }
 
-    private string OrderByOptionToString(OrderByOption option)
+    private string OrderOptionToString(OrderOption option)
     {
-        return (OrderingOption, option) switch
+        return (OrderByOption, option) switch
         {
-            (PostOrderingOption.Relevance, OrderByOption.Descending) => "Phù hợp nhất",
+            (PostOrderByOption.Relevance, OrderOption.Descending) => "Phù hợp nhất",
 
-            (PostOrderingOption.OverallRating, OrderByOption.Descending) => "Đánh giá cao nhất",
-            (PostOrderingOption.OverallRating, OrderByOption.Ascending) => "Đánh giá thấp nhất",
+            (PostOrderByOption.OverallRating, OrderOption.Descending) => "Đánh giá cao nhất",
+            (PostOrderByOption.OverallRating, OrderOption.Ascending) => "Đánh giá thấp nhất",
 
-            (PostOrderingOption.DateCreated, OrderByOption.Descending) => "Mới nhất",
-            (PostOrderingOption.DateCreated, OrderByOption.Ascending) => "Cũ nhất",
+            (PostOrderByOption.DateCreated, OrderOption.Descending) => "Mới nhất",
+            (PostOrderByOption.DateCreated, OrderOption.Ascending) => "Cũ nhất",
 
-            (_, OrderByOption.Descending) => "Nhiều nhất",
-            (_, OrderByOption.Ascending) => "Ít Nhất",
+            (_, OrderOption.Descending) => "Nhiều nhất",
+            (_, OrderOption.Ascending) => "Ít Nhất",
 
-            _ => throw new ArgumentOutOfRangeException(nameof(OrderByOption), "provided option is invalid"),
+            _ => throw new ArgumentOutOfRangeException(nameof(OrderOption), "provided option is invalid"),
         };
     }
 }

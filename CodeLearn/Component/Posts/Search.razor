@@ -1,8 +1,9 @@
-﻿@page "/posts/search/"
+@page "/posts/search/"
 @inject IPostRepository PostRepository
 @inject IPostRatingRepository PostRatingRepository
 @inject IUserRepository UserRepository
 @inject NavigationManager NavManager
+@inject IJSRuntime JS
 @using Data.OrderingQuery;
 @using Data.Ordering;
 @using System.Web;
@@ -29,16 +30,16 @@
         </div>
         <MudText Class="flex-grow-1 mb-2" Typo="Typo.h6">Kết quả tìm kiếm của "@_searchText"</MudText>
         <div class="d-flex justify-end align-end w-75 mb-6">
-            <MudSelect Class="mr-2" T="PostOrderingOption" Label="Sắp xếp dựa trên" ToStringFunc="(option) => option.ToUserFriendlyText()"
-                       Value="_orderingOption" ValueChanged="HandleOrderingOptionChanged">
-                <MudSelectItem Value="PostOrderingOption.Relevance" />
-                <MudSelectItem Value="PostOrderingOption.OverallRating" />
-                <MudSelectItem Value="PostOrderingOption.DateCreated" />
-                <MudSelectItem Value="PostOrderingOption.Comments" />
-                <MudSelectItem Value="PostOrderingOption.Ratings" />
+            <MudSelect Class="mr-2" T="PostOrderByOption" Label="Sắp xếp dựa trên" ToStringFunc="(option) => option.ToUserFriendlyText()"
+                       Value="_orderByOption" ValueChanged="HandleOrderByOptionChanged">
+                <MudSelectItem Value="PostOrderByOption.Relevance" />
+                <MudSelectItem Value="PostOrderByOption.OverallRating" />
+                <MudSelectItem Value="PostOrderByOption.DateCreated" />
+                <MudSelectItem Value="PostOrderByOption.Comments" />
+                <MudSelectItem Value="PostOrderByOption.Ratings" />
             </MudSelect>
-            <SelectPostOrderByOption Class="mr-2" OrderingOption="_orderingOption"
-                                     OrderByOption="_orderByOption" OrderByOptionChanged="HandleOrderByOptionChanged" />
+            <SelectPostOrderByOption Class="mr-2" OrderByOption="_orderByOption"
+                                     OrderOption="_orderOption" OrderOptionChanged="HandleOrderOptionChanged" />
         </div>
 
         @if (_loadPostsState == State.Loading)
@@ -96,9 +97,9 @@
 
     private User _user = null;
 
-    private PostOrderingOption _orderingOption;
+    private PostOrderByOption _orderByOption;
 
-    private OrderByOption _orderByOption;
+    private OrderOption _orderOption;
 
     private bool _searchButtonDisabled => string.IsNullOrWhiteSpace(_inputSearchText) || _loadPostsState == State.Loading;
 
@@ -118,27 +119,34 @@
     protected override async Task OnInitializedAsync()
     {
         _selectedPage = 1;
-        _orderingOption = PostOrderingOption.Relevance;
-        _orderByOption = OrderByOption.Descending;
+        _orderByOption = PostOrderByOption.Relevance;
+        _orderOption = OrderOption.Descending;
 
         _searchByOption = SearchByOption.PostContent;
         _inputSearchByOption = _searchByOption;
 
         _loadPostsState = State.Loading;
-
         _user = await _userTask;
     }
 
+    //Chạy khi page mới được load hay bị người dùng lùi hoặc tiến tới nhưng vẫn ở cùng page
     protected override async Task OnParametersSetAsync()
     {
         _loadPostsState = State.Loading;
 
         var uri = NavManager.ToAbsoluteUri(NavManager.Uri);
-        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("q", out var searchText))
-            _searchText = searchText;
+        var valueByParam = QueryHelpers.ParseQuery(uri.Query);
 
-        else
-            _searchText = "";
+        _searchText = valueByParam.TryGetValue("q", out var searchText) ? searchText : "";
+
+        if (valueByParam.TryGetValue("searchby", out var searchbyText))
+            _searchByOption = searchbyText == "PostContent" ? SearchByOption.PostContent : SearchByOption.AuthorName;
+
+        if (valueByParam.TryGetValue("orderby", out var orderbyOptionText))
+            _orderByOption = PostOrderByOptionUtils.ConvertFromUrlQueryParamValue(orderbyOptionText);
+
+        if (valueByParam.TryGetValue("order", out var orderOptionText))
+            _orderOption = OrderByOptionUtils.ConvertFromUrlQueryParamValue(orderOptionText);
 
         _inputSearchText = _searchText;
 
@@ -157,20 +165,25 @@
         _loadPostsState = State.Complete;
     }
 
-    private async Task HandleOrderingOptionChanged(PostOrderingOption option)
+
+    private async Task HandleOrderByOptionChanged(PostOrderByOption option)
     {
-        _orderingOption = option;
+        _orderByOption = option;
         _selectedPage = 1;
+
         _loadPostsState = State.Loading;
+        await ChangeQueryString();
         await StartSearch();
         _loadPostsState = State.Complete;
     }
 
-    private async Task HandleOrderByOptionChanged(OrderByOption option)
+    private async Task HandleOrderOptionChanged(OrderOption option)
     {
-        _orderByOption = option;
+        _orderOption = option;
         _selectedPage = 1;
+
         _loadPostsState = State.Loading;
+        await ChangeQueryString();
         await StartSearch();
         _loadPostsState = State.Complete;
     }
@@ -178,12 +191,14 @@
     private async Task HandlePageChanged(int selected)
     {
         _selectedPage = selected;
+
         _loadPostsState = State.Loading;
+        await ChangeQueryString();
         await StartSearch();
         _loadPostsState = State.Complete;
     }
 
-    private void HandleSearchButtonPressed()
+    private async Task HandleSearchButtonPressed()
     {
         if (_searchText == _inputSearchText.Trim() && _searchByOption == _inputSearchByOption && _selectedPage == 1)
             return;
@@ -192,34 +207,60 @@
         _searchByOption = _inputSearchByOption;
         _searchText = _inputSearchText.Trim();
 
-        NavManager.NavigateTo($"posts/search/?q={HttpUtility.UrlEncode(_searchText)}");
+        _loadPostsState = State.Loading;
+        await ChangeQueryString();
+        await StartSearch();
+        _loadPostsState = State.Complete;
     }
 
-    private void HandleKeyPressed(KeyboardEventArgs args)
+    /// <summary>
+    /// Do sử dụng NavigationManager.NaviagetTo sẽ scroll trang lên đầu, nên sử dụng window.pushState để thay thế.
+    /// Khác vơi NavigationManager.NaviagetTo, window.pushState làm thay đổi url nhưng sẽ không gọi OnParametersSet của trang này.
+    /// </summary>
+    private async Task ChangeQueryString()
+    {
+        string searchByParamValue = _searchByOption == SearchByOption.PostContent ? "PostContent" : "AuthorName";
+        string newUrl;
+
+        if (_orderByOption == PostOrderByOption.Relevance)
+        {
+            newUrl = $"posts/search/?q={HttpUtility.UrlEncode(_searchText)}&seachby={searchByParamValue}";
+        }
+        else
+        {
+            newUrl =
+                $"posts/search/?q={HttpUtility.UrlEncode(_searchText)}&seachby={searchByParamValue}" +
+                $"&orderby={_orderByOption.ToUrlQueryValue()}&order={_orderOption.ToUrlQueryValue()}";
+        }
+
+        await JS.InvokeVoidAsync("window.history.pushState", null, "", newUrl);
+    }
+
+    private async Task HandleKeyPressed(KeyboardEventArgs args)
     {
         if (args.Key == "Enter" && !_searchButtonDisabled)
-            HandleSearchButtonPressed();
+            await HandleSearchButtonPressed();
     }
 
     private async Task StartSearch()
     {
         if (_searchByOption == SearchByOption.PostContent)
         {
-            if (_orderingOption == PostOrderingOption.Relevance)
+            if (_orderByOption == PostOrderByOption.Relevance)
                 _postInfoPage = await PostRepository.GetPagePostInfoSearchByKeywordsAsync(_postInfoPerPage, _selectedPage, _searchText);
 
             else
                 _postInfoPage = await PostRepository.GetPagePostInfoSearchByKeywordsAsync(_postInfoPerPage, _selectedPage, _searchText,
-                    oq => PostInfoUtils.CreatePostInfoOrderingQuery(_orderingOption, _orderByOption, oq));
+                    oq => PostInfoUtils.CreatePostInfoOrderingQuery(_orderByOption, _orderOption, oq));
         }
         else
         {
-            if (_orderingOption == PostOrderingOption.Relevance)
+            if (_orderByOption == PostOrderByOption.Relevance)
                 _postInfoPage = await PostRepository.GetPagePostInfoSearchByAuthorNameAsync(_postInfoPerPage, _selectedPage, _searchText);
 
             else
                 _postInfoPage = await PostRepository.GetPagePostInfoSearchByAuthorNameAsync(_postInfoPerPage, _selectedPage, _searchText,
-                    oq => PostInfoUtils.CreatePostInfoOrderingQuery(_orderingOption, _orderByOption, oq));
+                    oq => PostInfoUtils.CreatePostInfoOrderingQuery(_orderByOption, _orderOption, oq));
         }
 
         if (_user != null)

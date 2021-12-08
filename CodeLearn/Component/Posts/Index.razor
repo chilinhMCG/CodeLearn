@@ -28,15 +28,15 @@
             </MudLink>
         </div>
         <div class="d-flex justify-end align-end w-75 mb-6">
-            <MudSelect Class="mr-2" T="PostOrderingOption" Label="Sắp xếp dựa trên" ToStringFunc="(option) => option.ToUserFriendlyText()"
-                       Value="_orderingOption" ValueChanged="HandleOrderingOptionChanged">
-                <MudSelectItem Value="PostOrderingOption.DateCreated" />
-                <MudSelectItem Value="PostOrderingOption.OverallRating" />
-                <MudSelectItem Value="PostOrderingOption.Comments" />
-                <MudSelectItem Value="PostOrderingOption.Ratings" />
+            <MudSelect Class="mr-2" T="PostOrderByOption" Label="Sắp xếp dựa trên" ToStringFunc="(option) => option.ToUserFriendlyText()"
+                       Value="_orderByOption" ValueChanged="HandleOrderByOptionChanged">
+                <MudSelectItem Value="PostOrderByOption.DateCreated" />
+                <MudSelectItem Value="PostOrderByOption.OverallRating" />
+                <MudSelectItem Value="PostOrderByOption.Comments" />
+                <MudSelectItem Value="PostOrderByOption.Ratings" />
             </MudSelect>
-            <SelectPostOrderByOption Class="mr-2" OrderingOption="_orderingOption"
-                                     OrderByOption="_orderByOption" OrderByOptionChanged="HandleOrderByOptionChanged" />
+            <SelectPostOrderByOption Class="mr-2" OrderByOption="_orderByOption"
+                                     OrderOption="_orderOption" OrderOptionChanged="HandleOrderOptionChanged" />
         </div>
 
         @if (_loadPostsState == State.Loading)
@@ -94,15 +94,15 @@
 
     private bool _searchButtonDisabled => string.IsNullOrWhiteSpace(_searchText);
 
-    private PostOrderingOption _orderingOption;
+    private PostOrderByOption _orderByOption;
 
-    private OrderByOption _orderByOption;
+    private OrderOption _orderOption;
 
     protected override async Task OnInitializedAsync()
     {
         _selectedPage = 1;
-        _orderingOption = PostOrderingOption.DateCreated;
-        _orderByOption = OrderByOption.Descending;
+        _orderByOption = PostOrderByOption.DateCreated;
+        _orderOption = OrderOption.Descending;
         _searchText = "";
 
         _loadPostsState = State.Loading;
@@ -114,12 +114,12 @@
         _loadPostsState = State.Complete;
     }
 
-    private async Task HandleOrderingOptionChanged(PostOrderingOption option)
+    private async Task HandleOrderByOptionChanged(PostOrderByOption option)
     {
-        if (_orderingOption == option)
+        if (_orderByOption == option)
             return;
 
-        _orderingOption = option;
+        _orderByOption = option;
 
         _loadPostsState = State.Loading;
 
@@ -128,12 +128,12 @@
         _loadPostsState = State.Complete;
     }
 
-    private async Task HandleOrderByOptionChanged(OrderByOption option)
+    private async Task HandleOrderOptionChanged(OrderOption option)
     {
-        if (_orderByOption == option)
+        if (_orderOption == option)
             return;
 
-        _orderByOption = option;
+        _orderOption = option;
 
         _loadPostsState = State.Loading;
 
@@ -158,7 +158,7 @@
         _selectedPage = pageNumber;
 
         _postInfoPage = await PostRepository.GetPagePostInfoAsync(_postInfoPerPage, pageNumber,
-            oq => PostInfoUtils.CreatePostInfoOrderingQuery(_orderingOption, _orderByOption, oq));
+            oq => PostInfoUtils.CreatePostInfoOrderingQuery(_orderByOption, _orderOption, oq));
 
         if (_user != null)
             _userPostRatings = await PostRatingRepository.GetRangeAsync(_user.Id, _postInfoPage.Items.Select(p => p.Id));
@@ -172,6 +172,6 @@
 
     private void MoveToSearchPage()
     {
-        NavManager.NavigateTo($"posts/search/?q={HttpUtility.UrlEncode(_searchText)}");
+        NavManager.NavigateTo($"posts/search/?q={HttpUtility.UrlEncode(_searchText)}&seachby=PostContent");
     }
 }

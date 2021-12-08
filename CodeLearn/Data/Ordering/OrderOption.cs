@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace CodeLearn.Data.Ordering
 {
-    public enum OrderByOption
+    public enum OrderOption
     {
         Ascending, Descending
     }

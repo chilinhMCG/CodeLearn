@@ -5,10 +5,8 @@ using System.Threading.Tasks;
 
 namespace CodeLearn.Data.Ordering
 {
-    public enum PostOrderingOption
+    public enum PostOrderByOption
     {
         Ratings, Comments, Relevance, OverallRating, DateCreated
     }
-
-
 }
