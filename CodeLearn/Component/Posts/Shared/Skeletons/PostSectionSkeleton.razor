@@ -1,0 +1,27 @@
+﻿<div class="py-2">
+    <div class="d-flex mb-2">
+        <MudSkeleton SkeletonType="SkeletonType.Circle" Animation="Animation.Wave" Width="40px" Height="40px" />
+        <div class="ml-2 w-100">
+            <div class="d-flex justify-space-between w-100">
+                <MudSkeleton Animation="Animation.Wave" Width="42%" Height="15px" />
+                <MudSkeleton Animation="Animation.Wave" Width="20%" Height="20px" />
+            </div>
+            <MudSkeleton Animation="Animation.Wave" Width="40%" Height="20px" />
+        </div>
+    </div>
+</div>
+<MudDivider Class="my-4" />
+<MudSkeleton Class=" mx-auto" Animation="Animation.Wave" Width="60%" Height="40px" />
+<MudDivider Class="my-4" />
+<div class="ma-1rem">
+    @for (int i = 0; i < 6; i++)
+    {
+        <MudSkeleton Class="mt-2" Animation="Animation.Wave" Height="20px" />
+        <MudSkeleton Class="mt-2" Animation="Animation.Wave" Height="20px" />
+        <MudSkeleton Class="mt-3" Animation="Animation.Wave" Height="20px" />
+    }
+</div>
+
+@code {
+
+}
