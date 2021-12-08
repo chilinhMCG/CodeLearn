@@ -10,8 +10,7 @@
     <MudPaper Class="pa-6">
         @if (_postState == State.Loading)
         {
-            <MudProgressCircular Class="d-block mx-auto" Size="Size.Large" Color="Color.Primary" Indeterminate="true" />
-
+            <PostSectionSkeleton />
         }
         else if (_postState == State.NotFound)
         {
