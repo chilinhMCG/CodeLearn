@@ -1,0 +1,17 @@
+﻿<div class="@Class py-2">
+    <div class="d-flex mb-2">
+        <MudSkeleton SkeletonType="SkeletonType.Circle" Animation="Animation.Wave" Width="40px" Height="40px" />
+        <div class="ml-2 w-100">
+            <div class="d-flex justify-space-between w-100">
+                <MudSkeleton Animation="Animation.Wave" Width="42%" Height="15px" />
+                <MudSkeleton Animation="Animation.Wave" Width="20%" Height="20px" />
+            </div>
+            <MudSkeleton Animation="Animation.Wave" Width="60%" Height="25px" />
+        </div>
+    </div>
+    <MudSkeleton Animation="Animation.Wave" Width="40%" Height="20px" />
+</div>
+@code {
+    [Parameter]
+    public string Class { get; set; }
+}
