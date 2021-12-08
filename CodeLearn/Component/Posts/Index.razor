@@ -41,7 +41,10 @@
 
         @if (_loadPostsState == State.Loading)
         {
-            <MudProgressCircular Class="d-block mx-auto" Size="Size.Large" Color="Color.Primary" Indeterminate="true" />
+            for (int i = 0; i < _postInfoPerPage; i++)
+            {
+                <PostHeaderSkeleton Class="mb-4" />
+            }
         }
         else
         {
