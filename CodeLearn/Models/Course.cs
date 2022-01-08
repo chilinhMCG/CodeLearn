@@ -31,9 +31,9 @@ namespace CodeLearn.Models
     }
     public enum CourseStatusEnum
     {
-        Free,
-        Block,
-        Updating,
-        Cancel
+        Free = 0,
+        Block = 1,
+        Updating = 2,
+        Cancel = 3
     }
 }
