@@ -1,0 +1,180 @@
+﻿@page "/posts"
+@inject IPostRepository PostRepository
+@inject IPostRatingRepository PostRatingRepository
+@inject IUserRepository UserRepository
+@inject NavigationManager NavManager
+@using Data.OrderingQuery;
+@using Data.Ordering;
+@using System.Web;
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="my-10">
+    <MudPaper Class="py-4 px-6">
+        <div class="d-flex align-center mb-4">
+            <MudTextField Class="mr-2" Immediate="true" @bind-Value="@_searchText" OnKeyPress="HandleKeyPressed"
+                          Label="Tìm kiếm" Variant="@Variant.Outlined" Margin="Margin.Dense"
+                          Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" />
+
+            <MudButton Class="px-12" Variant="@Variant.Outlined" Color="Color.Primary"
+                       Disabled="_searchButtonDisabled" OnClick="MoveToSearchPage">
+                Tìm
+            </MudButton>
+        </div>
+        <div class="d-flex justify-space-between">
+            <MudText Class="flex-grow-1" Typo="Typo.h4">Bài viết chia sẻ</MudText>
+            <MudLink Disabled="_loadPostsState != State.Complete" Href="@(_user == null ? "Identity/Account/Login" : "posts/create")">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary">
+                    <MudIcon Class="mr-1" Icon="@Icons.Material.Filled.PostAdd" /> Tạo bài viết mới
+                </MudButton>
+            </MudLink>
+        </div>
+        <div class="d-flex justify-end align-end w-75 mb-6">
+            <MudSelect Class="mr-2" T="PostOrderByOption" Label="Sắp xếp dựa trên" ToStringFunc="(option) => option.ToUserFriendlyText()"
+                       Value="_orderByOption" ValueChanged="HandleOrderByOptionChanged">
+                <MudSelectItem Value="PostOrderByOption.DateCreated" />
+                <MudSelectItem Value="PostOrderByOption.OverallRating" />
+                <MudSelectItem Value="PostOrderByOption.Comments" />
+                <MudSelectItem Value="PostOrderByOption.Ratings" />
+            </MudSelect>
+            <SelectPostOrderByOption Class="mr-2" OrderByOption="_orderByOption"
+                                     OrderOption="_orderOption" OrderOptionChanged="HandleOrderOptionChanged" />
+        </div>
+
+        @if (_loadPostsState == State.Loading)
+        {
+            for (int i = 0; i < _postInfoPerPage; i++)
+            {
+                <PostHeaderSkeleton Class="mb-4" />
+            }
+        }
+        else
+        {
+            @for (int i = 0; i < _postInfoPage.Items.Count; i++)
+            {
+                int index = i;
+                if (index != 0)
+                {
+                    <MudDivider Class="my-4" />
+                }
+                <AuthorizeView>
+                    <NotAuthorized>
+                        <PostHeader @key="_postInfoPage.Items[index].Id" @bind-PostInfo="_postInfoPage.Items[index]" />
+                    </NotAuthorized>
+
+                    <Authorized>
+                        <PostHeader @key="_postInfoPage.Items[index].Id" @bind-PostInfo="_postInfoPage.Items[index]"
+                                    @bind-PostRating="_userPostRatings[index]" />
+                    </Authorized>
+                </AuthorizeView>
+            }
+
+            @if (_postInfoPage.PageCount > 1)
+            {
+                <div Class="d-flex justify-center">
+                    <MudPagination Selected="_selectedPage" Count="_postInfoPage.PageCount" SelectedChanged="HandlePageChanged" />
+                </div>
+            }
+        }
+    </MudPaper>
+</MudContainer>
+
+@code {
+    [CascadingParameter]
+    private Task<User> _userTask { get; set; }
+
+    private static int _postInfoPerPage = 10;
+
+    private State _loadPostsState;
+
+    private Page<PostInfo> _postInfoPage;
+
+    private IList<PostRating> _userPostRatings;
+
+    private int _selectedPage;
+
+    private User _user = null;
+
+    private string _searchText;
+
+    private bool _searchButtonDisabled => string.IsNullOrWhiteSpace(_searchText);
+
+    private PostOrderByOption _orderByOption;
+
+    private OrderOption _orderOption;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _selectedPage = 1;
+        _orderByOption = PostOrderByOption.DateCreated;
+        _orderOption = OrderOption.Descending;
+        _searchText = "";
+
+        _loadPostsState = State.Loading;
+
+        _user = await _userTask;
+
+        await SearchAllPosts(_selectedPage);
+
+        _loadPostsState = State.Complete;
+    }
+
+    private async Task HandleOrderByOptionChanged(PostOrderByOption option)
+    {
+        if (_orderByOption == option)
+            return;
+
+        _orderByOption = option;
+
+        _loadPostsState = State.Loading;
+
+        await SearchAllPosts(1);
+
+        _loadPostsState = State.Complete;
+    }
+
+    private async Task HandleOrderOptionChanged(OrderOption option)
+    {
+        if (_orderOption == option)
+            return;
+
+        _orderOption = option;
+
+        _loadPostsState = State.Loading;
+
+        await SearchAllPosts(1);
+
+        _loadPostsState = State.Complete;
+    }
+
+    private async Task HandlePageChanged(int selected)
+    {
+        _selectedPage = selected;
+
+        _loadPostsState = State.Loading;
+
+        await SearchAllPosts(_selectedPage);
+
+        _loadPostsState = State.Complete;
+    }
+
+    private async Task SearchAllPosts(int pageNumber)
+    {
+        _selectedPage = pageNumber;
+
+        _postInfoPage = await PostRepository.GetPagePostInfoAsync(_postInfoPerPage, pageNumber,
+            oq => PostInfoUtils.CreatePostInfoOrderingQuery(_orderByOption, _orderOption, oq));
+
+        if (_user != null)
+            _userPostRatings = await PostRatingRepository.GetRangeAsync(_user.Id, _postInfoPage.Items.Select(p => p.Id));
+    }
+
+    private void HandleKeyPressed(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter")
+            MoveToSearchPage();
+    }
+
+    private void MoveToSearchPage()
+    {
+        NavManager.NavigateTo($"posts/search/?q={HttpUtility.UrlEncode(_searchText)}&seachby=PostContent");
+    }
+}

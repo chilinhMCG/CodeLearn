@@ -1,0 +1,294 @@
+﻿/**
+ * Taken from https://github.com/tinymce/tinymce-dist/blob/master/skins/content/default/content.css with modifications
+ * Copyright (c) Tiny Technologies, Inc. All rights reserved.
+ * Licensed under the LGPL or a commercial license.
+ * For LGPL see License.txt in the project root for license information.
+ * For commercial licenses see https://www.tiny.cloud/
+ */
+
+//Avoid editor to appear on top of page header
+.tox .tox-editor-header {
+    z-index: 0 !important;
+}
+
+.tinymce-wrapper {
+    outline: var(--mud-palette-divider) solid 2px;
+}
+
+.mce-content-body {
+    padding: 1rem;
+    min-height: 500px;
+}
+
+.mce-content-body:hover:not(:focus) {
+  outline: var(--mud-palette-primary) solid 2px;
+}
+
+.mce-content-body:focus {
+  outline: var(--mud-palette-primary-lighten) solid 2px;
+}
+
+.content-wrapper,
+.mce-content-body {
+    font-size: var(--mud-typography-body1-size);
+    font-family: var(--mud-typography-body1-family);
+    line-height: var(--mud-typography-body1-lineheight);
+    letter-spacing: var(--mud-typography-body1-letterspacing);
+    /* avoid float element outside of container */
+    overflow: hidden;
+
+    table {
+        border-collapse: collapse;
+    }
+
+    table table {
+        margin: 0rem;
+    }
+    /* Apply a default padding if legacy cellpadding attribute is missing */
+    table:not([cellpadding]) th,
+    table:not([cellpadding]) td {
+        padding: 0.4rem;
+    }
+    /* Set default table styles if a table has a positive border attribute
+   and no inline css */
+    table[border]:not([border="0"]):not([style*="border-width"]) th,
+    table[border]:not([border="0"]):not([style*="border-width"]) td {
+        border-width: 1px;
+    }
+    /* Set default table styles if a table has a positive border attribute
+   and no inline css */
+    table[border]:not([border="0"]):not([style*="border-style"]) th,
+    table[border]:not([border="0"]):not([style*="border-style"]) td {
+        border-style: solid;
+    }
+    /* Set default table styles if a table has a positive border attribute
+   and no inline css */
+    table[border]:not([border="0"]):not([style*="border-color"]) th,
+    table[border]:not([border="0"]):not([style*="border-color"]) td {
+        border-color: #ccc;
+    }
+
+    figure {
+        display: table;
+        margin: 1rem auto;
+    }
+
+    figure figcaption {
+        color: #999;
+        display: block;
+        margin-top: 0.25rem;
+        text-align: center;
+    }
+
+    hr {
+        border-color: #ccc;
+        border-style: solid;
+        border-width: 1px 0 0 0;
+    }
+
+    code {
+        background-color: #e8e8e8;
+        border-radius: 3px;
+        padding: 0.1rem 0.2rem;
+    }
+
+    .mce-content-body:not([dir="rtl"]) blockquote {
+        border-left: 2px solid #ccc;
+        margin-left: 1.5rem;
+        padding-left: 1rem;
+    }
+
+    .mce-content-body[dir="rtl"] blockquote {
+        border-right: 2px solid #ccc;
+        margin-right: 1.5rem;
+        padding-right: 1rem;
+    }
+
+    figure.image {
+        border: 1px solid gray;
+        text-align: center;
+        background: #f5f2f0;
+    }
+
+    figure.align-left {
+        float: left;
+        margin-right: 1rem;
+    }
+
+    figure.align-right {
+        float: right;
+        margin-left: 1rem;
+    }
+
+    figure.image img {
+        margin: 8px 8px 0 8px !important;
+    }
+
+    figure.image figcaption {
+        margin: 6px 8px 6px 8px;
+        text-align: center;
+    }
+
+    figure.image.align-center {
+        display: table;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    /*
+     * Taken from https://www.tiny.cloud/docs/general-configuration-guide/boilerplate-content-css/
+     * Alignment using classes rather than inline styles
+     * check out the "formats" option
+     */
+
+    img.align-left {
+        float: left;
+    }
+
+    img.align-right {
+        float: right;
+    }
+    /* Basic styles for Table of Contents plugin (toc) */
+    .mce-toc {
+        border: 1px solid gray;
+    }
+
+    .mce-toc h2 {
+        margin: 4px;
+    }
+
+    .mce-toc li {
+        list-style-type: none;
+    }
+    /*
+     *  Custom:
+     *  Override styles from other css files
+     */
+    img {
+        max-width: 100%;
+        margin-bottom: 1rem;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-weight: bold;
+        margin-inline-start: 0px;
+        margin-inline-end: 0px;
+    }
+
+    h1 {
+        line-height: var(--mud-typography-h1-lineheight);
+        letter-spacing: var(--mud-typography-h1-letterspacing);
+        margin-block-start: 0.67em;
+    }
+
+    h2 {
+        line-height: var(--mud-typography-h2-lineheight);
+        letter-spacing: var(--mud-typography-h2-letterspacing);
+        margin-block-start: 0.83em;
+    }
+
+    h3 {
+        line-height: var(--mud-typography-h3-lineheight);
+        letter-spacing: var(--mud-typography-h3-letterspacing);
+        margin-block-start: 1em;
+    }
+
+    h4 {
+        font-family: var(--mud-typography-h4-family);
+        line-height: var(--mud-typography-h4-lineheight);
+        letter-spacing: var(--mud-typography-h4-letterspacing);
+        margin-block-start: 1.33em;
+    }
+
+    h5 {
+        font-family: var(--mud-typography-h5-family);
+        line-height: var(--mud-typography-h5-lineheight);
+        letter-spacing: var(--mud-typography-h5-letterspacing);
+        margin-block-start: 1.67em;
+    }
+
+    h6 {
+        font-family: var(--mud-typography-h6-family);
+        line-height: var(--mud-typography-h6-lineheight);
+        letter-spacing: var(--mud-typography-h6-letterspacing);
+        margin-block-start: 2.33em;
+    }
+
+    ul {
+        list-style: disc;
+        margin-left: 2rem;
+    }
+
+    ol {
+        list-style: decimal;
+        margin-left: 2rem;
+    }
+
+    a {
+        color: var(--mud-palette-primary);
+    }
+
+    code {
+        color: var(--mud-palette-text-primary);
+    }
+
+    blockquote {
+        border-left: 10px solid #ccc;
+        margin: 1.5em 10px;
+        padding: 0.5em 10px;
+        quotes: "\201C""\201D""\2018""\2019";
+    }
+
+    blockquote:before {
+        color: #ccc;
+        content: open-quote;
+        font-size: 4em;
+        line-height: 0.1em;
+        margin-right: 0.25em;
+        vertical-align: -0.4em;
+    }
+
+    blockquote p {
+        display: inline;
+    }
+
+    code[class="language-markup"],
+    pre[class="language-markup"] {
+        color: black;
+        background: none;
+        text-shadow: 0 1px white;
+        font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
+        font-size: 1em;
+        text-align: left;
+        white-space: pre;
+        word-spacing: normal;
+        word-break: normal;
+        word-wrap: normal;
+        line-height: 1.5;
+        tab-size: 4;
+        -webkit-hyphens: none;
+        -ms-hyphens: none;
+        hyphens: none;
+    }
+
+    pre[class="language-markup"] {
+        padding: 1em;
+        margin: 0.5em 0;
+        overflow: auto;
+        background: #f5f2f0;
+    }
+
+    pre[class="language-markup"] code {
+        background-color: transparent;
+    }
+}
+
+/* Avoid inconsistent line spacing at the end of content*/
+.content-wrapper > *:last-child,
+.mce-content-body > *:last-child {
+  margin-bottom: 0;
+}

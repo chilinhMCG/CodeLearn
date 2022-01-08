@@ -1,0 +1,65 @@
+﻿@inject IPostRepository PostRepository;
+
+<div class="@Class">
+    <div class="w-100 d-flex">
+        <MudLink Class="mt-1 align-self-center" Href="@($"users/{PostInfo.AuthorId}")">
+            <MudAvatar class="mr-2" Color="Color.Info" />
+        </MudLink>
+
+        <div class="min-w-0 flex-grow-1">
+            <div class="d-flex justify-space-between">
+                <div>
+                    <MudText Typo="Typo.body2" Class="d-inline">bài viết của</MudText>
+                    <MudLink Typo="Typo.subtitle1" Href="@($"users/{PostInfo.Id}")">@PostInfo.Author</MudLink>
+                    <MudText Typo="Typo.body2" Class="ml-2 d-inline">ngày đăng: @PostInfo.DateCreated.ToShortDateStringDMY()</MudText>
+                    @if (PostInfo.DateCreated != PostInfo.DateLastEdited)
+                    {
+                        <MudText Typo="Typo.body2" Class="ml-2 d-inline">
+                            <i>(chỉnh sửa @DateUtils.RelativeTimeCompareToNow(PostInfo.DateLastEdited))</i>
+                        </MudText>
+                    }
+                </div>
+                <AuthorizeView>
+                    <UserPostRating PostRating="PostRating" Class="mr-2" PostRatingChanged="HandleRatingChanged" />
+                </AuthorizeView>
+            </div>
+
+            <MudLink Href="@($"posts/{PostInfo.AuthorId}/{PostInfo.Slug}")">
+                <MudText Typo="Typo.h6" Class="break-word mb-1" Style="@($"color: {Colors.Green.Darken4}")">@PostInfo.Title</MudText>
+            </MudLink>
+        </div>
+    </div>
+    <div class="mt-2 d-flex">
+        <MudText Typo="Typo.subtitle1" Class="d-inline mr-1">@PostInfo.OverallRating</MudText>
+        <HalfStarRating Value="@PostInfo.OverallRating" Class="mr-2" />
+        <MudText Typo="Typo.subtitle1" Class="d-inline mr-4">@PostInfo.RatingCount đánh giá</MudText>
+        <MudText Typo="Typo.subtitle1" Class="d-inline">@PostInfo.CommentCount bình luận</MudText>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string Class { get; set; }
+
+    [Parameter]
+    public PostInfo PostInfo { get; set; }
+
+    [Parameter]
+    public PostRating PostRating { get; set; }
+
+    [Parameter]
+    public EventCallback<PostRating> PostRatingChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<PostInfo> PostInfoChanged { get; set; }
+
+    private async Task HandleRatingChanged(PostRating newPostRating)
+    {
+        var task = PostRatingChanged.InvokeAsync(newPostRating);
+
+        var _newPostInfo = await PostRepository.GetPostInfoAsync(PostInfo.Id);
+
+        await PostInfoChanged.InvokeAsync(_newPostInfo);
+        await task;
+    }
+}

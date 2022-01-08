@@ -1,0 +1,12 @@
+﻿@*Mock how tiny mce display content in inline mode*@
+<div class="break-word content-wrapper @Class">
+    @((MarkupString) Content)
+</div>
+
+@code {
+    [Parameter]
+    public string Content { get; set; }
+
+    [Parameter]
+    public string Class { get; set; }
+}

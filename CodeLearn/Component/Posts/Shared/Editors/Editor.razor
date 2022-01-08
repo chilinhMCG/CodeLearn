@@ -1,0 +1,143 @@
+﻿@using Microsoft.JSInterop;
+@using Microsoft.Extensions.Configuration;
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+@inject IConfiguration Configuration;
+@*
+    /// <summary>
+    /// Editor này được sử dụng làm base cho các editor khác như PostEditor, CommentEditor.
+    /// </summary>
+*@
+<div class="@Class">
+    @if (_state == State.Loading)
+    {
+        <MudProgressLinear Color="Color.Primary" Indeterminate="true" />
+        <div class="d-flex flex-column align-center my-10" style="@($"color:{Colors.Grey.Lighten1}")">
+            <MudIcon Class="mr-2" Size="Size.Large" Icon="@Icons.Material.Filled.LibraryBooks" />
+            <MudText Align="Align.Center">Đang tải editor...</MudText>
+            <MudText Align="Align.Center">Vui lòng đợi trong giây lát!</MudText>
+        </div>
+    }
+
+    @if (_jsConfSrc != null)
+    {
+        <div hidden="@(_state != State.Complete)">
+            <TinyMCE.Blazor.Editor JsConfSrc="@_jsConfSrc"
+                                   ApiKey="@Configuration["TinyMceApiKey"]"
+                                   @bind-Value="@_boundContent"
+                                   @bind-Text="@_boundTextContent" />
+        </div>
+    }
+
+    @if (_state == State.Complete)
+    {
+        @if (_content.Length > CharacterLimit)
+        {
+            <MudText Class="mt-1" Color="Color.Error">@_content.Length/@CharacterLimit ký tự - vượt quá độ dài cho phép!</MudText>
+        }
+        else
+        {
+            <MudText Class="mt-1" style="@($"color:{Colors.Grey.Lighten1}")">@_content.Length/@CharacterLimit ký tự</MudText>
+        }
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int CharacterLimit { get; set; }
+
+    [Parameter]
+    public string JsConfigObjName { get; set; }
+
+    [Parameter]
+    public string Class { get; set; }
+
+    [Parameter]
+    public string Content { get; set; }
+
+    [Parameter]
+    public EventCallback<string> ContentChanged { get; set; }
+
+    /// <summary>
+    /// Khi đánh tiếng việt và có sử dụng binding, đôi khi từ trên trả xuống giá trị khác,
+    /// dẫn đến text cursor chuyện lại thành vị trí ban đầu. Để ngăn việc này, ta không cho bind giá trị
+    /// từ trên xuống mà chỉ cho bind giá trị từ đây lên trên.
+    /// </summary>
+    private string _content;
+
+    private string _boundContent
+    {
+        get => _content;
+        set
+        {
+            //nếu người dùng nhìn thấy lỗi nhưng vẫn đánh tiếp, cắt nội dung bài viết
+            if (value.Length <= CharacterLimit + 500)
+            {
+                _content = value;
+                ContentChanged.InvokeAsync(value);
+            }
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        _content = Content;
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (Content == "")
+            _content = Content;
+    }
+
+    [Parameter]
+    public string TextContent { get; set; }
+
+    [Parameter]
+    public EventCallback<string> TextContentChanged { get; set; }
+
+    private string _boundTextContent
+    {
+        get => TextContent;
+        set => TextContentChanged.InvokeAsync(value);
+    }
+
+    private string _editorId = Guid.NewGuid().ToString();
+
+    private string _jsConfSrc;
+
+    private State _state = State.Init;
+
+    private DotNetObjectReference<Editor> _objRef;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _state = State.Loading;
+            _objRef = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("createEditorConfigObj", _objRef, _editorId, JsConfigObjName);
+            StateHasChanged();
+        }
+    }
+
+    [JSInvokable]
+    public void OnConfigObjReady(string name)
+    {
+        _jsConfSrc = name;
+        StateHasChanged();
+    }
+
+    [JSInvokable]
+    public void OnEditorLoaded()
+    {
+        _state = State.Complete;
+        StateHasChanged();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await JS.InvokeVoidAsync("disposeEditorConfigObj", _editorId);
+        _objRef?.Dispose();
+    }
+}

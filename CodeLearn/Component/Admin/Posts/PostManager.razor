@@ -18,16 +18,16 @@
         <HeaderContent>
             <MudTh><MudTableSortLabel SortBy="new Func<Post, object>(x => x.Title)">Câu hỏi</MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<Post, object>(x => x.User.Name)">Người tạo</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel Enabled="true" SortBy="new Func<Post, object>(x => x.CreateAt)">Ngày tạo</MudTableSortLabel></MudTh>
-            <MudTh><MudTableSortLabel SortBy="new Func<Post, object>(x => x.LastUpdated)">Ngày sửa </MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel Enabled="true" SortBy="new Func<Post, object>(x => x.DateCreated)">Ngày tạo</MudTableSortLabel></MudTh>
+            <MudTh><MudTableSortLabel SortBy="new Func<Post, object>(x => x.DateLastEdited)">Ngày sửa </MudTableSortLabel></MudTh>
             <MudTh><MudTableSortLabel SortBy="new Func<Post, object>(x => CountInteract(x))">Số tương tác </MudTableSortLabel></MudTh>
             <MudTh>Tác vụ </MudTh>
         </HeaderContent>
         <RowTemplate>
             <MudTd DataLabel="Câu hỏi "><MudLink Href="#">@context.Title</MudLink></MudTd>
             <MudTd DataLabel="Người tạo">@context.User.Name</MudTd>
-            <MudTd DataLabel="Ngày tạo">@context.CreateAt</MudTd>
-            <MudTd DataLabel="Ngày sửa">@context.LastUpdated</MudTd>
+            <MudTd DataLabel="Ngày tạo">@context.DateCreated</MudTd>
+            <MudTd DataLabel="Ngày sửa">@context.DateLastEdited</MudTd>
             <MudTd DataLabel="Tương tác">@CountInteract(context)</MudTd>
             <MudTd DataLabel="Tác vụ">
                 <MudButton @onclick="(() => DeletePost(context))" Variant="Variant.Filled" Color="Color.Error">Xóa </MudButton>
@@ -68,7 +68,7 @@
     private int CountInteract(Post post)
     {
         var result = PostReactRepository.CountPostReactFromPost(post.Id.ToString())
-        +CommentRepository.CountCommentInPost(post.Id);
+        + CommentRepository.CountCommentInPost(post.Id);
         return result;
 
     }

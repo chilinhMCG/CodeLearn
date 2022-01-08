@@ -56,6 +56,7 @@ namespace CodeLearn
             //Repositories
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<ICourseTypeRepository, CourseTypeRepository>();
+           
             services.AddScoped<ICourseRepository, CourseRepository>();
             services.AddScoped<ILessonRepository, LessonRepository>();
             services.AddScoped<ICourseRatingRepository, CourseRatingRepository>();
@@ -63,7 +64,12 @@ namespace CodeLearn
             services.AddScoped<IRoleRepository, RoleRepository>();
             services.AddSingleton<IDiscussionRepository, DiscussionRepository>();
             services.AddSingleton<ICommentRepository, CommentRepository>();
+
             services.AddSingleton<IPostRepository, PostRepository>();
+            services.AddSingleton<IPostRatingRepository, PostRatingRepository>();
+            services.AddSingleton<IPostCommentRepository, PostCommentRepository>();
+            services.AddSingleton<IPostCommentStarRepository, PostCommentStarRepository>();
+
             services.AddSingleton<IPostReactRepository, PostReactRepository>();
             services.AddSingleton<IDiscussionReactRepository, DiscussionReactRepository>();
         }

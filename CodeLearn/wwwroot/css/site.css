@@ -1,7 +1,9 @@
 @import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
+
 body {
     background-color: #F5F5F5 !important;
 }
+
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
@@ -110,8 +112,20 @@ li {
         top: 0.5rem;
     }
 
-/*MainLayout*/
 
+.break-word {
+    overflow-wrap: break-word;
+}
+
+.min-w-0 {
+    min-width: 0;
+}
+
+.ma-1rem {
+    margin: 1rem;
+}
+
+/*MainLayout*/
 .textlink {
     color: white !important;
     letter-spacing: .25rem;
@@ -120,10 +134,11 @@ li {
     font-size: 24px;
     user-select: none;
 }
-.textlink:hover
-{
-    text-decoration: none;
-}
+
+    .textlink:hover {
+        text-decoration: none;
+    }
+
 .link-navbar:hover {
     text-decoration: none;
 }

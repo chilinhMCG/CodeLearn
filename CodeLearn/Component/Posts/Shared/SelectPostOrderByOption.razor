@@ -1,0 +1,52 @@
+﻿@using Data.Ordering;
+
+<MudSelect Class="@Class" T="OrderOption" Label="Sắp xếp" Disabled="OrderByOption == PostOrderByOption.Relevance"
+           @bind-Value="_boundOrderOption" ToStringFunc="OrderOptionToString">
+    <MudSelectItem Value="OrderOption.Descending" />
+    <MudSelectItem Value="OrderOption.Ascending" />
+</MudSelect>
+
+@code {
+    [Parameter]
+    public string Class { get; set; }
+
+    [Parameter]
+    public PostOrderByOption OrderByOption { get; set; }
+
+    [Parameter]
+    public OrderOption OrderOption { get; set; }
+
+    [Parameter]
+    public EventCallback<OrderOption> OrderOptionChanged { get; set; }
+
+    private OrderOption _boundOrderOption
+    {
+        get => OrderOption;
+        set => OrderOptionChanged.InvokeAsync(value);
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (OrderByOption == PostOrderByOption.Relevance && _boundOrderOption != OrderOption.Descending)
+            _boundOrderOption = OrderOption.Descending;
+    }
+
+    private string OrderOptionToString(OrderOption option)
+    {
+        return (OrderByOption, option) switch
+        {
+            (PostOrderByOption.Relevance, OrderOption.Descending) => "Phù hợp nhất",
+
+            (PostOrderByOption.OverallRating, OrderOption.Descending) => "Đánh giá cao nhất",
+            (PostOrderByOption.OverallRating, OrderOption.Ascending) => "Đánh giá thấp nhất",
+
+            (PostOrderByOption.DateCreated, OrderOption.Descending) => "Mới nhất",
+            (PostOrderByOption.DateCreated, OrderOption.Ascending) => "Cũ nhất",
+
+            (_, OrderOption.Descending) => "Nhiều nhất",
+            (_, OrderOption.Ascending) => "Ít Nhất",
+
+            _ => throw new ArgumentOutOfRangeException(nameof(OrderOption), "provided option is invalid"),
+        };
+    }
+}

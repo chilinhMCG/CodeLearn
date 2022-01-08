@@ -1,0 +1,283 @@
+﻿@page "/posts/search/"
+@inject IPostRepository PostRepository
+@inject IPostRatingRepository PostRatingRepository
+@inject IUserRepository UserRepository
+@inject NavigationManager NavManager
+@inject IJSRuntime JS
+@using Data.OrderingQuery;
+@using Data.Ordering;
+@using System.Web;
+@using Microsoft.AspNetCore.WebUtilities;
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="my-10">
+    <MudPaper Class="py-4 px-6">
+        <MudText Class="flex-grow-1 mb-2" Typo="Typo.h4">Tìm kiếm bài viết chia sẻ</MudText>
+        <div class="d-flex align-center mb-6">
+            <div>
+                <MudSelect Dense="true" Class="mr-2" T="SearchByOption" Label="Tìm kiếm dựa trên" ToStringFunc="SearchByOptionToString"
+                           @bind-Value="_inputSearchByOption">
+                    <MudSelectItem Value="SearchByOption.PostContent" />
+                    <MudSelectItem Value="SearchByOption.AuthorName" />
+                </MudSelect>
+            </div>
+            <MudTextField Class="mr-2" Immediate="true" @bind-Value="@_inputSearchText" OnKeyPress="HandleKeyPressed"
+                          Label="Tìm kiếm" Variant="@Variant.Outlined" Margin="Margin.Dense"
+                          Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" />
+            <MudButton Class="px-12" Variant="@Variant.Outlined" Color="Color.Primary"
+                       Disabled="_searchButtonDisabled" OnClick="HandleSearchButtonPressed">
+                Tìm
+            </MudButton>
+        </div>
+        <MudText Class="flex-grow-1 mb-2" Typo="Typo.h6">Kết quả tìm kiếm của "@_searchText"</MudText>
+        <div class="d-flex justify-end align-end w-75 mb-6">
+            <MudSelect Class="mr-2" T="PostOrderByOption" Label="Sắp xếp dựa trên" ToStringFunc="(option) => option.ToUserFriendlyText()"
+                       Value="_orderByOption" ValueChanged="HandleOrderByOptionChanged">
+                <MudSelectItem Value="PostOrderByOption.Relevance" />
+                <MudSelectItem Value="PostOrderByOption.OverallRating" />
+                <MudSelectItem Value="PostOrderByOption.DateCreated" />
+                <MudSelectItem Value="PostOrderByOption.Comments" />
+                <MudSelectItem Value="PostOrderByOption.Ratings" />
+            </MudSelect>
+            <SelectPostOrderByOption Class="mr-2" OrderByOption="_orderByOption"
+                                     OrderOption="_orderOption" OrderOptionChanged="HandleOrderOptionChanged" />
+        </div>
+
+        @if (_loadPostsState == State.Loading)
+        {
+            for (int i = 0; i < _postInfoPerPage; i++)
+            {
+                <PostHeaderSkeleton Class="mb-4" />
+            }
+        }
+        else if (_postInfoPage.Items.Count == 0)
+        {
+            <MudText Class="pt-10 pb-4" Align="Align.Center">Không có kết quả, hãy thử dùng từ khóa khác.</MudText>
+        }
+        else
+        {
+            @for (int i = 0; i < _postInfoPage.Items.Count; i++)
+            {
+                int index = i;
+                if (index != 0)
+                {
+                    <MudDivider Class="my-4" />
+                }
+                <AuthorizeView>
+                    <NotAuthorized>
+                        <PostHeader @key="_postInfoPage.Items[index].Id" @bind-PostInfo="_postInfoPage.Items[index]" />
+                    </NotAuthorized>
+
+                    <Authorized>
+                        <PostHeader @key="_postInfoPage.Items[index].Id" @bind-PostInfo="_postInfoPage.Items[index]"
+                                    @bind-PostRating="_userPostRatings[index]" />
+                    </Authorized>
+                </AuthorizeView>
+            }
+
+            @if (_postInfoPage.PageCount > 1)
+            {
+                <div Class="d-flex justify-center">
+                    <MudPagination Selected="_selectedPage" Count="_postInfoPage.PageCount" SelectedChanged="HandlePageChanged" />
+                </div>
+            }
+        }
+    </MudPaper>
+</MudContainer>
+
+@code {
+    [CascadingParameter]
+    private Task<User> _userTask { get; set; }
+
+    private static int _postInfoPerPage = 10;
+
+    private State _loadPostsState;
+
+    private Page<PostInfo> _postInfoPage;
+
+    private IList<PostRating> _userPostRatings;
+
+    private int _selectedPage;
+
+    private User _user = null;
+
+    private PostOrderByOption _orderByOption;
+
+    private OrderOption _orderOption;
+
+    private bool _searchButtonDisabled => string.IsNullOrWhiteSpace(_inputSearchText) || _loadPostsState == State.Loading;
+
+    private string _inputSearchText;
+
+    private string _searchText;
+
+    private SearchByOption _inputSearchByOption;
+
+    private SearchByOption _searchByOption;
+
+    private enum SearchByOption
+    {
+        PostContent, AuthorName
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        _selectedPage = 1;
+        _orderByOption = PostOrderByOption.Relevance;
+        _orderOption = OrderOption.Descending;
+
+        _searchByOption = SearchByOption.PostContent;
+        _inputSearchByOption = _searchByOption;
+
+        _loadPostsState = State.Loading;
+        _user = await _userTask;
+    }
+
+    //Chạy khi page mới được load hay bị người dùng lùi hoặc tiến tới nhưng vẫn ở cùng page
+    protected override async Task OnParametersSetAsync()
+    {
+        _loadPostsState = State.Loading;
+
+        var uri = NavManager.ToAbsoluteUri(NavManager.Uri);
+        var valueByParam = QueryHelpers.ParseQuery(uri.Query);
+
+        _searchText = valueByParam.TryGetValue("q", out var searchText) ? searchText : "";
+
+        if (valueByParam.TryGetValue("searchby", out var searchbyText))
+            _searchByOption = searchbyText == "PostContent" ? SearchByOption.PostContent : SearchByOption.AuthorName;
+
+        if (valueByParam.TryGetValue("orderby", out var orderbyOptionText))
+            _orderByOption = PostOrderByOptionUtils.ConvertFromUrlQueryParamValue(orderbyOptionText);
+
+        if (valueByParam.TryGetValue("order", out var orderOptionText))
+            _orderOption = OrderByOptionUtils.ConvertFromUrlQueryParamValue(orderOptionText);
+
+        _inputSearchText = _searchText;
+
+        if (_searchText == "")
+        {
+            _postInfoPage = new Page<PostInfo>()
+            {
+                Size = _postInfoPerPage,
+                CurrentPage = _selectedPage,
+                PageCount = 0,
+            };
+        }
+        else
+            await StartSearch();
+
+        _loadPostsState = State.Complete;
+    }
+
+
+    private async Task HandleOrderByOptionChanged(PostOrderByOption option)
+    {
+        _orderByOption = option;
+        _selectedPage = 1;
+
+        _loadPostsState = State.Loading;
+        await ChangeQueryString();
+        await StartSearch();
+        _loadPostsState = State.Complete;
+    }
+
+    private async Task HandleOrderOptionChanged(OrderOption option)
+    {
+        _orderOption = option;
+        _selectedPage = 1;
+
+        _loadPostsState = State.Loading;
+        await ChangeQueryString();
+        await StartSearch();
+        _loadPostsState = State.Complete;
+    }
+
+    private async Task HandlePageChanged(int selected)
+    {
+        _selectedPage = selected;
+
+        _loadPostsState = State.Loading;
+        await ChangeQueryString();
+        await StartSearch();
+        _loadPostsState = State.Complete;
+    }
+
+    private async Task HandleSearchButtonPressed()
+    {
+        if (_searchText == _inputSearchText.Trim() && _searchByOption == _inputSearchByOption && _selectedPage == 1)
+            return;
+
+        _selectedPage = 1;
+        _searchByOption = _inputSearchByOption;
+        _searchText = _inputSearchText.Trim();
+
+        _loadPostsState = State.Loading;
+        await ChangeQueryString();
+        await StartSearch();
+        _loadPostsState = State.Complete;
+    }
+
+    /// <summary>
+    /// Do sử dụng NavigationManager.NaviagetTo sẽ scroll trang lên đầu, nên sử dụng window.pushState để thay thế.
+    /// Khác vơi NavigationManager.NaviagetTo, window.pushState làm thay đổi url nhưng sẽ không gọi OnParametersSet của trang này.
+    /// </summary>
+    private async Task ChangeQueryString()
+    {
+        string searchByParamValue = _searchByOption == SearchByOption.PostContent ? "PostContent" : "AuthorName";
+        string newUrl;
+
+        if (_orderByOption == PostOrderByOption.Relevance)
+        {
+            newUrl = $"posts/search/?q={HttpUtility.UrlEncode(_searchText)}&seachby={searchByParamValue}";
+        }
+        else
+        {
+            newUrl =
+                $"posts/search/?q={HttpUtility.UrlEncode(_searchText)}&seachby={searchByParamValue}" +
+                $"&orderby={_orderByOption.ToUrlQueryValue()}&order={_orderOption.ToUrlQueryValue()}";
+        }
+
+        await JS.InvokeVoidAsync("window.history.pushState", null, "", newUrl);
+    }
+
+    private async Task HandleKeyPressed(KeyboardEventArgs args)
+    {
+        if (args.Key == "Enter" && !_searchButtonDisabled)
+            await HandleSearchButtonPressed();
+    }
+
+    private async Task StartSearch()
+    {
+        if (_searchByOption == SearchByOption.PostContent)
+        {
+            if (_orderByOption == PostOrderByOption.Relevance)
+                _postInfoPage = await PostRepository.GetPagePostInfoSearchByKeywordsAsync(_postInfoPerPage, _selectedPage, _searchText);
+
+            else
+                _postInfoPage = await PostRepository.GetPagePostInfoSearchByKeywordsAsync(_postInfoPerPage, _selectedPage, _searchText,
+                    oq => PostInfoUtils.CreatePostInfoOrderingQuery(_orderByOption, _orderOption, oq));
+        }
+        else
+        {
+            if (_orderByOption == PostOrderByOption.Relevance)
+                _postInfoPage = await PostRepository.GetPagePostInfoSearchByAuthorNameAsync(_postInfoPerPage, _selectedPage, _searchText);
+
+            else
+                _postInfoPage = await PostRepository.GetPagePostInfoSearchByAuthorNameAsync(_postInfoPerPage, _selectedPage, _searchText,
+                    oq => PostInfoUtils.CreatePostInfoOrderingQuery(_orderByOption, _orderOption, oq));
+        }
+
+        if (_user != null)
+            _userPostRatings = await PostRatingRepository.GetRangeAsync(_user.Id, _postInfoPage.Items.Select(p => p.Id));
+    }
+
+    private string SearchByOptionToString(SearchByOption option)
+    {
+        return option switch
+        {
+            SearchByOption.PostContent => "Nội dung bài viết",
+            SearchByOption.AuthorName => "Tên người đăng bài",
+            _ => throw new ArgumentException(),
+        };
+    }
+}
+

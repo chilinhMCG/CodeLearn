@@ -1,13 +1,5 @@
-﻿@using Microsoft.AspNetCore.Identity
-@using Microsoft.AspNetCore.Http
-@inject IHttpContextAccessor httpContextAccessor
 @inherits LayoutComponentBase
-@inject IHttpContextAccessor httpContextAccsessor
-@inject IUserRepository UserRepository
-@inject IRoleRepository RoleRepository
-@inject UserManager<IdentityUser> UserManager
-
-
+@inject IUserRepository UserRepository;
 
 <MudThemeProvider Theme="MCGTheme" />
 <MudDialogProvider />
@@ -18,8 +10,7 @@
     <MudMainContent>
         <MudContainer MaxWidth="MaxWidth.Large">
 
-            <CascadingValue Value="_userId">
-
+                <CascadingValue Value="_userTask">
                 @if (_isAdmin)
                 {
                     <MudGrid>
@@ -50,38 +41,42 @@
         <Footer />
     </MudLayout>
 
-
-    @code{
-            bool _isAdmin = false;
-
-            MudTheme MCGTheme = new()
-            {
-                Palette = new Palette()
-                {
-                    Primary = "#19B33D",
-                    AppbarBackground = "#19B33D",
-
-                }
-            };
-
-            Guid _userId;
-            IList<string> _roles = new List<string>();
-        protected override async Task OnInitializedAsync()
+@code{ 
+    MudTheme MCGTheme = new()
+    {
+        Palette = new Palette()
         {
-            if (httpContextAccsessor.HttpContext.User.Identity.IsAuthenticated == true)
-            {
-                User user = UserRepository.GetUserByName(httpContextAccsessor.HttpContext.User.Identity.Name);
-                var identityUser = await UserManager.FindByNameAsync(user.Name);
-                _userId = user.Id;
-                if (identityUser != null)
-                {
-                    _roles = await UserManager.GetRolesAsync(identityUser);
-
-                    foreach (var role in _roles)
-                    {
-                        if (role == "Admin") _isAdmin = true;
-                    }
-                }
-            }
+            Primary = "#19B33D",
+            AppbarBackground = "#19B33D",
         }
+    };
+
+    [CascadingParameter]
+    private Task<AuthenticationState> _authenticationStateTask { get; set; }
+
+    private Task<User> _userTask;
+
+    private bool _isAdmin = false;
+
+    private ClaimsPrincipal _identityUser;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        var authState = await _authenticationStateTask;
+        _identityUser = authState.User;
+
+        _userTask = GetUser();
+
+        _isAdmin = _identityUser.IsInRole("Admin");
     }
+
+    private async Task<User> GetUser()
+    {
+        if (_identityUser.Identity.IsAuthenticated)
+            return await UserRepository.GetUserByEmailAsync(_identityUser.FindFirst(ClaimTypes.Email).Value);
+
+        else
+            return null;
+    }
+}

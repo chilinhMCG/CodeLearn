@@ -1,0 +1,34 @@
+﻿
+<Editor Class="@Class" CharacterLimit="CharacterLimit" JsConfigObjName="commentEditorConfig"
+        @bind-Content="@_boundContent" @bind-TextContent="@_boundTextContent" />
+
+@code {
+    public const int CharacterLimit = 5000;
+
+    [Parameter]
+    public string Class { get; set; }
+
+    [Parameter]
+    public string Content { get; set; }
+
+    [Parameter]
+    public EventCallback<string> ContentChanged { get; set; }
+
+    private string _boundContent
+    {
+        get => Content;
+        set => ContentChanged.InvokeAsync(value);
+    }
+
+    [Parameter]
+    public string TextContent { get; set; }
+
+    [Parameter]
+    public EventCallback<string> TextContentChanged { get; set; }
+
+    private string _boundTextContent
+    {
+        get => TextContent;
+        set => TextContentChanged.InvokeAsync(value);
+    }
+}

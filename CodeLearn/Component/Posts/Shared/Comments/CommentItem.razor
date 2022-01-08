@@ -1,0 +1,430 @@
+﻿@inject IPostCommentRepository CommentRepository;
+@inject IPostCommentStarRepository CommentStarRepository;
+@inject IUserRepository UserRepository;
+@inject IDialogService DialogService
+
+<div class="d-flex">
+    <MudLink Href="@($"users/{_commentInfo.Comment.UserId}")">
+        <MudAvatar Class="flex-grow-0" Color="Color.Info" />
+    </MudLink>
+    <div class="min-w-0 ml-2 flex-grow-1">
+        <div class="min-w-0 d-flex justify-content-between">
+            <div class="min-w-0 flex-grow-1">
+                <MudLink Typo="Typo.subtitle1" Href="@($"users/{_commentInfo.Comment.UserId}")">@_commentInfo.UserName</MudLink>
+                <MudText Typo="Typo.body2" Class="ml-2 d-inline">ngày đăng: @_commentInfo.Comment.DateCreated.ToShortDateString()</MudText>
+                @if (_commentInfo.Comment.DateCreated != _commentInfo.Comment.DateLastEdited)
+                {
+                    <MudText Typo="Typo.body2" Class="ml-2 d-inline">
+                        <i>(chỉnh sửa @DateUtils.RelativeTimeCompareToNow(_commentInfo.Comment.DateLastEdited))</i>
+                    </MudText>
+                }
+
+                @if (_showEditCommentEditor)
+                {
+                    <CommentBox SubmitButtonText="Sửa" @bind-Content="@_editedContent"
+                                Cancelable="true" OnCancel="CancelEditComment" OnSubmit="SubmitEditedComment" />
+                }
+                else
+                {
+                    <FormatContent Content="@_commentInfo.Comment.Content" />
+                }
+            </div>
+
+            <AuthorizeView>
+                @if (_isAdmin || User.Id == _commentInfo.Comment.UserId)
+                {
+                    var color = _isAdmin ? Color.Error : Color.Dark;
+                    <MudMenu Class="d-block" Color="color" Icon="@Icons.Material.Outlined.MoreVert">
+                        <MudMenuItem OnClick="() => _showEditCommentEditor = true">
+                            <MudText Color="color">
+                                <MudIcon Icon="@Icons.Material.Filled.Edit" Size="Size.Small" />
+                                Chỉnh Sửa
+                            </MudText>
+                        </MudMenuItem>
+                        <MudMenuItem OnClick="HandleSelectRemoveComment">
+                            <MudText Color="color">
+                                <MudIcon Icon="@Icons.Material.Filled.Delete" Size="Size.Small" />
+                                Xóa
+                            </MudText>
+                        </MudMenuItem>
+                    </MudMenu>
+                }
+            </AuthorizeView>
+        </div>
+
+
+        <div class="mt-1 d-flex align-center">
+            <AuthorizeView>
+                <Authorized>
+                    <MudIconButton Class="pa-1" Icon="@_starIcon" OnClick="UpdateStarredState" />
+                </Authorized>
+                <NotAuthorized>
+                    <MudLink Href="/Identity/Account/Login">
+                        <MudIconButton Class="pa-1" Icon="@Icons.Material.Rounded.StarBorder" />
+                    </MudLink>
+                </NotAuthorized>
+            </AuthorizeView>
+
+            <MudText Typo="Typo.subtitle1">@_commentInfo.StarCount</MudText>
+            <AuthorizeView>
+                <MudButton Variant="Variant.Text" Class="ml-2" OnClick="() => _showReplyEditor = true">Trả lời</MudButton>
+            </AuthorizeView>
+        </div>
+
+        <AuthorizeView>
+            @if (_showReplyEditor)
+            {
+                <CommentBox Class="mt-2 mb-4" SubmitButtonText="Trả lời" @bind-Content="_userReplyContent"
+                            Cancelable="true" OnCancel="CancelReply" OnSubmit="SubmitReply" />
+            }
+        </AuthorizeView>
+
+        @if (_showReplyButton)
+        {
+            if (_toggleState == ToogleState.Hide)
+            {
+                <MudButton Variant="Variant.Text" Class="ml-2" Color="Color.Primary" OnClick="LoadReplies">
+                    @($"Xem {_commentInfo.ReplyCount} câu trả lời")
+                </MudButton>
+            }
+            else
+            {
+                <MudButton Variant="Variant.Text" Class="ml-2" Color="Color.Primary" OnClick="HideReplies">
+                    Đóng các câu trả lời
+                </MudButton>
+            }
+        }
+
+        @if (_showNewUserReplies)
+        {
+            @for (int i = _newUserReplyInfoList.Count - 1; i >= _showNewUserRepliesEndIndex; i--)
+            {
+                int index = i;
+
+                <MudDivider Class="mt-2 mb-4" />
+                <CommentItem @key="_newUserReplyInfoList[index].Comment.Id" User="User" Post="Post"
+                             @bind-Starred="_newUserReplyStarredList[index]" @bind-CommentInfo="_newUserReplyInfoList[index]"
+                             OnCommentRemove="() => HandleNewUserReplyRemoved(index)" />
+            }
+        }
+
+        @if (_toggleState == ToogleState.Show)
+        {
+            for (int i = 0; i < _replyInfoList.Count; i++)
+            {
+                int index = i;
+                var replyInfo = _replyInfoList[index];
+
+                if (_newUserReplyInfoList.FirstOrDefault(ci => ci.Comment.Id == replyInfo.Comment.Id) != null)
+                    continue;
+
+                <MudDivider Class="mt-2 mb-3" />
+                <AuthorizeView>
+                    <Authorized>
+                        <CommentItem @key="replyInfo.Comment.Id" User="User" Post="Post"
+                                     @bind-Starred="_replyStarredList[index]" @bind-CommentInfo="_replyInfoList[index]"
+                                     OnCommentRemove="() => HandleReplyRemoved(index)" />
+                    </Authorized>
+
+                    <NotAuthorized>
+                        <CommentItem @key="replyInfo.Comment.Id" Post="Post"
+                                     @bind-CommentInfo="_replyInfoList[index]" />
+                    </NotAuthorized>
+                </AuthorizeView>
+            }
+
+            @if (_showMoreRepliesButton)
+            {
+                <MudButton Variant="Variant.Text" Class="ml-2" Color="Color.Primary" OnClick="LoadMoreReplies">
+                    Xem thêm các câu trả lời
+                </MudButton>
+            }
+        }
+
+        @if (_loadRepliesState == State.Loading)
+        {
+            <MudProgressCircular Class="d-block mx-auto" Size="Size.Large" Color="Color.Primary" Indeterminate="true" />
+        }
+    </div>
+</div>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> _authenticationStateTask { get; set; }
+
+    [Parameter]
+    public Post Post { get; set; }
+
+    [Parameter]
+    public PostCommentInfo CommentInfo { get; set; }
+
+    private PostCommentInfo _commentInfo;
+
+    [Parameter]
+    public bool Starred { get; set; }
+
+    [Parameter]
+    public User User { get; set; }
+
+    [Parameter]
+    public EventCallback<PostCommentInfo> CommentInfoChanged { get; set; }
+
+    [Parameter]
+    public EventCallback OnCommentRemove { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> StarredChanged { get; set; }
+
+    private enum ToogleState
+    {
+        Show, Hide
+    }
+
+    private bool _isAdmin;
+
+    private string _starIcon => Starred == false ? Icons.Material.Rounded.StarBorder : Icons.Material.Rounded.Star;
+
+    /// <summary>
+    /// Not show button if reply count is 0 or if replies only contain new newly submmited reply by user
+    /// </summary>
+    private bool _showReplyButton => _commentInfo.ReplyCount != 0 && _newUserReplyInfoList.Count != _commentInfo.ReplyCount;
+
+    private bool _showMoreRepliesButton => _loadRepliesState == State.Complete && _repliesPage.CurrentPage < _repliesPage.PageCount;
+
+    private ToogleState _toggleState;
+
+    private bool _showNewUserReplies;
+
+    private int _showNewUserRepliesEndIndex;
+
+    private static readonly int _pageSize = 10;
+
+    private bool _showReplyEditor;
+
+    private string _userReplyContent;
+
+    private bool _showEditCommentEditor;
+
+    private string _editedContent;
+
+    private State _loadRepliesState;
+
+    private Page<PostCommentInfo> _repliesPage { get; set; }
+
+    private List<PostCommentInfo> _replyInfoList { get; set; }
+
+    private List<bool> _replyStarredList { get; set; }
+
+    /// <summary>
+    /// comment info list of user's submitted replies since page loaded
+    /// </summary>
+    private List<PostCommentInfo> _newUserReplyInfoList { get; set; }
+
+    /// <summary>
+    /// user starred states of user's submitted replies since page loaded
+    /// </summary>
+    private List<bool> _newUserReplyStarredList { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        _toggleState = ToogleState.Hide;
+        _showNewUserReplies = true;
+        _showNewUserRepliesEndIndex = 0;
+
+        _commentInfo = CommentInfo;
+
+        _showEditCommentEditor = false;
+        _editedContent = _commentInfo.Comment.Content;
+
+        _showReplyEditor = false;
+        _userReplyContent = "";
+
+        _replyInfoList = new List<PostCommentInfo>();
+        _replyStarredList = new List<bool>();
+
+        _newUserReplyInfoList = new List<PostCommentInfo>();
+        _newUserReplyStarredList = new List<bool>();
+
+        _loadRepliesState = State.NotLoaded;
+
+        var authState = await _authenticationStateTask;
+        _isAdmin = authState.User.IsInRole("Admin");
+    }
+
+    protected override void OnParametersSet()
+    {
+        _commentInfo = CommentInfo;
+
+        if (_commentInfo?.Comment.Id != CommentInfo?.Comment.Id)
+        {
+            _replyInfoList = new List<PostCommentInfo>();
+            _repliesPage = null;
+            _loadRepliesState = State.NotLoaded;
+        }
+    }
+
+    private void HideReplies()
+    {
+        _toggleState = ToogleState.Hide;
+        _showNewUserReplies = false;
+
+        //show newest user reply when submit
+        _showNewUserRepliesEndIndex = _newUserReplyInfoList.Count;
+    }
+
+    private async Task LoadReplies()
+    {
+        _toggleState = ToogleState.Show;
+        _showNewUserReplies = true;
+        _showNewUserRepliesEndIndex = 0;
+
+        if (_repliesPage == null)
+        {
+            await LoadMoreReplies();
+        }
+    }
+
+    private async Task LoadMoreReplies()
+    {
+        _loadRepliesState = State.Loading;
+
+        int nextPageNumber = _repliesPage == null ? 1 : _repliesPage.CurrentPage + 1;
+
+        _repliesPage = await CommentRepository.GetPageReplyInfoAsync(_pageSize, nextPageNumber, CommentInfo.Comment.Id,
+                             ordering => ordering.OrderBy(ci => ci.Comment.DateCreated));
+
+        _replyInfoList.AddRange(_repliesPage.Items);
+
+        var _replyIds = _repliesPage.Items.Select(r => r.Comment.Id);
+
+        if (User != null)
+        {
+            var commentStars = await CommentStarRepository.GetRangeAsync(User.Id, _replyIds);
+            _replyStarredList.AddRange(commentStars.Select(cs => cs == null ? false : true));
+        }
+
+        _loadRepliesState = State.Complete;
+    }
+
+    private async Task UpdateStarredState()
+    {
+        bool newStarredState = !Starred;
+
+        var userCommentStar = new PostCommentStar
+        {
+            UserId = User.Id,
+            CommentId = CommentInfo.Comment.Id,
+        };
+
+        if (newStarredState)
+            await CommentStarRepository.AddAsync(userCommentStar);
+
+        else
+            await CommentStarRepository.RemoveAsync(userCommentStar);
+
+        var newCommentInfo = await CommentRepository.GetCommentInfoAsync(_commentInfo.Comment.Id);
+
+        var task = CommentInfoChanged.InvokeAsync(newCommentInfo);
+        await StarredChanged.InvokeAsync(newStarredState);
+        await task;
+    }
+
+    private void CancelReply()
+    {
+        _userReplyContent = "";
+        _showReplyEditor = false;
+    }
+
+    private async Task SubmitReply()
+    {
+        DateTime dateCreated = DateTime.Now;
+        var comment = new PostComment
+        {
+            UserId = User.Id,
+            ParentCommentId = _commentInfo.Comment.Id,
+            DateCreated = dateCreated,
+            DateLastEdited = dateCreated,
+            PostId = Post.Id,
+            Content = _userReplyContent,
+        };
+
+        await CommentRepository.AddAsync(comment);
+
+        _newUserReplyInfoList.Add(new PostCommentInfo
+        {
+            Comment = comment,
+            UserName = User.Name,
+            ReplyCount = 0,
+            StarCount = 0,
+        });
+
+        _newUserReplyStarredList.Add(false);
+
+        _userReplyContent = "";
+        _showReplyEditor = false;
+        _showNewUserReplies = true;
+
+
+        _commentInfo.ReplyCount++;
+        await CommentInfoChanged.InvokeAsync(_commentInfo);
+    }
+
+    private void CancelEditComment()
+    {
+        _editedContent = _commentInfo.Comment.Content;
+        _showEditCommentEditor = false;
+    }
+
+    private async Task SubmitEditedComment()
+    {
+        _commentInfo.Comment.DateLastEdited = DateTime.Now;
+        _commentInfo.Comment.Content = _editedContent;
+
+        await CommentRepository.UpdateAsync(_commentInfo.Comment);
+
+        _showEditCommentEditor = false;
+    }
+
+    private async Task HandleSelectRemoveComment()
+    {
+        var parameters = new DialogParameters() {
+            {"ContentText", "Bạn có chắc là muốn xóa bình luận này?" },
+            {"ConfirmButtonText", "Xóa" },
+            {"CancelButtonText", "Hủy" },
+        };
+
+        var dialog = DialogService.Show<ConfirmationDialog>("Xóa bình luận", parameters);
+
+        var result = await dialog.Result;
+
+        if (!result.Cancelled)
+        {
+            var successParameters = new DialogParameters() {
+                {"ContentText", "Xóa bình luận thành công." },
+            };
+
+            await CommentRepository.RemoveAsync(_commentInfo.Comment);
+            await OnCommentRemove.InvokeAsync();
+
+            DialogService.Show<InformationDialog>("Thành công", successParameters);
+        }
+    }
+
+    private async Task HandleReplyRemoved(int index)
+    {
+        _replyInfoList.RemoveAt(index);
+        _replyStarredList.RemoveAt(index);
+
+        _commentInfo.ReplyCount--;
+        await CommentInfoChanged.InvokeAsync(_commentInfo);
+    }
+
+    private async Task HandleNewUserReplyRemoved(int index)
+    {
+        _newUserReplyInfoList.RemoveAt(index);
+        _newUserReplyStarredList.RemoveAt(index);
+
+        _commentInfo.ReplyCount--;
+        await CommentInfoChanged.InvokeAsync(_commentInfo);
+    }
+}

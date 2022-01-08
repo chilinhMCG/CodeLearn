@@ -21,6 +21,8 @@ namespace CodeLearn.Repositories.Interface
         void AddUser(User user);
         void UpdateUser(User user);
 
-        
+        Task<User> GetUserByEmailAsync(string email);
+
+        Task<User> GetUserByIdAsync(Guid id);
     }
 }

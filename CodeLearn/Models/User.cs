@@ -31,5 +31,14 @@ namespace CodeLearn.Models
             this.Comments = new HashSet<Comment>();
         }
         public ICollection<Lesson> Lessons { get; set; }
+
+        [Column("profile_picture_path", TypeName = "varchar(260)")]
+        public string ProfilePicturePath { get; set; }
+
+        public List<PostComment> PostComments { get; set; }
+
+        public List<PostRating> PostRatings { get; set; }
+
+        public List<PostCommentStar> PostCommentStars { get; set; }
     }
 }

@@ -1,0 +1,36 @@
+﻿
+<Editor CharacterLimit="CharacterLimit" Class="@Class" JsConfigObjName="postEditorConfig"
+        @bind-Content="@_boundContent" @bind-TextContent="_boundTextContent" />
+
+@code {
+    //Vì một lý do nào đó, tinyMCE bị dừng hoạt động khi cao hơn con số này một chút.
+    public const int CharacterLimit = 29000;
+
+    [Parameter]
+    public string Class { get; set; }
+
+    [Parameter]
+    public string Content { get; set; }
+
+    [Parameter]
+    public EventCallback<string> ContentChanged { get; set; }
+
+    private string _boundContent
+    {
+        get => Content;
+        set => ContentChanged.InvokeAsync(value);
+
+    }
+
+    [Parameter]
+    public string TextContent { get; set; }
+
+    [Parameter]
+    public EventCallback<string> TextContentChanged { get; set; }
+
+    private string _boundTextContent
+    {
+        get => TextContent;
+        set => TextContentChanged.InvokeAsync(value);
+    }
+}

@@ -1,4 +1,5 @@
-﻿using System;
+using NpgsqlTypes;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -9,30 +10,51 @@ namespace CodeLearn.Models
 {
     public class Post
     {
-        public Post()
-        {
-            Id = new Guid();
-            CreateAt = DateTime.Now;
-        }
         [Column("id")]
-        [Key]
         public Guid Id { get; set; }
-        [Column("create_at")]
-        public DateTime CreateAt { get; set; }
-        [Column("last_updated")]
-        public DateTime LastUpdated { get; set; }
-        [Column("hashtag")]
-        public List<string> HashTag { get; set; }
+
+        [Column("user_id")]
+        public Guid UserId { get; set; }
+
+        [Required(ErrorMessage = "Bắt buộc phải có tiêu đề bài viết.")]
         [Column("title")]
+        [MaxLength(300, ErrorMessage = "Tiêu đề độ dài tối đa là 300 ký tự.")]
         public string Title { get; set; }
+
+        [Column("slug")]
+        [Required]
+        public string Slug { get; set; }
+
+        [Required]
         [Column("content")]
         public string Content { get; set; }
-        [Column("user_id")]
-        public Guid? UserId { get; set; }
-        [Column("user_id")]
+
+        [Column("date_created")]
+        public DateTime DateCreated { get; set; }
+
+        [Column("date_last_edited")]
+        public DateTime DateLastEdited { get; set; }
+
+        [Column("unaccented_title")]
+        [MaxLength(300)]
+        public string UnaccentedTitle { get; set; }
+        
+        [Column("unaccented_content")]
+        public string UnaccentedContent { get; set; }
+
+        [Column("hashtag")]
+        public List<string> HashTag { get; set; }
+
         int NumberInteract { set; get; }
-        public ICollection<Comment> Comments { get; set; }
+
+        public NpgsqlTsVector TitleSearchVector { get; set; }
+
+        public NpgsqlTsVector ContentSearchVector { get; set; }
+
         public User User { get; set; }
 
+        public List<PostComment> Comments { get; set; }
+
+        public List<PostRating> PostRatings { get; set; }
     }
 }

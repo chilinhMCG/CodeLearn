@@ -1,4 +1,4 @@
-﻿using CodeLearn.Data;
+using CodeLearn.Data;
 using CodeLearn.Models;
 using CodeLearn.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
@@ -64,6 +64,18 @@ namespace CodeLearn.Repositories
         {
             using var context = _applicationDBContext.CreateDbContext();
             return context.Users.Where(h => h.Id == id).FirstOrDefault();
+        }
+
+                public async Task<User> GetUserByEmailAsync(string email)
+        {
+            using var context = _applicationDBContext.CreateDbContext();
+            return await context.Users.Where(u => u.Email == email).FirstOrDefaultAsync();
+        }
+
+        public async Task<User> GetUserByIdAsync(Guid id)
+        {
+            using var context = _applicationDBContext.CreateDbContext();
+            return await context.Users.FindAsync(id);
         }
     }
 }
