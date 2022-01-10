@@ -10,7 +10,7 @@
     <MudMainContent>
         <MudContainer MaxWidth="MaxWidth.Large">
 
-                <CascadingValue Value="_userTask">
+            <CascadingValue Value="_userTask">
                 @if (_isAdmin)
                 {
                     <MudGrid>
@@ -29,19 +29,19 @@
                 }
             </CascadingValue>
 
-                <MudScrollToTop>
-                    <MudFab Color="Color.Success" Icon="@Icons.Filled.ArrowCircleUp" />
-                </MudScrollToTop>
-            </MudContainer>
+            <MudScrollToTop>
+                <MudFab Color="Color.Success" Icon="@Icons.Filled.ArrowCircleUp" />
+            </MudScrollToTop>
+        </MudContainer>
 
-        </MudMainContent>
+    </MudMainContent>
 
 
 
-        <Footer />
-    </MudLayout>
+    <Footer />
+</MudLayout>
 
-@code{ 
+@code{
     MudTheme MCGTheme = new()
     {
         Palette = new Palette()
@@ -74,9 +74,14 @@
     private async Task<User> GetUser()
     {
         if (_identityUser.Identity.IsAuthenticated)
-            return await UserRepository.GetUserByEmailAsync(_identityUser.FindFirst(ClaimTypes.Email).Value);
-
+        {
+            var data = await UserRepository.GetUserByEmailAsync(_identityUser.FindFirst(ClaimTypes.Email).Value);
+            return data;
+        }
         else
+        {
             return null;
+
+        }
     }
 }

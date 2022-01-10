@@ -61,8 +61,7 @@ namespace CodeLearn.Repositories
         public List<Course> GetAllFreeCourse()
         {
             using var context = _applicationDbContext.CreateDbContext();
-            return context.Courses.Where(x => x.Status == CourseStatusEnum.Free).ToList();
-
+            return context.Courses.Where(x => x.Status.Equals("free")).ToList();
         }
 
         public Course GetSingleCourse(string id)
